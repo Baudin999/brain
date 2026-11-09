@@ -15,16 +15,23 @@ window can never write past the CLI's checks.
 [`brain ui`](cli.md#brain-ui) opens the window, and starts `brain serve` in the background first when it is not running; its
 output goes to the data repo's `cache/serve.log`. There is one window: a new window closes every window open before it.
 
-`brain ui --restart` asks a running `brain serve` to restart, and `brain install` runs it. The old server tells its
-windows to close, frees its port, lands an answer already in flight and refuses one that comes later, so each answer
+`brain ui --restart` asks a running `brain serve` to restart, and `brain install` runs it. When a window is open, the
+old server hands it on: it writes a fresh launch code for its successor in `cache/serve`, which only your account can
+read, and says `moved` with the successor's launch URL on the window's own event stream. From then on it answers
+nothing new. It frees its port, lands an answer already in flight and refuses one that comes later, so each answer
 lands once. Then it starts its successor itself, from its own environment, on the binary now published in
-`cache/publish` beside its own, and the successor opens the new window. `brain ui --restart` then says which build the
-successor runs, and when that is not its own, such as from another worktree, the command that serves its own instead.
+`cache/publish` beside its own. The successor takes the handed code once as it starts, in place of opening a window.
+The window waits until the successor serves its page and goes to the launch URL with `location.replace`, and the page
+trades the code as at any launch. So the window you had is the window on the new build, and no second one opens. When
+no window was open, or a handed code is more than a minute old, the successor opens a new window. `brain ui --restart`
+then says which build the successor runs, and when that is not its own, such as from another worktree, the command
+that serves its own instead.
 
 ## How a window closes
 
 A window closes itself. brain serve says `close` on the event stream the window holds, the one a theme switch travels
-on, once a newer window traded its launch code or before the server stops. A window that loses its server without that
+on, once a newer window traded its launch code or before the server stops. A restart says `moved` instead, and the
+window moves onto the new build rather than closing. A window that loses its server without that
 word, because the server crashed or was killed, closes itself as well. The browser allows it because the launch file
 opens the page with `location.replace`, so the window has one history entry. Nothing kills a browser process: every
 brain window shares one, under brain's own profile. A window an alarm shut stays open to say so.

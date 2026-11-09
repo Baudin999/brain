@@ -7,13 +7,16 @@
 //
 // There is one window. brain serve says "close" on the window's event stream when a newer window opened or before it
 // stops, and the page closes itself. A page that loses its server without that word closes itself too. Only a page
-// that never had a key, or one an alarm shut, stays open to say why.
+// that never had a key, or one an alarm shut, stays open to say why. When brain serve restarts onto a new build it says
+// "moved" instead, with its successor's launch URL, and the page goes there in place: the same window, on the new build.
 'use strict';
 
 const SESSION = 'X-Brain-Session';
 const POLL_MS = 1000;
 const POLL_TIMEOUT_MS = 10000;
 const EVENTS_RETRY_MS = 2000;
+const MOVE_POLL_MS = 200;
+const MOVE_WAIT_MS = 60000;
 const SETTLE_MS = 700;
 const UNPINNED_KEPT = 6;
 const PINS_KEY = 'brain.pins';
@@ -473,7 +476,8 @@ async function poll() {
 }
 
 // brain serve says "theme" when the stream opens and on every Omarchy theme switch: the page swaps /theme.css in place,
-// so nothing reloads and nothing scrolls. It says "close" when this window must go.
+// so nothing reloads and nothing scrolls. It says "close" when this window must go, and "moved" when it goes on in the
+// successor of a restart.
 async function followEvents() {
   while (!state.closed) {
     state.events = new AbortController();
@@ -490,6 +494,7 @@ async function followEvents() {
           const lines = buffer.slice(0, end).split('\n');
           if (lines.includes('event: theme')) swapTheme();
           if (lines.includes('event: close')) shut('A newer brain window took over, or brain serve stopped.', true);
+          if (lines.includes('event: moved')) move(lines.find((line) => line.startsWith('data: ')).slice('data: '.length));
           buffer = buffer.slice(end + 2);
         }
       }
@@ -497,6 +502,42 @@ async function followEvents() {
       // The stream broke or the window shut; poll says which.
     }
     await new Promise((resolve) => setTimeout(resolve, EVENTS_RETRY_MS));
+  }
+}
+
+// brain serve restarts onto a new build and hands this window on: once its successor serves the page, the window goes
+// to the successor's launch URL, whose page trades the launch code. Until then the old server answers nothing and the
+// port may stand free, and the window stays as it is: it neither closes nor says brain serve stopped. A successor that
+// never serves leaves the window to shut as on a server gone.
+async function move(url) {
+  if (state.closed) return;
+  state.closed = 'brain moves onto its new build.';
+  state.token = null;
+  state.events?.abort();
+  const until = Date.now() + MOVE_WAIT_MS;
+  while (Date.now() < until) {
+    if (await serves()) {
+      // The launch URL differs from this page's only in its fragment, so the replace alone stays in this page: the
+      // reload loads the successor's.
+      location.replace(url);
+      location.reload();
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, MOVE_POLL_MS));
+  }
+  // The window is no longer moving: it shuts.
+  state.closed = null;
+  shut('brain serve did not come back on its new build. Open brain again with brain ui.', true);
+}
+
+// True once a brain serve answers the page: the one that restarts refuses everything, and none answers while the port
+// stands free.
+async function serves() {
+  try {
+    const response = await fetch('/', { cache: 'no-store' });
+    return response.ok;
+  } catch {
+    return false;
   }
 }
 

@@ -45,6 +45,7 @@ export CLAUDE_CONFIG_DIR="$tmp/claude" LOCAL_BIN="$tmp/bin" BRAIN_HOME="$tmp/dat
 export BRAIN_PORT=$((20000 + RANDOM % 20000)) BRAIN_JUDGE=off BRAIN_NOTIFY_SEND=off
 origin="http://127.0.0.1:$BRAIN_PORT"
 land_pid=""
+events_pid=""
 
 # serve_pid: prints the pid of the clone's brain serve, if one runs.
 serve_pid() {
@@ -65,6 +66,7 @@ stop_serve() {
 cleanup() {
     stop_serve || true
     [[ -z "$land_pid" ]] || kill "$land_pid" 2>/dev/null || true
+    [[ -z "$events_pid" ]] || kill "$events_pid" 2>/dev/null || true
     rm -rf "$tmp"
 }
 trap cleanup EXIT
@@ -320,7 +322,8 @@ grep -q '^install: 0 linked, 0 written, 0 backed up, ' "$tmp/rerun.log" ||
     fail "brain install run again did not keep the parts linked to the clone: $(grep '^relink' "$tmp/rerun.log")"
 
 # A running brain serve restarts on the build, and the write a waiting brain land put before the user survives it.
-# The stub browser records the launch file each window opens on.
+# The stub browser records the launch file each window opens on. The window brain ui opens trades its launch code and
+# listens on its event stream, as the page does, so the restart moves it onto the successor and opens no second one.
 cat >"$tmp/stub/browser" <<EOF
 #!/usr/bin/env bash
 printf '%s\n' "\$1" >>"$tmp/opened"
@@ -328,6 +331,16 @@ EOF
 chmod +x "$tmp/stub/browser"
 export BRAIN_BROWSER="$tmp/stub/browser"
 "$LOCAL_BIN/brain" ui >"$tmp/ui.log" 2>&1 || fail "brain ui did not start brain serve: $(cat "$tmp/ui.log")"
+for ((i = 0; i < 50; i++)); do
+    [[ ! -s "$tmp/opened" ]] || break
+    sleep 0.1
+done
+first="$(head -n 1 "$tmp/opened")"
+first="${first#--app=file://}"
+first_code="$(grep -oE '#launch=[0-9a-f]{64}' "$first" | head -n 1 | cut -d = -f 2)"
+first_token="$(curl -fsS -X POST -H "Origin: $origin" -H 'Content-Type: application/json' -d "{\"code\":\"$first_code\"}" "$origin/api/launch" | jq -r .token)"
+curl -sSN -H "X-Brain-Session: $first_token" "$origin/api/events" >"$tmp/events" 2>/dev/null &
+events_pid=$!
 staged="$("$LOCAL_BIN/brain" add global tea "The drill drinks tea" --subjects drinks --kind idea)"
 id="$(grep -oE 'pending [0-9a-f]{12}' <<<"$staged" | cut -d ' ' -f 2)"
 [[ -n "$id" ]] || fail "brain add staged nothing: $staged"
@@ -366,17 +379,15 @@ parent="$(ps -o ppid= -p "$new_pid" | tr -d ' ')"
 if [[ "$parent" == "$$" ]] || ps -o args= -p "$parent" | grep -qE 'install\.sh|brain (ui|install)'; then
     fail "the new brain serve is a child of the install: $(ps -o args= -p "$parent")"
 fi
-for ((i = 0; i < 50; i++)); do
-    (($(wc -l <"$tmp/opened") < 2)) || break
-    sleep 0.1
-done
-(($(wc -l <"$tmp/opened") == 2)) || fail "the restarted brain serve did not open its window"
+grep -q '^event: moved$' "$tmp/events" || fail "the restart did not move the open window onto the successor: $(cat "$tmp/events")"
+(($(wc -l <"$tmp/opened") == 1)) || fail "the restarted brain serve opened a second window"
 kill -0 "$land_pid" 2>/dev/null || fail "brain land stopped waiting when brain serve restarted: $(cat "$tmp/land.log")"
+wait "$events_pid" || true
+events_pid=""
 
-# The restarted window trades its launch code, as the page does, and says yes to the write it lists.
-launch="$(tail -n 1 "$tmp/opened")"
-launch="${launch#--app=file://}"
-code="$(grep -oE '#launch=[0-9a-f]{64}' "$launch" | head -n 1 | cut -d = -f 2)"
+# The window that moved trades the launch code it was handed, as the page does, and says yes to the write it lists.
+code="$(grep -oE "^data: $origin/#launch=[0-9a-f]{64}$" "$tmp/events" | cut -d = -f 2)"
+[[ -n "$code" ]] || fail "the restart did not hand the window a launch code on the successor: $(cat "$tmp/events")"
 token="$(curl -fsS -X POST -H "Origin: $origin" -H 'Content-Type: application/json' -d "{\"code\":\"$code\"}" "$origin/api/launch" | jq -r .token)"
 # A new session answers once it is armed, two seconds after the trade.
 sleep 3
@@ -387,6 +398,7 @@ curl -fsS -X POST -H "Origin: $origin" -H "X-Brain-Session: $token" -H 'Content-
     fail "the restarted window could not answer $id"
 wait "$land_pid" || fail "brain land failed after the yes: $(cat "$tmp/land.log")"
 land_pid=""
+events_pid=""
 [[ -f "$BRAIN_HOME/graph/global/tea.md" ]] || fail "the yes did not land global:tea"
 
 # The data repo's usage log holds every call and the answer, and through the installed hook a validator's round of

@@ -9,7 +9,8 @@ namespace Brain.Windows;
 /// Who may use a small window server's API, and what its windows hear. The server opens a window with a launch code,
 /// which only a launch file of the user's holds; the window trades it once, within a minute, for a session token it
 /// sends with every call. A server has one window: a window that trades its code closes the one before it. Each window
-/// listens on an event stream, which hears what its server publishes, a theme switch, and close.
+/// listens on an event stream, which hears what its server publishes, a theme switch, close, and moved, with the launch
+/// URL of the server's successor, once the server hands its window on to a new build.
 /// </summary>
 internal sealed class WindowSessions(TimeProvider time)
 {
@@ -34,12 +35,47 @@ internal sealed class WindowSessions(TimeProvider time)
     public string Issue()
     {
         var code = Secret();
+        Admit(code);
+        return code;
+    }
+
+    /// <summary>Takes <paramref name="code"/>, one the server's predecessor handed it, as a launch code issued now.</summary>
+    public void Admit(string code)
+    {
         lock (gate)
         {
             codes[Hash(code)] = time.GetUtcNow();
         }
+    }
 
-        return code;
+    /// <summary>True while a window listens on its event stream.</summary>
+    public bool Listened
+    {
+        get
+        {
+            lock (gate)
+            {
+                return streams.Count > 0;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Tells every window to move to <paramref name="url"/>, the launch URL of the server's successor, and ends its
+    /// streams and its session: the window goes on in the successor.
+    /// </summary>
+    public void Move(string url)
+    {
+        lock (gate)
+        {
+            foreach (var hash in streams.Keys)
+            {
+                Tell(hash, "event: moved\ndata: " + url + "\n\n");
+                Tell(hash, End);
+            }
+
+            sessions.Clear();
+        }
     }
 
     /// <summary>Trades a launch code for a session token, once and within its life, and closes every window before it; null refuses.</summary>

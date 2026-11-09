@@ -21,7 +21,8 @@ namespace Brain.Serving;
 /// theme from <see cref="OmarchyTheme"/>, is one of them; the window's event stream, which says when the theme switched
 /// and when the window must close, needs a session token. A conversation's calls drive the open agent of a sitting, so
 /// like an answer they need a session that is armed, and so do a chat's and a settings change, which commits
-/// <see cref="BrainSettings"/> in the data repo. Before it stops, brain serve tells every window to close, and it stops
+/// <see cref="BrainSettings"/> in the data repo. Before it stops, brain serve tells every window to close, or on a
+/// restart hands the window that listens on to its successor with a <see cref="HandedLaunch"/>, and it stops
 /// every agent it runs, a sitting's, a chat's or a dream's, with everything each started. Every one starts through
 /// <see cref="ClaudeRuns"/>, so what an agent started stops with brain serve however brain serve stops.
 /// <see cref="AgentRegistry"/> lists them for the window. Search runs on the embedder <see cref="ModelSwitch"/> holds
@@ -94,13 +95,24 @@ internal sealed class ReviewServer(
     private BrainEnv Searching => env with { Embedder = models.Embedder };
 
     /// <summary>
-    /// Listens until <paramref name="stop"/> or a restart call; opens a window first when <paramref name="window"/> holds.
-    /// After a restart call it starts its successor once its port is free and no answer is in flight.
+    /// Listens until <paramref name="stop"/> or a restart call; opens a window first when <paramref name="window"/> holds,
+    /// unless its predecessor handed it a launch code, which the window already open trades as it moves here. After a
+    /// restart call it starts its successor once its port is free and no answer is in flight.
     /// </summary>
+    // navarone: 0000139
+    // navarone: 0000216
     public async Task Serve(bool window, CancellationToken stop)
     {
         using var listener = new HttpListener();
         listener.Prefixes.Add(Origin + "/");
+
+        // A handed code is admitted before the port answers, so the moving window that finds the page can trade it.
+        var handed = HandedLaunch.Take(files, time);
+        if (handed is not null)
+        {
+            Keys.Admit(handed);
+        }
+
         try
         {
             listener.Start();
@@ -114,7 +126,7 @@ internal sealed class ReviewServer(
         perf.Prune();
         using var watching = theme.Watch(time);
         await env.Err.WriteLineAsync($"brain serve: listening on {Origin}").ConfigureAwait(false);
-        if (window)
+        if (window && handed is null)
         {
             OpenWindow();
         }
@@ -163,6 +175,22 @@ internal sealed class ReviewServer(
         }
     }
 
+    /// <summary>
+    /// The restart: while a window listens, it hands the successor a launch code and tells the window, on its own event
+    /// stream, the launch URL it goes on at once the successor serves; then the server stops.
+    /// </summary>
+    private void Restart()
+    {
+        restarting = true;
+        if (Volatile.Read(ref streams) > 0)
+        {
+            Keys.Move(Origin + "/#launch=" + HandedLaunch.Hand(files, time));
+            theme.Wake();
+        }
+
+        serving?.Cancel();
+    }
+
     /// <summary>True while something accepts a connection on this server's port.</summary>
     private bool Answers()
     {
@@ -195,11 +223,20 @@ internal sealed class ReviewServer(
     /// <summary>Answers one request in the boundary <see cref="WebCalls.Answer"/> gives every server.</summary>
     public void Handle(HttpListenerContext context) => WebCalls.Answer(context, env.Home, "brain serve", env.Err, Route);
 
+    // navarone: 0000026
+    // navarone: 0000049
     private void Route(HttpListenerRequest request, HttpListenerResponse response)
     {
         var path = request.Url?.AbsolutePath ?? string.Empty;
         if (RefusedStranger(request, response, Origin))
         {
+            return;
+        }
+
+        // A server that restarts answers nothing new: the window that moves knows the page it finds is the successor's.
+        if (restarting)
+        {
+            Refuse(response, HttpStatusCode.ServiceUnavailable, "brain serve is restarting on a new build");
             return;
         }
 
@@ -225,8 +262,7 @@ internal sealed class ReviewServer(
             case (Post, "/api/restart"):
                 response.StatusCode = (int)HttpStatusCode.Accepted;
                 response.Close();
-                restarting = true;
-                serving?.Cancel();
+                Restart();
                 return;
             case (Post, "/api/launch") when origin is not null:
                 Launch(request, response);
@@ -377,7 +413,8 @@ internal sealed class ReviewServer(
     /// <summary>
     /// The window's event stream. It says <c>theme</c> when it opens and on every Omarchy theme switch, so the window swaps
     /// <c>/theme.css</c>; without Omarchy it says only that it is alive. Once the window's session was closed it says
-    /// <c>close</c>, and the window closes itself. It ends with the window's session or its connection.
+    /// <c>close</c>, and the window closes itself; once it was handed on to the successor it says <c>moved</c> with the
+    /// successor's launch URL, and the window goes there. It ends with the window's session or its connection.
     /// </summary>
     private void WindowEvents(HttpListenerResponse response, string token)
     {
@@ -397,7 +434,11 @@ internal sealed class ReviewServer(
                 seen = theme.Version;
             }
 
-            if (Keys.Closed(token))
+            if (Keys.MovedTo(token) is { } url)
+            {
+                Say(response, "event: moved\ndata: " + url + "\n\n");
+            }
+            else if (Keys.Closed(token))
             {
                 Say(response, "event: close\ndata: close\n\n");
             }

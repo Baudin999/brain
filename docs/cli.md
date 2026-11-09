@@ -772,7 +772,7 @@ brain ui [--restart]
 
 | Flag | Default | What it does |
 |---|---|---|
-| `--restart` | off | Have the running `brain serve` close its windows and start its successor on the build published beside it, and say which build that is. `brain install` runs it. |
+| `--restart` | off | Have the running `brain serve` start its successor on the build published beside it, and say which build that is. The window already open moves onto the successor in place; one opens only when none was open. `brain install` runs it. |
 
 It prints one line: `brain ui: opened brain's window; it closes every window open before it`, or
 `brain ui: started brain serve on 127.0.0.1:47474, and it opens the window`. With `--restart` it prints the restart and

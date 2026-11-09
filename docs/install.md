@@ -114,9 +114,10 @@ a bare binary alike.
 ### Restarting a running window
 
 Last, it restarts a running window. When a `brain serve` of `BRAIN_HOME` answers on `BRAIN_PORT`, `brain ui --restart`
-asks it to restart. It starts its successor on this build, in its own directory and project, and the successor opens a
-fresh window. The old window says brain serve stopped. Every write waiting for your answer stays waiting and shows in
-the new window, and a `brain land` blocked on one keeps waiting for it. When no window server runs, none starts.
+asks it to restart. It starts its successor on this build, in its own directory and project, and the window that is
+open moves onto the successor in place, so it is the same window on the new build and no second one opens. Only when
+no window was open does the successor open one. Every write waiting for your answer stays waiting and shows in the
+window, and a `brain land` blocked on one keeps waiting for it. When no window server runs, none starts.
 
 It runs from a Claude Code session too: the successor is a child of the old server, never of the session, and the call
 carries nothing that shapes it. When the window cannot restart, such as a `brain serve` from before this step existed,

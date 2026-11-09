@@ -10,6 +10,8 @@ namespace Brain.Serving;
 /// the window says so, and a new session can answer only once it is <see cref="Arming"/> old. That catches a careless
 /// race for a code; a process of the user's own account can read the launch file, so it is no protection against one.
 /// There is one window: a window that trades its code closes every other, and <see cref="CloseAll"/> closes them all.
+/// <see cref="Move"/> instead hands every window on to brain serve's successor, which <see cref="Admit"/>s the code its
+/// predecessor handed it.
 /// </summary>
 internal sealed class WindowKeys(TimeProvider time)
 {
@@ -28,6 +30,10 @@ internal sealed class WindowKeys(TimeProvider time)
     /// <summary>The token hashes of sessions closed so their windows close, as against those an alarm ended.</summary>
     private readonly HashSet<string> closed = new(StringComparer.Ordinal);
 
+    /// <summary>The token hashes of sessions handed on to the successor, whose windows go to <see cref="movedTo"/>.</summary>
+    private readonly HashSet<string> moved = new(StringComparer.Ordinal);
+
+    private string? movedTo;
     private bool alarmed;
 
     /// <summary>True since a spent code was tried, until a window opens with a fresh one.</summary>
@@ -45,13 +51,44 @@ internal sealed class WindowKeys(TimeProvider time)
     /// <summary>A fresh launch code for a new window. Every code not yet used is retired: one window opens at a time.</summary>
     public string Issue()
     {
+        var code = Secret();
+        Admit(code);
+        return code;
+    }
+
+    /// <summary>Takes <paramref name="code"/>, one brain serve's predecessor handed it, as a launch code issued now.</summary>
+    public void Admit(string code)
+    {
         lock (gate)
         {
             spent.UnionWith(codes.Keys.Select(Hash));
             codes.Clear();
-            var code = Secret();
             codes[Hash(code)] = time.GetUtcNow();
-            return code;
+        }
+    }
+
+    /// <summary>Ends every session so its window goes to <paramref name="url"/>, the launch URL of brain serve's successor.</summary>
+    public void Move(string url)
+    {
+        lock (gate)
+        {
+            movedTo = url;
+            moved.UnionWith(sessions.Keys);
+            sessions.Clear();
+        }
+    }
+
+    /// <summary>The URL the window of <paramref name="token"/> goes to, once its session was handed on; else null.</summary>
+    public string? MovedTo(string token)
+    {
+        lock (gate)
+        {
+            if (!moved.Contains(Hash(token)))
+            {
+                return null;
+            }
+
+            return movedTo;
         }
     }
 

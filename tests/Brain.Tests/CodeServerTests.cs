@@ -32,6 +32,9 @@ public sealed partial class CodeServerTests : IDisposable
     private readonly HttpClient client;
     private int successors;
 
+    /// <summary>What a successor's start does past being counted, such as start a successor server; nothing unless a test sets it.</summary>
+    private Action succeeding = () => { };
+
     public CodeServerTests()
     {
         config = Path.Combine(brain.Root, "claude-config");
@@ -1128,9 +1131,15 @@ public sealed partial class CodeServerTests : IDisposable
         return path;
     }
 
-    /// <summary>A server of this brain on the stand-in, whose build runs from the publish folder; its successor is counted.</summary>
+    /// <summary>A server of this brain on the stand-in, whose build runs from the publish folder; its successor is counted, then <see cref="succeeding"/> runs.</summary>
     private CodeServer Server() =>
-        new(brain.Home, brain.Root, StandIn(), new ClaudeFiles(config), TextWriter.Null, Open, (_) => false, TimeProvider.System, new OmarchyTheme(brain.Root, colorCommand: null), new CodeBuild(publish), () => Interlocked.Increment(ref successors));
+        new(brain.Home, brain.Root, StandIn(), new ClaudeFiles(config), TextWriter.Null, Open, (_) => false, TimeProvider.System, new OmarchyTheme(brain.Root, colorCommand: null), new CodeBuild(publish), Succeed);
+
+    private void Succeed()
+    {
+        Interlocked.Increment(ref successors);
+        succeeding();
+    }
 
     private bool Open(string url)
     {

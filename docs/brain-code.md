@@ -223,8 +223,8 @@ shared components, each in its states in the Stylebook.
 
 The window's server, `brain code --serve`, is a process of the same binary that `brain code` starts in the background
 with its output in the data repo's `cache/code/serve.log`. It runs every session, keeps the list of what runs under each
-in memory, and ends a few seconds after its window closes, and every session and what runs under it with it. The window
-asks before it closes while a session runs. Like a workspace, it takes calls only from its window's session;
+in memory, and ends a few seconds after its window closes, and every session and what runs under it with it. Closing
+or reloading the window asks nothing first. Like a workspace, it takes calls only from its window's session;
 `brain code` reaches it with the key in `cache/code`. The window is a Chromium-family browser in app mode with the
 window class `brain-code`.
 
@@ -234,10 +234,14 @@ any session runs: a turn, a process or an agent it started, or a permission requ
 is highlighted once none does. Install never restarts brain code.
 
 A click writes every session to `cache/code/handover.json`, by its Claude Code session id with its agent and its folder,
-and the session in view. Then the server stops every session and starts its successor on the new build itself, from its
-own environment, so no session owns the new server. The successor takes the handover once and resumes each session that
-was alive with `--resume`, in the same order. A session that had ended stays ended as it was shown, and the new window
-opens on the session that was in view.
+and the session in view, with a fresh launch code for the successor in `cache/code`, which only your account can read.
+Then the server stops every session and starts its successor on the new build itself, from its own environment, so no
+session owns the new server. The successor takes the handover once and resumes each session that was alive with
+`--resume`, in the same order; it takes the code once too, in place of opening a window. Once the successor serves, the
+old server says `moved` with the successor's launch URL on the window's own event stream, and the window goes there
+with `location.replace` and trades the code. So the window you clicked in is the window on the new build, and no second
+one opens. A session that had ended stays ended as it was shown, and the window shows the session that was in view.
+Only when no window listened does the successor open a new one.
 
 Every call and the server's work are records in the data repo's `perf/code/`, kept 14 days and out of git; they never
 leave the machine.

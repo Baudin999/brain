@@ -1,5 +1,5 @@
 {
-  "granted": 215,
+  "granted": 216,
   "problems": [
     {
       "id": "0000001",
@@ -209,9 +209,13 @@
       "id": "0000026",
       "check": "cyclomatic",
       "symbol": "brain::Brain.Serving.ReviewServer.Route(HttpListenerRequest, HttpListenerResponse)",
-      "fingerprint": "2d485a07ca277804cd541308636764a3afeaccf72f5779377c4d5f8c2e42fd17",
+      "fingerprint": "d189fe9813b5519c161f5d7fcd0461833a737a683481e66fbd9151d9b81a2f44",
       "value": 37,
-      "resolution": null
+      "resolution": {
+        "reason": "Route is the server\u0027s routing table as one switch: each case is one method and path, read as a list, so the count is the number of routes, not depth. The restart guard goes first because it refuses every route alike.",
+        "fingerprint": "d189fe9813b5519c161f5d7fcd0461833a737a683481e66fbd9151d9b81a2f44",
+        "value": 37
+      }
     },
     {
       "id": "0000027",
@@ -377,9 +381,13 @@
       "id": "0000049",
       "check": "cognitive",
       "symbol": "brain::Brain.Serving.ReviewServer.Route(HttpListenerRequest, HttpListenerResponse)",
-      "fingerprint": "2d485a07ca277804cd541308636764a3afeaccf72f5779377c4d5f8c2e42fd17",
-      "value": 28,
-      "resolution": null
+      "fingerprint": "d189fe9813b5519c161f5d7fcd0461833a737a683481e66fbd9151d9b81a2f44",
+      "value": 29,
+      "resolution": {
+        "reason": "The cognitive count comes from the switch\u0027s cases and their when guards, each a flat line of the routing table; nothing nests past the switch. The restart guard is one if before it that refuses every route.",
+        "fingerprint": "d189fe9813b5519c161f5d7fcd0461833a737a683481e66fbd9151d9b81a2f44",
+        "value": 29
+      }
     },
     {
       "id": "0000050",
@@ -621,9 +629,13 @@
       "id": "0000079",
       "check": "split-complexity",
       "symbol": "brain::Brain.Commands.UiCommand.Run(BrainEnv, bool, int)",
-      "fingerprint": "3509287007d8156feb8a184823ca15260e3caecfc19b4be3ae2cdc129b598a92",
+      "fingerprint": "606253bac071eccfd0376a293169bb6f78fc054c02f7ab37b7f18d11920a4c2a",
       "value": 20,
-      "resolution": null
+      "resolution": {
+        "reason": "Run is brain ui\u0027s three outcomes, restart, start and open, over one hello. Await polls until brain serve answers, Fix and FixItWith build the command that fixes a held port, Serves says which build runs, and Restart and Start each send one call; inlined, they would bury the three outcomes under polling and messages.",
+        "fingerprint": "606253bac071eccfd0376a293169bb6f78fc054c02f7ab37b7f18d11920a4c2a",
+        "value": 20
+      }
     },
     {
       "id": "0000080",
@@ -961,9 +973,13 @@
       "id": "0000122",
       "check": "control-coupling",
       "symbol": "brain::Brain.Commands.UiCommand.Run(BrainEnv, bool, int)",
-      "fingerprint": "224aa3c746544416a87848c5aaf590885c662d55d20c7bd710c57502153bf289",
+      "fingerprint": "6fd343b0bc63337c01c89acb5c15628089cc00c5d46b7c96646903d886341622",
       "value": 1,
-      "resolution": null
+      "resolution": {
+        "reason": "restart is brain ui\u0027s own --restart flag: the CLI passes what it parsed and brain install passes true. The two modes share the hello and the refusal of a port that does not answer to this brain\u0027s key, so they are one command, not two.",
+        "fingerprint": "6fd343b0bc63337c01c89acb5c15628089cc00c5d46b7c96646903d886341622",
+        "value": 1
+      }
     },
     {
       "id": "0000123",
@@ -1101,9 +1117,13 @@
       "id": "0000139",
       "check": "control-coupling",
       "symbol": "brain::Brain.Serving.ReviewServer.Serve(bool, CancellationToken)",
-      "fingerprint": "bb08809cac4679a588b5d7f969dc4f5a11d3da644b9b2b2868c5c7960ccb6e00",
+      "fingerprint": "8428e22c51ab20edfc25f8f4bf4ff678b7dde3fe92bb69a55bad223b3dec3516",
       "value": 1,
-      "resolution": null
+      "resolution": {
+        "reason": "window is false only in the tests, whose stand-in browser records each window a test opens itself; brain serve always passes true. Taking it away changes how every ReviewServer test starts, not this server.",
+        "fingerprint": "8428e22c51ab20edfc25f8f4bf4ff678b7dde3fe92bb69a55bad223b3dec3516",
+        "value": 1
+      }
     },
     {
       "id": "0000140",
@@ -1389,12 +1409,12 @@
       "id": "0000174",
       "check": "split-complexity",
       "symbol": "brain::Brain.Windows.WindowServer.Serve(CancellationToken)",
-      "fingerprint": "0492bd3dbf93c06ffcc16b8c4f698d0112c30f6edf8fadd286cec9a95b84503d",
-      "value": 14,
+      "fingerprint": "11e56b486c4b1fc7c2f65c01adf65e2ac984b2f99cac13469705d970c263d9c8",
+      "value": 16,
       "resolution": {
-        "reason": "Serve runs what lives while the server serves: Listen picks the port, and FollowTheme, RecordCpu and Stop are what its thread and its timers run. It moved unchanged from the workspace\u0027s server, which loses it.",
-        "fingerprint": "0492bd3dbf93c06ffcc16b8c4f698d0112c30f6edf8fadd286cec9a95b84503d",
-        "value": 14
+        "reason": "Serve runs what lives while the server serves: Listen picks the port, and FollowTheme, RecordCpu and Stop are what its thread and its timers run. It moved unchanged from the workspace\u0027s server. The handed code adds the two ifs that admit it and skip the window it replaces, beside the window they decide.",
+        "fingerprint": "11e56b486c4b1fc7c2f65c01adf65e2ac984b2f99cac13469705d970c263d9c8",
+        "value": 16
       }
     },
     {
@@ -1746,6 +1766,18 @@
       "resolution": {
         "reason": "Listed makes one CodeSent per agent from facts that span agents. CheckedBy matches a check\u0027s brief, then falls to the next builder or validator sent; IsWork names the one test of those two kinds; OutlineOf shortens the steps PieceOf takes from Trail.Of. Each is its own question about one agent.",
         "fingerprint": "49221cfc8fc9e27916486298aeb0a0cf7f1e639ce6266a022e031876d1a3c642",
+        "value": 11
+      }
+    },
+    {
+      "id": "0000216",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Serving.ReviewServer.Serve(bool, CancellationToken)",
+      "fingerprint": "8428e22c51ab20edfc25f8f4bf4ff678b7dde3fe92bb69a55bad223b3dec3516",
+      "value": 11,
+      "resolution": {
+        "reason": "Serve is the server\u0027s life read top to bottom: take a handed code, start the listener or say the port is taken, open the window unless one moves here, accept until stopped, then land an answer in flight, stop every agent and start the successor. The eleventh path is the handed code, which stands beside the window it replaces; a helper for it would hide one if and add a name.",
+        "fingerprint": "8428e22c51ab20edfc25f8f4bf4ff678b7dde3fe92bb69a55bad223b3dec3516",
         "value": 11
       }
     }

@@ -29,7 +29,8 @@ namespace Brain.Code;
 /// Once a newer build is published beside it, its window hears so and its session list says whether a reload waits for
 /// a session that runs. The user's reload, refused while one runs, hands every session on in <see cref="Handover"/>, and
 /// the server stops them and starts its successor itself, from its own environment, so no session owns the new server.
-/// A server that starts takes the handover a reload left: it resumes each session by its id and opens its window on the
+/// The window moves onto the successor in place, through <see cref="WindowServer.MoveTo"/>, and no second window opens.
+/// A server that starts takes the handover a reload left: it resumes each session by its id and its window shows the
 /// one that was in view.
 /// </para>
 /// </summary>
@@ -104,6 +105,7 @@ internal sealed class CodeServer : IDisposable
     private readonly CancellationTokenSource reloaded = new();
     private string? opened;
     private bool reloading;
+    private bool moved;
 
     /// <param name="program">The claude each session runs: <c>claude</c>, or a test's stand-in.</param>
     /// <param name="build">The build the server runs, which says when a newer one is published.</param>
@@ -132,7 +134,8 @@ internal sealed class CodeServer : IDisposable
 
     /// <summary>
     /// Resumes the sessions a reload handed on, opens its window and listens until <paramref name="stop"/>, until the
-    /// window is gone, or until the user's reload; then it stops every session, and after a reload starts its successor.
+    /// window is gone, or until the user's reload; then it stops every session. After a reload whose window did not move
+    /// onto the successor, as when no window listened, it starts the successor now, which opens its own window.
     /// </summary>
     public async Task Serve(CancellationToken stop)
     {
@@ -154,7 +157,7 @@ internal sealed class CodeServer : IDisposable
             sessions.Dispose();
         }
 
-        if (reloading)
+        if (reloading && !moved)
         {
             successor();
         }
@@ -173,6 +176,12 @@ internal sealed class CodeServer : IDisposable
     /// <summary>A session changed: the window hears of it once the changes of the next 50 ms are gathered.</summary>
     private void Changed(string id)
     {
+        // A reload stops every session as it hands them on: the window, about to move, hears none of it.
+        if (Volatile.Read(ref reloading))
+        {
+            return;
+        }
+
         lock (gate)
         {
             if (pending.Add(id) && pending.Count == 1)
@@ -368,8 +377,9 @@ internal sealed class CodeServer : IDisposable
     }
 
     /// <summary>
-    /// The user's reload onto the newer build: every session is handed on, with the one the window shows, and the server
-    /// stops, which starts its successor. Refused, with why, while no newer build is published or a session runs.
+    /// The user's reload onto the newer build: every session is handed on, with the one the window shows, every session
+    /// stops, the successor starts and the window moves onto it, and the server stops. Refused, with why, while no newer
+    /// build is published or a session runs.
     /// </summary>
     private void Reload(HttpListenerRequest request, HttpListenerResponse response)
     {
@@ -380,8 +390,11 @@ internal sealed class CodeServer : IDisposable
             return;
         }
 
-        // The answer goes before the server stops, since closing its listener drops every connection still open.
+        // The answer goes before the server stops, since closing its listener drops every connection still open. Every
+        // session stops before the successor starts, which resumes each by its id.
         response.Close();
+        sessions.Dispose();
+        moved = window.MoveTo(successor);
         reloaded.Cancel();
     }
 

@@ -9,8 +9,9 @@ namespace Brain.Commands;
 /// <summary>
 /// <c>brain ui</c>: opens brain's window, and starts <c>brain serve</c> in the background first when it is not running.
 /// There is one window: the new one closes every window open before it. Bind it to a key of your own. <c>--restart</c>
-/// has a running brain serve of this brain close its windows and start its successor on the build now published beside
-/// it, and says which build that is; brain install runs it.
+/// has a running brain serve of this brain start its successor on the build now published beside it, and says which
+/// build that is; brain install runs it. The window already open moves onto the successor in place, and one opens only
+/// when none was open.
 /// </summary>
 internal static class UiCommand
 {
@@ -29,6 +30,8 @@ internal static class UiCommand
     }
 
     /// <summary><c>brain ui</c>, or <c>brain ui --restart</c> when <paramref name="restart"/> holds, on <paramref name="port"/>.</summary>
+    // navarone: 0000079
+    // navarone: 0000122
     internal static int Run(BrainEnv env, bool restart, int port)
     {
         var files = new ServeFiles(env.Home);
@@ -50,7 +53,7 @@ internal static class UiCommand
             }
 
             Restart(env, client, files, port);
-            env.Out.WriteLine($"brain ui: restarted brain serve on 127.0.0.1:{port}, and it opens the window; {Serves(Hello(client, files).Build, port)}");
+            env.Out.WriteLine($"brain ui: restarted brain serve on 127.0.0.1:{port}, and the window moves onto it, or opens when none was open; {Serves(Hello(client, files).Build, port)}");
             return ExitCodes.Ok;
         }
 
@@ -169,9 +172,9 @@ internal static class UiCommand
 
     /// <summary>
     /// Asks the running brain serve to restart, and waits until its successor answers with a key of its own. The old one
-    /// tells its windows to close, then starts the successor itself, from its own environment, so the successor is never
-    /// a child of this process. It lands an answer in flight before it ends, so every write before the user stays before
-    /// the user in the new window.
+    /// hands its window on to the successor, then starts the successor itself, from its own environment, so the
+    /// successor is never a child of this process. It lands an answer in flight before it ends, so every write before
+    /// the user stays before the user in the window on the new build.
     /// </summary>
     private static void Restart(BrainEnv env, HttpClient client, ServeFiles files, int port)
     {

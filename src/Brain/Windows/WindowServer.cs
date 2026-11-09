@@ -22,7 +22,7 @@ internal sealed record WindowKind(string App, string Command, string Folder, str
 /// and a POST from a browser must come from its origin. Hello, raise and the window's own keyed calls need the key in its
 /// <see cref="ServeFiles"/>, which only the user's account can read; launch needs a launch code; everything else under
 /// <c>/api</c> needs the session of its window from <see cref="WindowSessions"/>. Its window hears on its event stream
-/// what the server publishes and each Omarchy theme switch. It sends the window's records and its own to its
+/// what the server publishes and each Omarchy theme switch, and moves onto the server's successor once it hands on. It sends the window's records and its own to its
 /// <see cref="Records"/>, and once a minute records the CPU it used, which an idle window keeps near none. It ends once
 /// its window is gone.
 /// </summary>
@@ -50,6 +50,13 @@ internal sealed class WindowServer
     private static readonly TimeSpan FirstWindow = TimeSpan.FromMinutes(1);
 
     private static readonly TimeSpan Minute = TimeSpan.FromMinutes(1);
+
+    /// <summary>How long a server that moves its window waits for its successor to serve, and how often it looks.</summary>
+    private static readonly TimeSpan SuccessorWait = TimeSpan.FromSeconds(20);
+    private static readonly TimeSpan SuccessorPoll = TimeSpan.FromMilliseconds(50);
+
+    /// <summary>How long a server that moved its window waits for the window's streams to carry the word.</summary>
+    private static readonly TimeSpan Drain = TimeSpan.FromSeconds(2);
 
     private readonly string home;
     private readonly WindowKind kind;
@@ -89,12 +96,23 @@ internal sealed class WindowServer
 
     public string Origin { get; private set; } = string.Empty;
 
-    /// <summary>Opens its window and listens until <paramref name="stop"/>, or until the window is gone.</summary>
+    /// <summary>
+    /// Opens its window and listens until <paramref name="stop"/>, or until the window is gone. A launch code its
+    /// predecessor handed it takes the place of a new window: the window already open moves onto this server. The code is
+    /// admitted before the port file names this server, so a predecessor that waits on that file tells its window only
+    /// once the code trades.
+    /// </summary>
     // navarone: 0000174
     public async Task Serve(CancellationToken stop)
     {
         using var listener = Listen();
         key = files.WriteKey();
+        var handed = HandedLaunch.Take(files, time);
+        if (handed is not null)
+        {
+            windows.Admit(handed);
+        }
+
         files.Write(PortFile, Origin["http://127.0.0.1:".Length..]);
         using var watching = theme.Watch(time);
         using var stopping = CancellationTokenSource.CreateLinkedTokenSource(stop);
@@ -105,7 +123,10 @@ internal sealed class WindowServer
         using var cpu = time.CreateTimer(_ => RecordCpu(), null, Minute, Minute);
         using var gone = time.CreateTimer(_ => Stop(), null, FirstWindow, Timeout.InfiniteTimeSpan);
         idle = gone;
-        OpenWindow();
+        if (handed is null)
+        {
+            OpenWindow();
+        }
 
         using var closing = stopping.Token.Register(() =>
         {
@@ -135,6 +156,42 @@ internal sealed class WindowServer
 
     /// <summary>Says <paramref name="text"/>, one whole event, on the stream of every window.</summary>
     public void Publish(string text) => windows.Publish(text);
+
+    /// <summary>
+    /// Moves the window onto <paramref name="successor"/>: while a window listens, it hands the successor a launch code,
+    /// starts it, waits until the successor's port file names it, and tells the window the successor's launch URL on the
+    /// window's own event stream, waiting a moment for the stream to carry it, so the window goes on there and no second
+    /// window opens. False, with nothing started, when no window listens: the successor then opens its own. A successor
+    /// that does not serve within <see cref="SuccessorWait"/> leaves the window to find this server gone.
+    /// </summary>
+    public bool MoveTo(Action successor)
+    {
+        if (!windows.Listened)
+        {
+            return false;
+        }
+
+        var code = HandedLaunch.Hand(files, time);
+        var mine = files.Read(PortFile);
+        successor();
+        var deadline = DateTime.UtcNow + SuccessorWait;
+        var theirs = files.Read(PortFile);
+        while (theirs is null || theirs == mine)
+        {
+            if (DateTime.UtcNow > deadline)
+            {
+                return true;
+            }
+
+            Thread.Sleep(SuccessorPoll);
+            theirs = files.Read(PortFile);
+        }
+
+        // The streams carry moved to the window before the server stops, since closing its listener cuts them off.
+        windows.Move("http://127.0.0.1:" + theirs + "/#launch=" + code);
+        SpinWait.SpinUntil(() => !windows.Listened, Drain);
+        return true;
+    }
 
     /// <summary>Brings the window forward: the compositor raises it, or a fresh window takes its place.</summary>
     public string Raise()
@@ -355,7 +412,8 @@ internal sealed class WindowServer
     }
 
     /// <summary>
-    /// The window's event stream: what the server publishes, a theme switch, and close once a newer window took over. It
+    /// The window's event stream: what the server publishes, a theme switch, close once a newer window took over, and
+    /// moved once the window goes on in the server's successor. It
     /// ends with the window's goodbye or its connection. Once the last stream ended and none came back within a few
     /// seconds, the server stops.
     /// </summary>

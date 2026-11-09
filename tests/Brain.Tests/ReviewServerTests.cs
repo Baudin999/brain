@@ -16,7 +16,8 @@ namespace Brain.Tests;
 /// brain serve, over real HTTP on 127.0.0.1: the window's API answers only a session that traded a launch code, the code
 /// works once and a second try closes every session, a request for another host or from another origin is refused, a
 /// yes from the window lands exactly the write it showed, which <c>land</c> then returns, and there is one window: a new
-/// window and a stopping server each tell every older window to close.
+/// window and a stopping server each tell every older window to close, and a restart moves the window onto its
+/// successor in place.
 /// </summary>
 [Collection(ReviewServerTests.StartsClaude)]
 public sealed partial class ReviewServerTests : IDisposable
@@ -928,11 +929,17 @@ public sealed partial class ReviewServerTests : IDisposable
         Assert.Equal(HttpStatusCode.Accepted, restart.StatusCode);
         Assert.Equal([false], successors);
         Assert.Empty(Directory.EnumerateFiles(new ServeFiles(brain.Home).Dir, "launch-*"));
+        Assert.False(File.Exists(Path.Combine(new ServeFiles(brain.Home).Dir, HandedLaunch.FileName)));
         Assert.True(new PendingStore(brain.Home).IsAsked(id));
     }
 
+    /// <summary>
+    /// A restart with a window listening tells it the successor's launch URL on its own stream, answers nothing new,
+    /// and starts the successor once its port is free. The successor admits the handed code in place of opening a
+    /// window, so the window that moves trades it and no second window opens.
+    /// </summary>
     [Fact]
-    public async Task ARestartTellsTheWindowToCloseThenStartsTheSuccessor()
+    public async Task ARestartMovesTheWindowOntoTheSuccessorAndOpensNoSecondWindow()
     {
         StartWithOmarchy();
         var token = await Trade(Launch());
@@ -942,12 +949,25 @@ public sealed partial class ReviewServerTests : IDisposable
 
         var restart = await Send(HttpMethod.Post, "/api/restart", key: Key);
         var told = await NextEvent(events);
+        var url = await events.ReadLineAsync();
         await serving.WaitAsync(TimeSpan.FromSeconds(5));
+        var successor = new ReviewServer(brain.Env(TextReader.Null, TextWriter.Null, TextWriter.Null), port, Open, time, new OmarchyTheme(brain.Root, colorCommand: null), Successor, models, GpuWatch.None(time));
+        using var stopping = new CancellationTokenSource();
+        var served = successor.Serve(window: true, stopping.Token);
+        var launch = "data: " + server.Origin + "/#launch=";
+        Assert.NotNull(url);
+        Assert.StartsWith(launch, url, StringComparison.Ordinal);
+        var moved = await Send(HttpMethod.Post, "/api/launch", Json(new { code = url[launch.Length..] }), origin: server.Origin);
 
         Assert.Equal(HttpStatusCode.Accepted, restart.StatusCode);
         Assert.Equal("event: theme", opened);
-        Assert.Equal("event: close", told);
+        Assert.Equal("event: moved", told);
         Assert.Equal([false], successors);
+        Assert.Single(windows);
+        Assert.Equal(HttpStatusCode.OK, moved.StatusCode);
+        Assert.False(File.Exists(Path.Combine(new ServeFiles(brain.Home).Dir, HandedLaunch.FileName)));
+        await stopping.CancelAsync();
+        await served.WaitAsync(TimeSpan.FromSeconds(5));
     }
 
     [Fact]

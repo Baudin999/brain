@@ -23,9 +23,9 @@
 // agent started that still run fold out of a chip in its head, over its conversation, and fold away on Esc or a click
 // outside; while they are out, the sessions read again each second, so they come and go as they do. Once a newer build
 // of brain code is published, the head of the sessions shows the reload button, disabled while a session runs and
-// highlighted once none does; a click puts the server on the new build, every session with it, and the new window
-// opens on the session that was in view. Each action and each read is a record, sent to the server for the log of
-// perf/code, on this machine only.
+// highlighted once none does; a click puts the server on the new build, every session with it, and this window moves
+// onto it in place, on the session that was in view. Each action and each read is a record, sent to the server for the
+// log of perf/code, on this machine only.
 //
 // Text selected in the conversation or in the information panel is quoted into the composer of the session in view,
 // from the Quote button beside it or with Alt+Q. Under the image viewer, the file explorer or the close confirm there
@@ -884,7 +884,7 @@ function closeConfirmView() {
 }
 
 // The user's reload onto the newer build: the server hands every session to its successor, with the one in view, and
-// stops, which closes this window; the successor's window opens on the same session. A refusal, as a session that
+// says moved once the successor serves, so this window goes on there on the same session. A refusal, as a session that
 // started to run, shows as the window's problem.
 async function reload() {
   state.reloading = true;
@@ -1043,6 +1043,16 @@ function heard(event, data) {
   if (event === 'build') timed('build.published', '', READ_BUDGET_MS, readSessions);
   if (event === 'theme') windowSwapTheme(draw);
   if (event === 'close') shut('brain code opened in a newer window.', true);
+  if (event === 'moved') move(data);
+}
+
+// The server handed this window on to its successor on a newer build: the window goes to the successor's launch URL,
+// whose page trades the launch code, and shows the session that was in view. It neither closes nor says it stopped.
+function move(url) {
+  if (state.closed) return;
+  state.closed = 'brain code moves onto its new build.';
+  windowForget(SESSION_KEY);
+  location.replace(url);
 }
 
 function ended(why) {
@@ -1224,11 +1234,6 @@ async function boot() {
   if (state.opened) await pick(state.opened);
 }
 
-// Leaving the window stops every session that runs: the browser asks first.
-window.addEventListener('beforeunload', (event) => {
-  if (state.closed || !state.sessions.some((session) => session.alive)) return;
-  event.preventDefault();
-});
 window.addEventListener('pagehide', () => {
   windowSendRecords(unsent, true);
   windowBye();
