@@ -1,5 +1,5 @@
 {
-  "granted": 213,
+  "granted": 215,
   "problems": [
     {
       "id": "0000001",
@@ -1565,24 +1565,24 @@
       "id": "0000190",
       "check": "split-complexity",
       "symbol": "brain::Brain.Code.SentAgents.View(Transcript, string, WorkSignals, Landings)",
-      "fingerprint": "47863b722f3a7f976b659e6162f2d765d90371b09a560395c24d192e53a32b8e",
-      "value": 19,
+      "fingerprint": "340d859659c61f6ebbb6be4562d1c421c9f91187b19e7f02aff968fa9407e058",
+      "value": 18,
       "resolution": {
-        "reason": "View reads one sent agent\u0027s transcript into its view, and its helpers are the facts the view states, one each: NavaroneRuns.get adds 5, Now.get adds 4, Questions.get adds 3, RunsNavarone adds 5 and TrailOf adds 4. RunsNavarone only changed where it reads a Bash command, from the event\u0027s text to its input field, so the counts are the view\u0027s own.",
-        "fingerprint": "1809cee85752bf561f99b7edcac69d29b1aa5c3ffa0790294a50759edcd06ba8",
-        "value": 23
+        "reason": "View finds one agent and hands its facts to the view. NavaroneRuns.get counts the Bash results that ran Navarone, RunsNavarone(CodeEvent) is the one test of a call for it, Questions.get cuts a readiness check\u0027s report after its verdict, and TrailOf(Agent, List\u003CAgent\u003E, WorkSignals, Landings) builds the trail of the agent\u0027s work. Each answers one question and none is a branch of View cut in pieces.",
+        "fingerprint": "340d859659c61f6ebbb6be4562d1c421c9f91187b19e7f02aff968fa9407e058",
+        "value": 18
       }
     },
     {
       "id": "0000191",
       "check": "split-complexity",
       "symbol": "brain::Brain.Code.SentAgents.Read(Transcript)",
-      "fingerprint": "c6f2c6acf67bab840956b439a8af8aa3ec1cece1f485718eea80101b1afc450c",
-      "value": 46,
+      "fingerprint": "863af49d3686350ca37ec0f91894669a97dc2029ce38a1049d7baf59e462bc8e",
+      "value": 39,
       "resolution": {
-        "reason": "Read stays a short walk: calls, metas, agents, order, attach. The ctor reads one agent\u0027s state, start and end; KindOf maps a type to a kind; StateOf picks one of four states; Verdict reads the two words a check opens with; WorkOf finds the builder a brief names; FailedCalls collects error results; WithUnwritten adds a meta for a call with none yet; Attach hands each agent its attached check, now and outline; CheckedBy matches a check\u0027s brief and falls to the next agent sent; IsWork names the one test both share; OutlineOf shortens Trail.Of\u0027s steps. Each answers one question about one agent and is called once per agent, none is a branch of Read cut in pieces.",
-        "fingerprint": "c6f2c6acf67bab840956b439a8af8aa3ec1cece1f485718eea80101b1afc450c",
-        "value": 46
+        "reason": "Read stays a short walk: calls, metas, agents, order. The ctor reads one agent\u0027s state, start, end and now; KindOf maps a type to a kind; NowOf(string-free) reads the last tool call or words; StateOf picks one of four states; Verdict reads the two words a check opens with; WorkOf finds the builder a brief names; FailedCalls collects error results; WithUnwritten adds a meta for a call with none yet. Each answers one question about one agent and none is a branch of Read cut in pieces.",
+        "fingerprint": "863af49d3686350ca37ec0f91894669a97dc2029ce38a1049d7baf59e462bc8e",
+        "value": 39
       }
     },
     {
@@ -1736,6 +1736,18 @@
       "fingerprint": "14a638ca4f650036fbf9f4b735ecccd57bfd0d4a3b6eed1da1d56c2c2842a6b1",
       "value": 13,
       "resolution": null
+    },
+    {
+      "id": "0000214",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Code.SentAgents.Listed(List\u003CAgent\u003E)",
+      "fingerprint": "49221cfc8fc9e27916486298aeb0a0cf7f1e639ce6266a022e031876d1a3c642",
+      "value": 11,
+      "resolution": {
+        "reason": "Listed makes one CodeSent per agent from facts that span agents. CheckedBy matches a check\u0027s brief, then falls to the next builder or validator sent; IsWork names the one test of those two kinds; OutlineOf shortens the steps PieceOf takes from Trail.Of. Each is its own question about one agent.",
+        "fingerprint": "49221cfc8fc9e27916486298aeb0a0cf7f1e639ce6266a022e031876d1a3c642",
+        "value": 11
+      }
     }
   ]
 }

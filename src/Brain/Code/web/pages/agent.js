@@ -20,7 +20,7 @@ function leadOf(view) {
   if (sent.state === 'failed') return `It failed after ${ran}.`;
   if (sent.state === 'stopped') return `It was stopped after ${ran}.`;
   if (sent.state === 'finished') return `It finished after ${ran}.`;
-  if (view.now) return `It is working, for ${ran} so far. Now: ${view.now}`;
+  if (sent.now) return `It is working, for ${ran} so far. Now: ${sent.now}`;
   return `It is working, for ${ran} so far.`;
 }
 

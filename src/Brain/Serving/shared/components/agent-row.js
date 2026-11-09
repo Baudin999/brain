@@ -52,7 +52,7 @@ export function agentRowView(sent, { opened = false, now = Date.now(), onOpen })
       <span class="agent-row-kind">${kindLabel(sent)}</span>
       <span class="agent-row-what">${sent.description}</span>
       <span class="agent-row-state">${stateWords(sent, now)}</span>
-      ${sent.state === 'running' && sent.now ? html`<span class="agent-row-now">${sent.now}</span>` : nothing}
+      ${sent.now ? html`<span class="agent-row-now">${sent.now}</span>` : nothing}
     </button>
   `;
 }

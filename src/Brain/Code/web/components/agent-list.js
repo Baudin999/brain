@@ -10,22 +10,19 @@ import { trailOutlineView } from '/components/trail-step.js';
 // The entries of the list, in the order the first agent of each was sent. A builder heads one piece of work, which its
 // validators join; a readiness check joins the entry of the agent the server says it checked, and stands alone when
 // none was sent after it. Any other agent is an entry of its own.
-function entryKeys(agents) {
-  const builders = new Set(agents.filter((sent) => sent.kind === 'builder').map((sent) => sent.agent));
-  const byTool = new Map(agents.map((sent) => [sent.tool, sent]));
-  const keyOf = (sent) => {
-    if (sent.kind === 'ready' && byTool.has(sent.attached)) return keyOf(byTool.get(sent.attached));
-    if (sent.work && builders.has(sent.work)) return `work|${sent.work}`;
-    return sent.tool;
-  };
-  return keyOf;
+// The key of the entry an agent is in: the piece of work of its builder, the entry of the agent a check checked, or its own.
+function keyOf(sent, builders, byTool) {
+  if (sent.kind === 'ready' && byTool.has(sent.attached)) return keyOf(byTool.get(sent.attached), builders, byTool);
+  if (sent.work && builders.has(sent.work)) return `work|${sent.work}`;
+  return sent.tool;
 }
 
 function grouped(agents) {
-  const keyOf = entryKeys(agents);
+  const builders = new Set(agents.filter((sent) => sent.kind === 'builder').map((sent) => sent.agent));
+  const byTool = new Map(agents.map((sent) => [sent.tool, sent]));
   const groups = new Map();
   for (const sent of agents) {
-    const key = keyOf(sent);
+    const key = keyOf(sent, builders, byTool);
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(sent);
   }
@@ -44,13 +41,19 @@ function trailOf(group) {
   for (const sent of group) {
     for (const step of sent.steps || []) items.push({ step });
   }
-  return items.map((item, place) => ({ item, place })).sort((a, b) => atOf(a.item) - atOf(b.item) || a.place - b.place).map(({ item }) => item);
+  items.sort((a, b) => atOf(a) - atOf(b));
+  return items;
+}
+
+function itemView(item, open, now, onOpen) {
+  if (item.step) return trailOutlineView(item.step, onOpen);
+  return agentRowView(item.sent, { opened: item.sent.tool === open, now, onOpen });
 }
 
 function groupView(group, open, now, onOpen) {
   const items = trailOf(group);
   if (items.length === 1) return html`<li class="code-sent-one">${agentRowView(group[0], { opened: group[0].tool === open, now, onOpen })}</li>`;
-  const drawn = items.map((item) => item.sent ? agentRowView(item.sent, { opened: item.sent.tool === open, now, onOpen }) : trailOutlineView(item.step, onOpen));
+  const drawn = items.map((item) => itemView(item, open, now, onOpen));
   return html`<li class="code-work" aria-label="One piece of work">${drawn}</li>`;
 }
 

@@ -219,14 +219,13 @@ internal sealed record CodeOutline(
 internal sealed record CodeSentList(IReadOnlyList<CodeSent> Agents);
 
 /// <summary>
-/// One agent as its own view draws it: the agent, the brief it was sent with, what it is doing now while it runs, its
+/// One agent as its own view draws it: the agent, the brief it was sent with, its
 /// report once it gave one, the trail of the work it is part of, for a builder and a validator, and for a readiness
 /// check the questions of its report: what follows its verdict.
 /// </summary>
 internal sealed record CodeAgentView(
     CodeSent Sent,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Brief,
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Now,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Report,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] CodeTrail? Trail,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Questions);

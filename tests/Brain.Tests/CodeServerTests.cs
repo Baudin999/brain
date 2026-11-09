@@ -318,7 +318,7 @@ public sealed partial class CodeServerTests : IDisposable
         Assert.Equal("One note: the brief names no repo.", ready.RootElement.GetProperty("questions").GetString());
         var root = view.RootElement;
         Assert.StartsWith("Validate the lens. Builder agent ID: b1.", root.GetProperty("brief").GetString(), StringComparison.Ordinal);
-        Assert.Equal("SendMessage b1", root.GetProperty("now").GetString());
+        Assert.Equal("SendMessage b1", root.GetProperty("sent").GetProperty("now").GetString());
         var steps = root.GetProperty("trail").GetProperty("steps").EnumerateArray().ToList();
         Assert.Equal(["report", "findings", "answer"], steps.Select((one) => one.GetProperty("kind").GetString()!));
         Assert.Equal(["Built the lens.", "1. The lens has no test.", "Tested in 1234abc."], steps.Select((one) => one.GetProperty("text").GetString()!));

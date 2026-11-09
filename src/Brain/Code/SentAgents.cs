@@ -24,7 +24,7 @@ internal sealed class SentAgents
     }
 
     /// <summary>Every agent the session sent, in the order it sent them.</summary>
-    public IReadOnlyList<CodeSent> All(Transcript session) => [.. Read(session).Select(agent => agent.Sent)];
+    public IReadOnlyList<CodeSent> All(Transcript session) => Listed(Read(session));
 
     /// <summary>How many of the agents the session sent still run, by the same state the list shows.</summary>
     public int Running(Transcript session) => All(session).Count(sent => sent.State == CodeSent.Running);
@@ -45,7 +45,8 @@ internal sealed class SentAgents
         }
 
         var trail = TrailOf(agent, agents, signals, landings);
-        return new CodeAgentView(agent.Sent, agent.Brief, agent.Now, agent.Report, trail, agent.Questions);
+        var sent = Listed(agents)[agents.IndexOf(agent)];
+        return new CodeAgentView(sent, agent.Brief, agent.Report, trail, agent.Questions);
     }
 
     /// <summary>Each agent the session sent, with its events, the earliest sent first: by when its transcript starts.</summary>
@@ -63,24 +64,25 @@ internal sealed class SentAgents
             agents.Add(new Agent(meta, events, failed, builders));
         }
 
-        var ordered = agents.OrderBy(agent => agent.Sent.Started ?? DateTimeOffset.MaxValue).ToList();
-        Attach(ordered);
-        return ordered;
+        return [.. agents.OrderBy(agent => agent.Sent.Started ?? DateTimeOffset.MaxValue)];
     }
 
     /// <summary>
-    /// Gives each readiness check the agent it checked, what each running agent does now, and each builder the outline
-    /// of its work. A check belongs to the builder or validator sent with exactly its brief; one whose brief matches
-    /// none belongs to the next builder or validator sent after it; one with none after it belongs to none.
+    /// The agents as the list shows them, in the same order: each readiness check with the agent it checked, and each
+    /// builder with the outline of its work. A check belongs to the builder or validator sent with exactly its brief;
+    /// one whose brief matches none belongs to the next builder or validator sent after it; one with none after it
+    /// belongs to none.
     /// </summary>
-    private static void Attach(List<Agent> agents)
+    // navarone: 0000214
+    private static List<CodeSent> Listed(List<Agent> agents)
     {
+        var listed = new List<CodeSent>();
         foreach (var agent in agents)
         {
-            var attached = CheckedBy(agent, agents);
-            var steps = OutlineOf(agent, agents);
-            agent.Sent = agent.Sent with { Attached = attached, Now = agent.Now, Steps = steps };
+            listed.Add(agent.Sent with { Attached = CheckedBy(agent, agents), Steps = OutlineOf(agent, agents) });
         }
+
+        return listed;
     }
 
     /// <summary>The call id of the agent the check <paramref name="check"/> checked; null for any other agent, and for a check with no agent sent after it.</summary>
@@ -105,6 +107,15 @@ internal sealed class SentAgents
         return sentAfter.FirstOrDefault()?.Meta.ToolUseId;
     }
 
+    /// <summary>A builder's work: the validators sent for it, and its steps.</summary>
+    private sealed record Piece(List<Agent> Validators, IReadOnlyList<CodeStep> Steps);
+
+    private static Piece PieceOf(Agent builder, List<Agent> agents)
+    {
+        var validators = agents.Where(one => one.Sent.Kind == CodeSent.Validator && one.Sent.Work == builder.Meta.Agent).ToList();
+        return new Piece(validators, Trail.Of(builder.Worker, [.. validators.Select(one => one.Worker)]));
+    }
+
     /// <summary>True for a builder and a validator: the agents a readiness check checks.</summary>
     private static bool IsWork(Agent agent) => agent.Sent.Kind == CodeSent.Builder || agent.Sent.Kind == CodeSent.Validator;
 
@@ -116,15 +127,15 @@ internal sealed class SentAgents
             return null;
         }
 
-        var validators = agents.Where(one => one.Sent.Kind == CodeSent.Validator && one.Sent.Work == builder.Meta.Agent).ToList();
+        var piece = PieceOf(builder, agents);
         var tools = new Dictionary<string, string>(StringComparer.Ordinal) { [builder.Meta.Agent] = builder.Meta.ToolUseId };
-        foreach (var validator in validators)
+        foreach (var validator in piece.Validators)
         {
             tools[validator.Meta.Agent] = validator.Meta.ToolUseId;
         }
 
         var outline = new List<CodeOutline>();
-        foreach (var step in Trail.Of(builder.Worker, [.. validators.Select(one => one.Worker)]))
+        foreach (var step in piece.Steps)
         {
             outline.Add(new CodeOutline(step.Kind, tools[step.Agent], step.At, step.Round, step.Commits.Count, step.Landed));
         }
@@ -207,9 +218,9 @@ internal sealed class SentAgents
             return null;
         }
 
-        var validators = agents.Where(one => one.Sent.Kind == CodeSent.Validator && one.Sent.Work == work).ToList();
-        var steps = Trail.Of(builder.Worker, [.. validators.Select(one => one.Worker)]);
-        var told = steps.Select(landings.Told).ToList();
+        var piece = PieceOf(builder, agents);
+        var validators = piece.Validators;
+        var told = piece.Steps.Select(landings.Told).ToList();
         var found = new CodeSignals(Read: false, []);
         if (builder.Meta.Worktree is { } worktree)
         {
@@ -251,14 +262,20 @@ internal sealed class SentAgents
                 ended = events.LastOrDefault(one => one.At is not null)?.At;
             }
 
-            Sent = new CodeSent(meta.Agent, meta.ToolUseId, meta.Type, Kind, meta.Description, state, started, ended, WorkOf(builders), Verdict(), meta.Worktree);
+            string? now = null;
+            if (state == CodeSent.Running)
+            {
+                now = NowOf();
+            }
+
+            Sent = new CodeSent(meta.Agent, meta.ToolUseId, meta.Type, Kind, meta.Description, state, started, ended, WorkOf(builders), Verdict(), meta.Worktree, Now: now);
         }
 
         public SentMeta Meta { get; }
 
         public IReadOnlyList<CodeEvent> Events { get; }
 
-        public CodeSent Sent { get; set; }
+        public CodeSent Sent { get; }
 
         /// <summary>The kind of view the agent opens in, from its type.</summary>
         public string Kind => KindOf(Meta.Type);
@@ -289,24 +306,21 @@ internal sealed class SentAgents
             }
         }
 
-        /// <summary>What a running agent does now, in one line: its last tool call with what it works on, or the first line of its last words.</summary>
-        public string? Now
+        /// <summary>What an agent does now, in one line: its last tool call with what it works on, or the first line of its last words; null before it did either.</summary>
+        private string? NowOf()
         {
-            get
+            var last = Events.LastOrDefault(one => one.Kind is CodeEvent.Tool or CodeEvent.Said);
+            if (last is null)
             {
-                var last = Events.LastOrDefault(one => one.Kind is CodeEvent.Tool or CodeEvent.Said);
-                if (Sent.State != CodeSent.Running || last is null)
-                {
-                    return null;
-                }
-
-                if (last.Kind == CodeEvent.Tool)
-                {
-                    return $"{last.Name} {last.Subject}".Trim();
-                }
-
-                return last.Text!.Split('\n')[0];
+                return null;
             }
+
+            if (last.Kind == CodeEvent.Tool)
+            {
+                return $"{last.Name} {last.Subject}".Trim();
+            }
+
+            return last.Text!.Split('\n')[0];
         }
 
         /// <summary>A readiness check's questions: its report after its verdict; null for any other agent, and for a verdict that asks none.</summary>
