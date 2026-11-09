@@ -54,6 +54,12 @@ function renameRow(session, renaming, handlers) {
   `;
 }
 
+function renameStarted(event, session, handlers) {
+  if (event.key === 'F2') {
+    handlers.onRenameStart(session.id);
+  }
+}
+
 function titleView(session) {
   if (!session.title) return nothing;
   return html`<span class="code-session-title">${session.title}</span>`;
@@ -65,7 +71,7 @@ function sessionRow(session, current, handlers) {
     <li>
       <button class="row code-session" aria-current=${current ? 'true' : 'false'} title=${session.prompt ?? nothing}
         @click=${() => handlers.onPick(session.id)} @dblclick=${() => handlers.onRenameStart(session.id)}
-        @keydown=${(event) => event.key === 'F2' && handlers.onRenameStart(session.id)}>
+        @keydown=${(event) => renameStarted(event, session, handlers)}>
         ${titleView(session)}
         <span class="code-session-agent">${session.agent}</span>
         <span class="code-session-state" data-state=${state}>${STATE_WORDS[state]}</span>

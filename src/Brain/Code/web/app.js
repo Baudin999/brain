@@ -386,13 +386,21 @@ async function rename(session, name) {
     draw();
     return;
   }
+  const started = state.renaming;
   await act('session.rename', session.id, null, async () => {
+    let refusal = null;
     try {
       await ask('/api/rename', { session: session.id, name: name.trim() });
-      state.renaming = null;
     } catch (error) {
-      state.renaming.problem = error.message;
+      refusal = error.message;
     }
+    // The field may have closed, or moved to another row, while the server answered.
+    if (state.renaming !== started) return;
+    if (refusal === null) {
+      state.renaming = null;
+      return;
+    }
+    started.problem = refusal;
   });
 }
 

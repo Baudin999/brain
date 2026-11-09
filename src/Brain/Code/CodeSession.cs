@@ -169,7 +169,7 @@ internal sealed class CodeSession : IDisposable
         var title = name;
         if (title is null && prompt is not null)
         {
-            title = PastSessions.Headline(prompt);
+            title = Transcript.FirstWords(prompt);
         }
 
         return new CodeSessionView(Id, Agent, Cwd, alive, answering, why, started, running, asks.All(), questions.All(), agents, name, title, prompt);

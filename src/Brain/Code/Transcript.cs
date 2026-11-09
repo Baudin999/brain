@@ -24,6 +24,9 @@ internal sealed partial class Transcript(string path)
     private const int ResultLength = 12000;
     private const int InputLength = 12000;
     private const int SubjectLength = 200;
+
+    /// <summary>The most of a prompt's first line that stands as its first words.</summary>
+    private const int TitleLength = 120;
     private const string Extension = ".jsonl";
     private const string Meta = ".meta.json";
     private const string AgentPrefix = "agent-";
@@ -173,6 +176,18 @@ internal sealed partial class Transcript(string path)
             Read();
             return name;
         }
+    }
+
+    /// <summary>The first words of the user's <paramref name="prompt"/>: its first line, cut when long.</summary>
+    public static string FirstWords(string prompt)
+    {
+        var first = prompt.Trim().Split('\n')[0].Trim();
+        if (first.Length > TitleLength)
+        {
+            return first[..TitleLength] + "...";
+        }
+
+        return first;
     }
 
     /// <summary>The user's first words of the session, whole, or null when he said none, with what was written since the last read.</summary>

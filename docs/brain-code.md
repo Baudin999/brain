@@ -16,6 +16,12 @@ agent, `brain`, unless it names one, as `brain code immediate`, and the current 
 a full path, is the folder and any other is the agent, in either order. A folder that does not exist, two folders and
 two agents are refused. The session list and each session's head show its full folder.
 
+Each row of the list is headed by the session's name, the title `/rename` gives it, or else the first words of its first
+prompt, and hovering the row shows that prompt. A double-click or F2 on a row renames it: Enter applies, Escape or
+leaving the field cancels, and the name is sent into the session as `/rename`, so the transcript keeps it. A name is
+ASCII letters and digits only, at most 60, and no other session of the window carries it, whatever the case. The field
+checks the rule and so does the server, and a name that breaks it keeps the field open with why.
+
 A session whose claude exits without a transcript, or with an error, is marked ended and says the exit status and
 claude's stderr in its conversation; `brain code` prints the same when the server reports it within a second.
 

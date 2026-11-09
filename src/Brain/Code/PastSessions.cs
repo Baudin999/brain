@@ -11,8 +11,6 @@ internal sealed class PastSessions(ClaudeFiles claude)
     /// <summary>How many lines a transcript may begin with before it names its agent.</summary>
     private const int HeadLines = 30;
 
-    private const int TitleLength = 120;
-
     /// <summary>The open agent's sessions that ran in <paramref name="folder"/>, newest first.</summary>
     public CodePastList List(string folder)
     {
@@ -83,21 +81,9 @@ internal sealed class PastSessions(ClaudeFiles claude)
                 continue;
             }
 
-            return Headline(one.Text);
+            return Transcript.FirstWords(one.Text);
         }
 
         return null;
-    }
-
-    /// <summary>The first words of the user's <paramref name="prompt"/>: its first line, cut when long.</summary>
-    public static string Headline(string prompt)
-    {
-        var first = prompt.Trim().Split('\n')[0].Trim();
-        if (first.Length > TitleLength)
-        {
-            return first[..TitleLength] + "...";
-        }
-
-        return first;
     }
 }
