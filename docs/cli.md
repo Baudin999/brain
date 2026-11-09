@@ -1112,7 +1112,7 @@ registered lens ~/Projects/lens git@example.org:alice/lens.git
 ### brain stats
 
 Reports what brain cost and what it gave back, from the usage log. Each section opens with its line of the story, the
-evidence, and every case it counted.
+evidence, and its first 5 cases, then says how many more it counted; `--json` and brain's window list every case.
 
 ```
 brain stats [--since <yyyy-mm-dd>] [--until <yyyy-mm-dd>] [--json]

@@ -897,8 +897,8 @@
       "id": "0000112",
       "check": "split-complexity",
       "symbol": "brain::Brain.Staging.PendingStore.Undo(string, string, Graph)",
-      "fingerprint": "b8704da52008b9cc75fec0cfc30bb56602b5151658da7a78b55bd1f8fa432814",
-      "value": 18,
+      "fingerprint": "def135c6a2896a0e245c345153c44c252cad75f7f7365f6cd2b956e79ebc46dc",
+      "value": 24,
       "resolution": null
     },
     {
@@ -1197,12 +1197,12 @@
       "id": "0000151",
       "check": "split-complexity",
       "symbol": "brain::Brain.Commands.StatsCommand.Run(BrainEnv, IReadOnlyList\u003Cstring\u003E)",
-      "fingerprint": "f57828d759c48f3708268dd5df27e95daf3e6f9dae13cb1befef14ed143121a4",
-      "value": 11,
+      "fingerprint": "a24999b3e8820d9deaff30c2dfddf68541216757822869e05e70ea561ab13726",
+      "value": 12,
       "resolution": {
-        "reason": "Run parses, prints the heading and loops over the sections. Print writes one section: its title, story, note, cases and lines, each an optional part. Day parses one option. Each is a step only Run uses.",
-        "fingerprint": "f57828d759c48f3708268dd5df27e95daf3e6f9dae13cb1befef14ed143121a4",
-        "value": 11
+        "reason": "Run parses, prints the heading and loops over the sections. Print writes one section: its title, story, note, its first 5 cases and how many more, and its lines, each an optional part. Day parses one option. Each is a step only Run uses.",
+        "fingerprint": "a24999b3e8820d9deaff30c2dfddf68541216757822869e05e70ea561ab13726",
+        "value": 12
       }
     },
     {

@@ -5,10 +5,13 @@ namespace Brain.Stats;
 /// <summary>
 /// Validator rounds: every message a validator sent to an agent spawned as a builder in its session is one round of
 /// findings sent back, counted per builder and in total. A builder that got at least one round is a build that would
-/// have shipped with problems without the validator, and a case of the evidence.
+/// have shipped with problems without the validator, and a case of the evidence. The table lists the 10 builders with
+/// the most rounds; the cases hold every one.
 /// </summary>
 internal sealed class ValidatorMetric : IMetric
 {
+    private const int Listed = 10;
+
     public MetricSection Measure(IReadOnlyList<UsageEvent> events)
     {
         var spawned = Agents.Spawned(events, Agents.Builder);
@@ -29,7 +32,7 @@ internal sealed class ValidatorMetric : IMetric
             lines.Add($"  {"builder",-20}{"session",-38}{"rounds",6}");
         }
 
-        foreach (var builder in rounds.OrderByDescending(builder => builder.Count()).ThenBy(builder => builder.Key.Builder, StringComparer.Ordinal))
+        foreach (var builder in rounds.OrderByDescending(builder => builder.Count()).ThenBy(builder => builder.Key.Builder, StringComparer.Ordinal).Take(Listed))
         {
             lines.Add($"  {builder.Key.Builder,-20}{builder.Key.Session ?? "-",-38}{Figures.Number(builder.Count()),6}");
         }

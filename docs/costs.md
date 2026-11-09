@@ -67,13 +67,15 @@ A metric may also tell one line of the evidence: what would have happened withou
 filled from the log, with every caught event it counted as its cases. No line is an estimate and none is written by a
 model. A line whose count is zero still shows, except Navarone's two lines, which are absent when the log holds no
 event at all. brain's window shows the evidence under the Evidence tab at the bottom of its strip, all time or between
-two days, from the same list, and `brain stats` prints each line and its cases at the top of its section.
+two days, from the same list, and `brain stats` prints each line and its first 5 cases at the top of its section, and
+how many more there are; `--json` holds every case.
 
 - **Saves**: your answers to pending writes. Its line: "Without brain, your agent would have gone off the rails X
   times. You corrected it." X counts the no with words; each case is the write's title and your words.
 - **Validator**: every message a validator sent to a builder spawned in its session, by id or name, is a round of
   findings, per builder and in total. Its line: "Without brain's validator, X of Y builds would have shipped with
   problems." X counts the builders that got a round, Y the builders spawned; each case is a builder and its rounds.
+  Its table lists the 10 builders with the most rounds.
   Each round shows the first 3 non-empty lines of what the validator wrote, and the details page shows each round's
   full recorded text. A round recorded before the text was kept says that nothing was recorded, and it still counts.
 - **Knowledge reuse**: every node a `node` or a `walk` opened, its age when read and the sessions it served. Its line:

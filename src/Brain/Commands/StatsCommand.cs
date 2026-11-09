@@ -5,8 +5,8 @@ namespace Brain.Commands;
 
 /// <summary>
 /// <c>brain stats</c>: runs every metric in <see cref="Metrics.All"/> over the usage log in the range asked and prints
-/// their sections, each section's evidence first with every case it counted. Every token count is an estimate,
-/// characters divided by four, and says so.
+/// their sections, each section's evidence first with its first 5 cases and how many more it counted; <c>--json</c>
+/// and brain's window hold every case. Every token count is an estimate, characters divided by four, and says so.
 /// </summary>
 internal static class StatsCommand
 {
@@ -14,6 +14,7 @@ internal static class StatsCommand
     private const string SinceOption = "since";
     private const string UntilOption = "until";
     private const string JsonFlag = "json";
+    private const int Shown = 5;
 
     // navarone: 0000151
     public static int Run(BrainEnv env, IReadOnlyList<string> arguments)
@@ -55,9 +56,15 @@ internal static class StatsCommand
             env.Out.WriteLine("  " + note);
         }
 
-        foreach (var proof in section.Cases ?? [])
+        var cases = section.Cases ?? [];
+        foreach (var proof in cases.Take(Shown))
         {
             env.Out.WriteLine($"    - {proof.Subject}: {proof.Detail}");
+        }
+
+        if (cases.Count > Shown)
+        {
+            env.Out.WriteLine($"    and {Figures.Number(cases.Count - Shown)} more; brain stats --json and the Evidence tab in brain's window list every case");
         }
 
         foreach (var line in section.Lines)

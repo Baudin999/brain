@@ -288,7 +288,7 @@ internal static class Help
             Notes =
             [
                 "Sections: saves, validator rounds, knowledge reuse, readiness, guards, cost, hit rate and rework.",
-                "A section that tells the evidence opens with its line of the story and every case it counted.",
+                "A section that tells the evidence opens with its line of the story and its first 5 cases; --json lists every case.",
                 "A token is estimated as four characters of output.",
             ],
             Examples = ["brain stats", "brain stats --since 2026-11-01 --until 2026-11-30"],

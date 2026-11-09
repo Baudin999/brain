@@ -110,6 +110,25 @@ public sealed class StatsTests : IDisposable
     }
 
     [Fact]
+    public void TheTextPrintsFiveCasesAndCountsTheRestWhileJsonKeepsEvery()
+    {
+        var corrections = new List<string>();
+        for (var answer = 0; answer < 7; answer++)
+        {
+            corrections.Add($$"""{"at":"2026-11-03T10:00:0{{answer}}.000+01:00","event":"answer","session":"s-3","id":"00000000000{{answer}}","verdict":"change","title":"Write {{answer}}","words":"fix {{answer}}"}""");
+        }
+
+        File.WriteAllLines(Path.Combine(brain.Home, "usage", "2026-11.jsonl"), corrections);
+
+        var output = brain.Ok("stats");
+        using var report = JsonDocument.Parse(brain.Ok("stats", "--json"));
+
+        Assert.Contains("    - Write 4: fix 4\n    and 2 more; brain stats --json and the Evidence tab in brain's window list every case", output, StringComparison.Ordinal);
+        Assert.DoesNotContain("Write 5", output, StringComparison.Ordinal);
+        Assert.Equal(7, report.RootElement.GetProperty("sections")[0].GetProperty("cases").GetArrayLength());
+    }
+
+    [Fact]
     public void AWrongDayIsRefused()
     {
         var (code, _, errors) = brain.Run("stats", "--since", "yesterday");
