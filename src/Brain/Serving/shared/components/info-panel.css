@@ -1,0 +1,17 @@
+/* The information panel: a column on the canvas, ruled from the conversation, with a head, its close button at the end,
+   over a body that scrolls. */
+
+.info-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  border-left: 1px solid var(--rule);
+  background: var(--canvas);
+}
+
+.info-panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-3); padding: var(--sp-4) var(--sp-4) var(--sp-3); border-bottom: 1px solid var(--rule); }
+.info-panel-heading { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.info-panel-kind { color: var(--focus); font: 600 var(--text-1)/1.4 var(--sans); letter-spacing: .04em; text-transform: uppercase; }
+.info-panel-title { margin: 0; color: var(--ink); font: 600 var(--text-3)/1.4 var(--mono); overflow-wrap: anywhere; }
+.info-panel-body { flex: 1; min-height: 0; overflow-y: auto; padding: var(--sp-4); }

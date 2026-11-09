@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>brain</title>
+<link rel="stylesheet" href="/tokens.css">
+<link rel="stylesheet" href="/components.css">
+<link rel="stylesheet" href="/components/image-viewer.css">
+<link rel="stylesheet" href="/components/permission-request.css">
+<link rel="stylesheet" href="/components/question.css">
+<link rel="stylesheet" href="/components/stop-confirm.css">
+<link rel="stylesheet" href="/components/tool-call.css">
+<link rel="stylesheet" href="/components/tool-run.css">
+<link rel="stylesheet" href="/components/info-panel.css">
+<link rel="stylesheet" href="/components/tool-detail.css">
+<link rel="stylesheet" href="/components/image-thumb.css">
+<link rel="stylesheet" href="/components/file-explorer.css">
+<link rel="stylesheet" href="/components/process-fold.css">
+<link rel="stylesheet" href="/components/field-row.css">
+<link rel="stylesheet" href="/components/option-list.css">
+<link rel="stylesheet" href="/components/model-selector.css">
+<link rel="stylesheet" href="/components/embedder-picker.css">
+<link rel="stylesheet" href="/components/waiting-counts.css">
+<link rel="stylesheet" href="/components/project-row.css">
+<link rel="stylesheet" href="/components/pending-bar.css">
+<link rel="stylesheet" href="/components/select.css">
+<link rel="stylesheet" href="/components/toggle.css">
+<link rel="stylesheet" href="/base.css">
+<link rel="stylesheet" href="/prose.css">
+<link rel="stylesheet" href="/app.css">
+<link rel="stylesheet" href="/conversations.css">
+<link rel="stylesheet" href="/home.css">
+<link rel="stylesheet" href="/settings.css">
+<link rel="stylesheet" href="/questions.css">
+<link rel="stylesheet" href="/stylebook.css">
+<link rel="stylesheet" href="/pages/navarone.css">
+<link rel="stylesheet" href="/theme.css" data-theme>
+<script src="/probe.js" defer></script>
+<script src="/lit.js" type="module"></script>
+<script src="/offer.js" type="module"></script>
+<script src="/questions.js" defer></script>
+<script src="/prism.js" data-manual defer></script>
+<script src="/highlight.js" defer></script>
+<script src="/menu.js" defer></script>
+<script src="/app.js" defer></script>
+<script src="/perf.js" defer></script>
+<script src="/conversations.js" defer></script>
+<script src="/chat.js" defer></script>
+<script src="/dreams.js" defer></script>
+<script src="/evidence.js" defer></script>
+<script src="/home.js" defer></script>
+<script src="/pages/settings.js" type="module"></script>
+<script src="/pages/answered.js" type="module"></script>
+<script src="/pages/navarone.js" type="module"></script>
+<script src="/stylebook.js" defer></script>
+</head>
+<body>
+<div class="app" id="app">
+  <nav class="strip" id="strip" aria-label="Inboxes"></nav>
+  <nav class="queue" id="queue" aria-label="What waits for you"></nav>
+  <main class="main" id="main" tabindex="-1"></main>
+  <aside class="chat" id="chat" aria-label="Chat" hidden></aside>
+  <aside class="side" id="side" aria-label="Read the graph">
+    <div class="side-search">
+      <input id="search" class="field search" type="search" placeholder="Search the graph" autocomplete="off" spellcheck="false" aria-label="Search the graph">
+      <kbd class="hint">/</kbd>
+    </div>
+    <ol class="hits" id="hits"></ol>
+    <div class="stack" id="stack"></div>
+  </aside>
+</div>
+<div class="palette" id="palette" hidden>
+  <div class="palette-box" role="dialog" aria-label="Commands">
+    <input id="palette-input" class="field bare command" type="text" placeholder="Type a command" autocomplete="off" spellcheck="false" aria-label="Command">
+    <ol class="palette-list" id="palette-list"></ol>
+  </div>
+</div>
+<div class="palette selector" id="selector" hidden>
+  <div class="palette-box selector-box" id="selector-box" role="dialog" aria-modal="true" aria-label="Model selector" tabindex="-1"></div>
+</div>
+<div id="image-viewer"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

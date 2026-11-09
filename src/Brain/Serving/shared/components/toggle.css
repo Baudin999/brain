@@ -1,0 +1,32 @@
+/* The toggle: a setting on or off, a switch whose knob slides to the yes color when it is on. */
+
+.toggle {
+  position: relative;
+  width: 2.6rem;
+  height: 1.45rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  padding: 0;
+  cursor: pointer;
+}
+
+.toggle-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: var(--radius-pill);
+  background: var(--muted);
+  transition: transform .15s;
+}
+
+.toggle:is(:hover, [data-hover]):not(:disabled, [aria-checked="true"]) { border-color: var(--muted); }
+.toggle[aria-checked="true"] { border-color: var(--yes); background: var(--yes-wash); }
+.toggle[aria-checked="true"] .toggle-knob { background: var(--yes); transform: translateX(1.15rem); }
+.toggle:disabled { opacity: .45; cursor: default; }
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle-knob { transition: none; }
+}

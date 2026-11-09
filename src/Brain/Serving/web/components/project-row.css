@@ -1,0 +1,7 @@
+/* The project row: an option row of two lines. The chip and the waiting counts share the first, the counts pushed to
+   the right; the path takes the second, in small print, cut at its end. */
+
+.project-row { flex-direction: column; align-items: stretch; gap: var(--sp-1); }
+.project-row-head { display: flex; align-items: baseline; gap: var(--sp-3); }
+.project-row-head .chip { margin-right: auto; }
+.project-row-path { overflow: hidden; color: var(--muted); font: 400 var(--text-1)/1.4 var(--mono); text-overflow: ellipsis; white-space: nowrap; }

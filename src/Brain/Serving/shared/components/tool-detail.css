@@ -1,0 +1,42 @@
+/* The tool detail: sections under small labels, code in a box of its own on the paper. A diff marks each line with a
+   minus or a plus on the wash of the git colors, a file reads with its line numbers in a gutter, and a brain query is a
+   list of refs over their titles. The images a result carries sit in a row that wraps. */
+
+.tool-detail { display: flex; flex-direction: column; gap: var(--sp-4); }
+.tool-detail-section { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.tool-detail-label { margin: 0; color: var(--muted); font: 600 var(--text-1)/1.4 var(--sans); letter-spacing: .04em; text-transform: uppercase; }
+.tool-detail-path { margin: 0; color: var(--ink); font: var(--text-2)/1.5 var(--mono); overflow-wrap: anywhere; }
+.tool-detail-note { margin: 0 0 var(--sp-1); color: var(--ink-soft); font-size: var(--text-2); }
+.tool-detail-waiting { margin: 0; color: var(--muted); font-size: var(--text-2); }
+.tool-detail-images { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+
+.tool-detail-code {
+  max-height: 28rem;
+  margin: 0;
+  overflow: auto;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-2);
+  background: var(--paper);
+  color: var(--ink-soft);
+  font: var(--text-1)/1.5 var(--mono);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.tool-detail-code[data-failed="true"] { border-color: var(--no); color: var(--no); }
+.tool-detail-file { padding-left: 0; white-space: pre; }
+.tool-detail-line { display: flex; gap: var(--sp-2); white-space: pre-wrap; overflow-wrap: anywhere; }
+.tool-detail-gutter { flex: none; min-width: 3.5ch; padding-right: var(--sp-2); border-right: 1px solid var(--rule); color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+.tool-detail-diff { overflow: auto; margin-bottom: var(--sp-2); border: 1px solid var(--rule); border-radius: var(--radius-2); background: var(--paper); font: var(--text-1)/1.5 var(--mono); }
+.tool-detail-diff .tool-detail-line { padding: 0 var(--sp-3); }
+.tool-detail-mark { flex: none; width: 1ch; color: var(--muted); }
+.tool-detail-line[data-way="removed"] { background: var(--git-deleted-wash); }
+.tool-detail-line[data-way="removed"] .tool-detail-mark { color: var(--git-deleted); }
+.tool-detail-line[data-way="added"] { background: var(--git-added-wash); }
+.tool-detail-line[data-way="added"] .tool-detail-mark { color: var(--git-added); }
+
+.tool-detail-items { display: flex; flex-direction: column; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
+.tool-detail-item { display: flex; flex-direction: column; gap: var(--sp-1); padding: var(--sp-2) var(--sp-3); border: 1px solid var(--rule); border-radius: var(--radius-2); background: var(--paper); }
+.tool-detail-ref { color: var(--focus); font: 600 var(--text-1)/1.4 var(--mono); overflow-wrap: anywhere; }
+.tool-detail-title { color: var(--ink); font-size: var(--text-2); }

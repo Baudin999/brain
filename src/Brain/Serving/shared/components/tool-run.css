@@ -1,0 +1,29 @@
+/* The tool run: a folded line over a list of tool calls. Its summary is a whole line with a chevron that turns when it
+   opens, so it reads as something to open; the calls wait under it, set in from a rule of their own. */
+
+.tool-run { border: 1px solid var(--rule); border-radius: var(--radius-2); background: var(--canvas); }
+
+.tool-run-summary {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  border-radius: var(--radius-2);
+  padding: var(--sp-2) var(--sp-3);
+  color: var(--ink-soft);
+  font: 600 var(--text-2)/1.4 var(--sans);
+  cursor: pointer;
+  list-style: none;
+}
+
+.tool-run-summary::-webkit-details-marker { display: none; }
+.tool-run-summary::before { content: "\25B8"; flex: none; color: var(--muted); transition: transform .15s; }
+.tool-run[open] > .tool-run-summary::before { transform: rotate(90deg); }
+.tool-run-summary:is(:hover, [data-hover]) { background: var(--select); color: var(--ink); }
+.tool-run-words { flex: 1; min-width: 0; }
+.tool-run-count { flex: none; color: var(--muted); font-size: var(--text-1); font-weight: 400; }
+.tool-run[data-failed="true"] .tool-run-count { color: var(--no); }
+.tool-run-list { display: flex; flex-direction: column; gap: var(--sp-1); padding: 0 var(--sp-2) var(--sp-2); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tool-run-summary::before { transition: none; }
+}

@@ -1,0 +1,38 @@
+/* Markdown as brain draws it, in brain's window and in a workspace: the reading prose, its code, its tables and its
+   diagrams. */
+
+.prose {
+  font: 400 var(--text-4)/1.68 var(--serif);
+  color: var(--ink);
+  hyphens: auto;
+}
+
+.prose p { margin: 0 0 1em; }
+.prose > :last-child { margin-bottom: 0; }
+.prose h3, .prose h4, .prose h5 { font: 600 var(--text-4)/1.4 var(--sans); margin: 1.6em 0 .5em; }
+.prose ul, .prose ol { margin: 0 0 1em; padding-left: 1.3em; }
+.prose li + li { margin-top: .25em; }
+.prose blockquote { margin: 0 0 1em; padding-left: 1em; border-left: 2px solid var(--rule-strong); color: var(--ink-soft); }
+.prose code { font: var(--text-smaller)/1 var(--mono); padding: .12em .32em; border-radius: var(--radius-1); background: var(--canvas); }
+.prose pre { margin: 0 0 1em; padding: .9rem 1rem; border-radius: var(--radius-2); background: var(--canvas); overflow-x: auto; }
+.prose pre code { padding: 0; background: none; line-height: 1.55; }
+.prose li > ul, .prose li > ol, .prose li > p { margin: .25em 0 0; }
+.prose hr { margin: 1.6em 0; border: 0; border-top: 1px solid var(--rule); }
+.prose del { color: var(--muted); }
+/* A table reads as rows of figures: quiet rules, a sans header, and its own scroll when it is wider than the text. */
+.prose .table { margin: 0 0 1em; overflow-x: auto; }
+.prose table { border-collapse: collapse; font-size: var(--text-smaller); line-height: 1.45; font-variant-numeric: tabular-nums; }
+.prose th, .prose td { padding: .4em .9em .4em 0; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+.prose th { font-family: var(--sans); font-weight: 600; line-height: 1.4; color: var(--ink-soft); border-bottom-color: var(--rule-strong); }
+.prose th:last-child, .prose td:last-child { padding-right: 0; }
+.prose .align-right { text-align: right; }
+.prose .align-center { text-align: center; }
+
+/* A mermaid diagram, drawn by brain in the theme's colors; its source stays as code until it is drawn. */
+.prose .diagram { margin: 1.4em 0; padding: 1.1rem 1rem; border: 1px solid var(--rule); border-radius: var(--radius-3); background: var(--paper); overflow-x: auto; text-align: center; }
+.prose .diagram > pre { margin: 0; text-align: left; }
+.prose .diagram svg { max-width: 100%; height: auto; }
+/* Mermaid measures a label while the page's policy holds back its own stylesheet, so the label's paragraph must already
+   sit without margins then, as mermaid's sheet sets it. */
+foreignObject p { margin: 0; }
+.prose .diagram figcaption { margin-bottom: .6rem; text-align: left; color: var(--stale); font: 600 var(--text-2)/1.4 var(--sans); }

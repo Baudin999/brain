@@ -1,0 +1,39 @@
+/* The image thumbnail: an image drawn small in a ruled box with the radius of a card, the whole image shown on the
+   canvas; hovered, its rule turns to the ink. Its remove button sits raised on its corner. */
+
+.image-thumb { position: relative; display: inline-flex; }
+
+.image-thumb-open {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 7rem;
+  height: 5rem;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-2);
+  background: var(--canvas);
+  cursor: zoom-in;
+}
+
+.image-thumb-open:is(:hover, [data-hover]) { border-color: var(--ink-soft); }
+.image-thumb-image { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+.image-thumb-remove {
+  position: absolute;
+  top: calc(-1 * var(--sp-2));
+  right: calc(-1 * var(--sp-2));
+  width: 1.4rem;
+  height: 1.4rem;
+  padding: 0;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-pill);
+  background: var(--raised);
+  box-shadow: var(--shadow-lift);
+  color: var(--ink-soft);
+  font: 600 var(--text-2)/1 var(--sans);
+  cursor: pointer;
+}
+
+.image-thumb-remove:is(:hover, [data-hover]) { color: var(--no); border-color: var(--no); }

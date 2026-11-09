@@ -1,0 +1,96 @@
+{
+  "model": "opus[1m]",
+  "agent": "brain",
+  "worktree": {
+    "baseRef": "head"
+  },
+  "env": {
+    "UseSharedCompilation": "false"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/block-bad-worktree.sh",
+            "if": "Bash(git worktree add*)"
+          }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/developer-gate.sh mark"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/developer-gate.sh check"
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/graph-door.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Agent|Task|SendMessage|Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/usage.sh"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/usage.sh"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/developer-gate.sh mark"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/brain-context.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "clangd-lsp@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true
+  },
+  "awaySummaryEnabled": false,
+  "skipWorkflowUsageWarning": true,
+  "agentPushNotifEnabled": true,
+  "autoMemoryEnabled": false
+}

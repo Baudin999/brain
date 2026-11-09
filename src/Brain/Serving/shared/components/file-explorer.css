@@ -1,0 +1,82 @@
+/* The file explorer: a box laid over the window on the shade the palette and the image viewer use, so it reads as a
+   modal; its places in a panel on the canvas at its start, the folder's head over a grid of tiles, and a foot with its
+   keys and its buttons. A tile is a folder's glyph or an image's thumbnail over its name; under the cursor it takes the
+   focus ring, and marked, the select color and the focus color's rule. The framed variant sits inside its container,
+   for the Stylebook. */
+
+.file-explorer {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  background: var(--shade);
+  backdrop-filter: var(--shade-blur);
+}
+
+.file-explorer[data-framed] { position: relative; z-index: 0; height: 30rem; }
+
+.file-explorer-box {
+  position: absolute;
+  inset: var(--sp-6);
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-3);
+  background: var(--paper);
+  box-shadow: var(--shadow-pop);
+}
+
+.file-explorer-places { min-height: 0; overflow-y: auto; padding: var(--sp-3) var(--sp-2); border-right: 1px solid var(--rule); background: var(--canvas); }
+.file-explorer-title { margin: 0 0 var(--sp-2); padding: 0 var(--sp-2); color: var(--muted); font: 600 var(--text-1)/1.4 var(--sans); letter-spacing: .04em; text-transform: uppercase; }
+.file-explorer-place-list { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.file-explorer-place { flex-direction: column; align-items: flex-start; gap: 0; }
+.file-explorer-place-name { color: var(--ink); font-size: var(--text-2); font-weight: 600; }
+.file-explorer-place-path { max-width: 100%; overflow: hidden; color: var(--muted); font: var(--text-1)/1.4 var(--mono); text-overflow: ellipsis; white-space: nowrap; direction: rtl; text-align: left; }
+
+.file-explorer-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.file-explorer-head { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--rule); }
+.file-explorer-path { min-width: 0; overflow-wrap: anywhere; color: var(--ink-soft); font: var(--text-2)/1.4 var(--mono); }
+.file-explorer-problem { margin: 0; padding: var(--sp-2) var(--sp-4); color: var(--no); font-size: var(--text-2); }
+.file-explorer-none { flex: 1; margin: 0; padding: var(--sp-5) var(--sp-4); color: var(--muted); font-size: var(--text-2); }
+
+.file-explorer-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  align-content: start;
+  gap: var(--sp-3);
+  min-height: 0;
+  margin: 0;
+  padding: var(--sp-4);
+  overflow-y: auto;
+  list-style: none;
+}
+
+.file-explorer-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--sp-1);
+  width: 100%;
+  padding: var(--sp-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-2);
+  background: transparent;
+  color: var(--ink-soft);
+  font: var(--text-1)/1.4 var(--sans);
+  cursor: pointer;
+}
+
+.file-explorer-tile:is(:hover, [data-hover]) { background: var(--select); }
+.file-explorer-tile[aria-current="true"] { border-color: var(--focus); }
+.file-explorer-tile[aria-pressed="true"] { border-color: var(--focus); background: var(--select); color: var(--ink); font-weight: 600; box-shadow: inset 0 0 0 1px var(--focus); }
+
+.file-explorer-picture { display: flex; align-items: center; justify-content: center; height: 6.5rem; overflow: hidden; border-radius: var(--radius-1); background: var(--canvas); }
+.file-explorer-glyph { width: 3rem; height: 3rem; fill: var(--rule-strong); }
+.file-explorer-image { max-width: 100%; max-height: 100%; object-fit: contain; }
+.file-explorer-wait { width: 40%; height: 40%; border-radius: var(--radius-1); background: var(--rule); }
+.file-explorer-name { overflow: hidden; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+
+.file-explorer-foot { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); border-top: 1px solid var(--rule); }
+.file-explorer-help { flex: 1; margin: 0; color: var(--muted); font: 400 var(--text-1)/1.4 var(--sans); }
+.file-explorer-count { color: var(--muted); font-size: var(--text-2); }

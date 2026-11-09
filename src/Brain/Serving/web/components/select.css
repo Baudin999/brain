@@ -1,0 +1,24 @@
+/* The select: a value to change, a button that opens its picker. Open, or the one the keys act on in a row of two, its
+   border takes the focus color. A subtle select sits on the canvas: a lighter rule, no paper, and the select color
+   when hovered. A second value beside the first, as a model's effort, is muted small print. */
+
+.select {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .8rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-2);
+  background: var(--paper);
+  padding: .35rem .65rem;
+  font: 400 var(--text-2)/1.4 var(--sans);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.select:is(:hover, [data-hover]):not(:disabled, [aria-expanded="true"], [data-focus]) { border-color: var(--muted); }
+.select:is([aria-expanded="true"], [data-focus]) { border-color: var(--focus); }
+.select:disabled { opacity: .45; cursor: default; }
+.select.subtle { align-items: center; border-color: var(--rule); background: none; padding: .4rem .6rem; }
+.select.subtle:is(:hover, [data-hover]):not(:disabled) { border-color: var(--rule); background: var(--select); }
+.select-aside { color: var(--muted); font-size: var(--text-2); }

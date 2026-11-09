@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Runs the published brain CLI. The binary is a cache built by ./build.sh from the source in src/Brain.
+set -euo pipefail
+
+# Follows the links to this script, such as LOCAL_BIN/brain, without readlink -f, which macOS lacks before 12.3.
+source="${BASH_SOURCE[0]}"
+while [ -L "$source" ]; do
+    target="$(readlink "$source")"
+    case "$target" in
+    /*) source="$target" ;;
+    *) source="$(dirname "$source")/$target" ;;
+    esac
+done
+root="$(cd "$(dirname "$source")/.." && pwd)"
+binary="$root/cache/publish/brain"
+
+# 127, a command that is not there: the hooks tell it from brain's own exits, 0 to 2, and record it as an error.
+if [ ! -x "$binary" ]; then
+    echo "brain: $binary is missing; run $root/build.sh" >&2
+    exit 127
+fi
+
+exec "$binary" "$@"

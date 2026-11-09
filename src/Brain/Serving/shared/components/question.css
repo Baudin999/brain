@@ -1,0 +1,55 @@
+/* The question: what an agent asks the user, a raised box with a bar of the focus color at its start, so it stands out
+   of the conversation it sits in. Its head says whether the agent waits, in small muted type. Each question reads as
+   prose; its choices are boxes on a line that wraps, the label in ink, a recommended one marked in the yes color, and
+   what an option means under its label in muted type. A pressed choice takes the select color and an ink border. The
+   reason reads in the soft ink under the choices, the words field under it, and Answer closes the box, with Close
+   beside it to shut the box unanswered. Answered, closed or ended, the bar turns to the rule color; answering, the
+   box dims. */
+
+.question {
+  display: grid;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--rule-strong);
+  border-left: 3px solid var(--focus);
+  border-radius: var(--radius-3);
+  background: var(--raised);
+  box-shadow: var(--shadow);
+}
+
+.question:is([data-state="answered"], [data-state="closed"], [data-state="ended"]) { border-left-color: var(--rule-strong); box-shadow: none; }
+.question[data-state="answering"] { opacity: .6; }
+.question-head { color: var(--muted); font: 600 var(--text-1)/1.4 var(--sans); letter-spacing: .04em; text-transform: uppercase; }
+.question-item { display: grid; gap: var(--sp-2); }
+.question-item + .question-item { padding-top: var(--sp-3); border-top: 1px solid var(--rule); }
+.question-choices { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+
+.question-choice {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: start;
+  align-items: baseline;
+  column-gap: var(--sp-2);
+  max-width: 100%;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-2);
+  background: none;
+  padding: var(--sp-2) var(--sp-3);
+  text-align: left;
+  font: 400 var(--text-2)/1.4 var(--sans);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.question-choice:is(:hover, [data-hover]):not(:disabled) { background: var(--select); }
+.question-choice[aria-pressed="true"] { border-color: var(--ink); background: var(--select); }
+.question-choice:disabled { cursor: default; }
+.question-choice:disabled:not([aria-pressed="true"]) { opacity: .45; }
+.question-choice-label { font-weight: 600; }
+.question-choice-mark { color: var(--yes); font-size: var(--text-1); font-weight: 600; }
+.question-choice-description { grid-column: 1 / -1; color: var(--muted); font-size: var(--text-1); }
+.question-why { margin: 0; color: var(--ink-soft); font-size: var(--text-2); }
+.question-why-head { color: var(--ink); font-weight: 600; }
+.question-words-given { margin: 0; padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-2); background: var(--canvas); color: var(--ink); font-size: var(--text-2); white-space: pre-wrap; }
+.question-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); }
+.question-note { margin: 0; color: var(--muted); font-size: var(--text-2); }

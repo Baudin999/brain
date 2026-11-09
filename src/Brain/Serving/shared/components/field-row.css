@@ -1,0 +1,18 @@
+/* The field row: one line of a form, its label and then its controls. The one the keys are on is current: lit in the
+   select color, with a bar of the focus color at its start. Its label stacks the name over a muted hint. */
+
+.field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  border-radius: var(--radius-2);
+  padding: .55rem .8rem;
+  outline: none;
+}
+
+.field-row[aria-current="true"] { background: var(--select); box-shadow: inset 2px 0 0 var(--focus); }
+.field-row:focus-visible { outline: 1px solid var(--focus); }
+.field-row-label { display: flex; flex-direction: column; gap: .15rem; color: var(--ink); font-size: var(--text-2); }
+.field-row-hint { color: var(--muted); font-size: var(--text-1); }
+.field-row-controls { display: flex; gap: .6rem; flex: none; }

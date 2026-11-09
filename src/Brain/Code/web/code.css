@@ -1,0 +1,143 @@
+/* brain code's window: the sessions on the side, the one in view beside them, its conversation scrolling between its
+   head and the composer. Every value is a token, and every control a component of components.css, placed here. */
+
+.code {
+  display: grid;
+  grid-template-columns: var(--side-width) minmax(0, 1fr);
+  height: 100vh;
+}
+
+.code[data-panel="shown"] { grid-template-columns: var(--side-width) minmax(0, 1fr) var(--panel-width); }
+
+.code-side { display: flex; flex-direction: column; min-height: 0; overflow-y: auto; border-right: 1px solid var(--rule); background: var(--canvas); }
+.code-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--paper); }
+
+.code-sessions { list-style: none; margin: 0; padding: var(--sp-2); }
+.code-session { flex-wrap: wrap; }
+.code-session-agent { flex: 1; color: var(--ink); font-weight: 600; }
+.code-session-folder { flex-basis: 100%; min-width: 0; overflow-wrap: anywhere; color: var(--muted); font: var(--text-2)/1.4 var(--mono); }
+.code-session-state { color: var(--muted); font-size: var(--text-1); }
+.code-session-state[data-state="working"] { color: var(--focus); }
+.code-session-state[data-state="ended"] { color: var(--no); }
+.code-session-state[data-state="asking"] { color: var(--focus); font-weight: 600; }
+
+/* The row over the list that opens the page of every open question, its count in the focus color while any waits. */
+
+.code-questions-row { width: auto; margin: var(--sp-2) var(--sp-2) 0; }
+.code-questions-name { flex: 1; color: var(--ink); font-weight: 600; font-size: var(--text-2); }
+.code-questions-count { color: var(--muted); font-size: var(--text-1); font-variant-numeric: tabular-nums; }
+.code-questions-row[data-state="asking"] .code-questions-count { color: var(--focus); font-weight: 600; }
+
+/* A question on the page of open questions: the session it is of, over it. */
+
+.code-asked { display: grid; gap: var(--sp-2); }
+.code-asked-session { justify-self: start; }
+
+.code-none { margin: 0; padding: var(--sp-3) var(--sp-4); color: var(--muted); font-size: var(--text-2); }
+.code-problem { margin: 0; padding: var(--sp-2) var(--sp-4); color: var(--no); font-size: var(--text-2); white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* The sessions header lays its title, the reload button and the settings cog out in one line. Under it, the settings
+   page: the field rows under a lead, in a column. */
+
+.code-side .pane-head { display: flex; align-items: center; gap: var(--sp-2); }
+.code-side .pane-title { flex: 1; margin: 0; }
+.code-settings { flex: 1; min-height: 0; overflow-y: auto; max-width: var(--measure); padding: var(--sp-5) var(--sp-6); }
+.code-settings-lead { margin: 0 0 var(--sp-3); color: var(--muted); font-size: var(--text-2); }
+
+/* The new session form, under the list. */
+
+.code-new { display: grid; gap: var(--sp-1); margin-top: auto; padding: var(--sp-4); border-top: 1px solid var(--rule); }
+.code-new-title { margin: 0 0 var(--sp-2); color: var(--ink); font: 600 var(--text-2)/1.4 var(--sans); }
+.code-new-label { color: var(--muted); font-size: var(--text-1); }
+.code-new-actions { display: flex; gap: var(--sp-2); justify-self: start; margin-top: var(--sp-2); }
+
+/* The session's head, of one height: its agent on a line with the fold of what runs under it and its close button, and
+   its folder and id under them. */
+
+.code-head-line { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
+.code-head-actions { display: flex; align-items: center; gap: var(--sp-2); }
+.code-head-meta { margin: 0; overflow-wrap: anywhere; font-family: var(--mono); }
+
+/* The conversation: the user's words on canvas, the agent's prose on the page, the tool calls and runs between them. */
+
+.code-frame { position: relative; display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.code-to-end { position: absolute; right: var(--sp-6); bottom: var(--sp-4); }
+.code-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: var(--sp-5) var(--sp-6) var(--sp-6); }
+.code-events { display: flex; flex-direction: column; gap: var(--sp-3); max-width: var(--measure); }
+.code-asks { display: grid; gap: var(--sp-3); max-width: var(--measure); margin-top: var(--sp-4); }
+.code-user { padding: var(--sp-3) var(--sp-4); border-radius: var(--radius-3); background: var(--canvas); }
+.code-said { padding: 0 var(--sp-1); }
+.code-interrupted { margin: 0; padding: 0 var(--sp-1); color: var(--muted); font-size: var(--text-1); }
+
+.code-images { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.code-user .code-images:not(:first-child) { margin-top: var(--sp-2); }
+
+/* The session's body: its conversation and composer, and the agents it sent beside them. */
+
+.code-body { display: grid; grid-template-columns: minmax(0, 1fr) auto; flex: 1; min-height: 0; }
+.code-talk { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.code-session-agents { flex-basis: 100%; color: var(--focus); font-size: var(--text-1); }
+
+/* The agents a session sent: a piece of work, a builder with its validators under it, ruled at its start. */
+
+.code-agents { width: var(--side-width); min-height: 0; overflow-y: auto; padding: var(--sp-3) var(--sp-2); border-left: 1px solid var(--rule); background: var(--canvas); }
+.code-agents-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--sp-2); padding: 0 var(--sp-2) var(--sp-2); }
+.code-agents-title { margin: 0; color: var(--ink); font: 600 var(--text-2)/1.4 var(--sans); }
+.code-agents-count { color: var(--muted); font-size: var(--text-1); }
+.code-agent-groups { display: flex; flex-direction: column; gap: var(--sp-1); list-style: none; margin: 0; padding: 0; }
+.code-work { border-left: 2px solid var(--rule-strong); }
+.code-work .agent-row + .agent-row { margin-left: var(--sp-4); width: calc(100% - var(--sp-4)); }
+
+/* The agent page: what happened leads, in words; the brief and the details wait behind their folds. */
+
+.code-agent-lead { margin: 0 0 var(--sp-2); max-width: var(--measure); color: var(--ink-soft); font-size: var(--text-3); }
+.code-agent-body { display: flex; flex-direction: column; gap: var(--sp-4); max-width: var(--measure); }
+.code-section-title { margin: 0 0 var(--sp-2); color: var(--ink); font: 600 var(--text-3)/1.4 var(--sans); }
+.code-details-body { padding: var(--sp-2) 0; color: var(--muted); font: var(--text-1)/1.5 var(--mono); overflow-wrap: anywhere; }
+.code-details-body p { margin: 0; }
+
+/* The trail: the shared trail steps in a column, under the sentence that says how far the work came. */
+
+.code-trail-lead { margin: 0; color: var(--ink); font-size: var(--text-3); }
+.code-trail { display: flex; flex-direction: column; gap: var(--sp-3); list-style: none; margin: 0; padding: 0; }
+
+/* The Navarone signals of a piece of work: the shared signals in a column, under the line that counts how they ended. */
+
+.code-signals-title { margin: 0; color: var(--ink); font: 600 var(--text-3)/1.4 var(--sans); }
+.code-signals-sum { margin: var(--sp-1) 0 var(--sp-3); color: var(--muted); font-size: var(--text-2); }
+.code-signal-list { display: flex; flex-direction: column; gap: var(--sp-3); list-style: none; margin: 0; padding: 0; }
+
+/* The open questions of the session, over the composer: a line for each, which shows it in the conversation. */
+
+.code-open-questions { max-height: 30vh; overflow-y: auto; padding: var(--sp-2) var(--sp-6); border-top: 1px solid var(--rule); background: var(--canvas); }
+.code-open-questions-title { margin: 0 0 var(--sp-1); color: var(--focus); font: 600 var(--text-1)/1.4 var(--sans); letter-spacing: .04em; text-transform: uppercase; }
+.code-open-questions-list { margin: 0; padding: 0; list-style: none; }
+.code-open-question-text { flex: 1; min-width: 0; overflow: hidden; color: var(--ink); font-size: var(--text-2); text-overflow: ellipsis; white-space: nowrap; }
+.code-open-question-meta { color: var(--muted); font-size: var(--text-1); }
+
+/* The composer, under the conversation. */
+
+.code-composer { display: grid; gap: var(--sp-2); padding: var(--sp-3) var(--sp-6) var(--sp-4); border-top: 1px solid var(--rule); background: var(--canvas); }
+.code-attached { display: flex; flex-wrap: wrap; gap: var(--sp-3); padding-top: var(--sp-2); }
+.code-composer-bar { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+.code-status { color: var(--muted); font-size: var(--text-2); }
+.code-status[data-state="working"] { color: var(--focus); }
+.code-status[data-state="ended"] { color: var(--no); }
+.code-status[data-state="asking"] { color: var(--focus); font-weight: 600; }
+.code-status[data-state="stopping"] { color: var(--no); }
+.code-composer-actions { display: flex; gap: var(--sp-2); }
+
+/* The Quote button beside a selection lies over the window. */
+.code-quote { position: fixed; z-index: 10; margin-top: var(--sp-2); }
+
+/* The history modal over the window: the open agent's past sessions of a folder, and one of them read. The box is wider
+   and taller than a palette's, and its list or conversation scrolls under the head. */
+
+.code-history { display: flex; flex-direction: column; width: min(56rem, calc(100vw - 2rem)); max-height: 80vh; }
+.code-history-head { display: flex; align-items: center; gap: var(--sp-2); }
+.code-history-head .pane-title { flex: 1; min-width: 0; margin: 0; }
+.code-history-list { flex: 1; min-height: 0; overflow-y: auto; list-style: none; margin: 0; padding: var(--sp-2); }
+.code-history-read { flex: 1; min-height: 0; overflow-y: auto; padding: var(--sp-4) var(--sp-5); }
+.code-past { flex-wrap: wrap; }
+.code-past-title { flex: 1; min-width: 0; overflow-wrap: anywhere; color: var(--ink); }
+.code-past-at { color: var(--muted); font-size: var(--text-1); font-variant-numeric: tabular-nums; }

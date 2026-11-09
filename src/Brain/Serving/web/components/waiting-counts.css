@@ -1,0 +1,5 @@
+/* The waiting counts: two figures side by side, each in small print, a zero turned quiet. */
+
+.waiting-counts { display: inline-flex; gap: var(--sp-3); }
+.waiting-counts-figure { color: var(--ink-soft); font-size: var(--text-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.waiting-counts-figure[data-none="true"] { color: var(--muted); }

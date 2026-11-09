@@ -1,0 +1,11 @@
+# Ten labelled queries from search.tsv, translated to Dutch. Scored against the same refs. English original in the comment after each.
+zet builds vast op de zuinige kernen van deze stervende processor	global:cpu-guard global:gpu-jobs-skip-cpu-lock global:builds-one-at-a-time
+hoeveel builds kunnen er tegelijk draaien	global:builds-one-at-a-time
+wie controleert het werk van een builder voordat het landt	global:builder-validator
+moet ik de gebruiker vragen naar deze ontwerpkeuze	personal:decide-dont-ask personal:ask-only-the-unknowable global:ask-because-you-do-not-know
+alles herstellen nadat de laptop gewist is	project:data-apart-from-tool project:open-source-install
+heeft elke schrijfactie naar de graaf goedkeuring nodig	project:user-says-yes project:one-door
+welke programmeertaal voor een nieuwe tool	personal:prefers-csharp
+grote herschrijving of de oude code blijven oplappen	personal:rewrite-over-rot personal:rewrite-avoidance-is-claudes-pitfall
+code verwijderen om een feature op te leveren	personal:deleting-is-success
+hoe lang moeten antwoorden zijn	personal:plain-talk

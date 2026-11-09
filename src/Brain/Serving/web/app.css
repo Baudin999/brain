@@ -1,0 +1,671 @@
+/* brain's window. A reading room: one serif for what the graph says, one quiet sans for the room around it. */
+
+/* The strip of inboxes, then the three panes. */
+
+.app {
+  --queue-column: var(--queue-width);
+  --side-column: var(--side-width);
+  display: grid;
+  grid-template-columns: var(--strip-width) var(--queue-column) minmax(0, 1fr) var(--side-column);
+  height: 100vh;
+}
+
+.app.no-side { --side-column: 0px; }
+.app.no-queue { --queue-column: 0px; }
+.app.no-queue .queue { visibility: hidden; padding: 0; border: 0; }
+
+/* The inboxes down the window's left edge, each label turned a quarter left to read upward, as an editor's side strip.
+   A failing source says so in words, not in color alone. */
+
+.strip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: .6rem .2rem;
+  border-right: 1px solid var(--rule);
+  overflow-y: auto;
+}
+
+.strip-label { white-space: nowrap; }
+.strip-count { color: var(--muted); font-size: var(--text-1); font-variant-numeric: tabular-nums; }
+.strip-failing { color: var(--no); font-size: var(--text-1); font-weight: 600; }
+.strip-failing::before { content: "! "; }
+/* The gap pushes Ask again and the views registered at the bottom, such as Evidence, to the strip's far end. */
+.strip-gap { flex: 1 1 auto; }
+.strip-ask { color: var(--muted); font-size: var(--text-1); }
+
+/* The focus: one project for the whole window, picked at the top of the queue. */
+
+.focus-select { display: flex; gap: .5rem; width: 100%; margin: 0 0 1rem; }
+.focus-select .chip { flex: 0 1 auto; min-width: 0; }
+.focus-select .palette-keys { margin-left: auto; }
+.focus-label { color: var(--muted); font-size: var(--text-2); }
+.app.no-side .side { visibility: hidden; }
+
+/* The queue: what waits, oldest first. */
+
+.queue {
+  border-right: 1px solid var(--rule);
+  padding: 1.6rem .75rem 1rem;
+  overflow-y: auto;
+}
+
+.queue-head { justify-content: space-between; margin: 0 var(--sp-3) .9rem; }
+.queue-count { font-variant-numeric: tabular-nums; }
+
+.queue ol { list-style: none; margin: 0; padding: 0; }
+
+.queue-item { display: block; }
+.queue-item[aria-current="true"] .queue-title { color: var(--ink); }
+
+.queue-title {
+  display: block;
+  font: 500 var(--text-2)/1.35 var(--sans);
+  color: var(--ink-soft);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.queue-sub { display: block; margin-top: .2rem; font-size: var(--text-2); color: var(--muted); }
+
+.queue-empty { padding: 0 var(--sp-3); color: var(--muted); font-size: var(--text-2); }
+
+.tag-filter { display: flex; flex-wrap: wrap; gap: .35rem; padding: 0 var(--sp-3) 1rem; }
+
+.queue-row { position: relative; }
+.chips { display: inline-flex; flex-wrap: wrap; gap: .3rem; max-width: 100%; }
+.queue-row .chips { margin: -.35rem var(--sp-3) .45rem; }
+
+.queue-foot {
+  margin-top: 1.4rem;
+  padding: .9rem var(--sp-3) 0;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: var(--text-2);
+}
+
+/* The main pane: the write in full, or a node opened from the graph. */
+
+.main {
+  position: relative;
+  overflow-y: auto;
+  outline: none;
+  background: var(--paper);
+}
+
+/* The chat of the tab in view, summoned over the main pane's right edge, in the main pane's own cell. It draws its
+   phases as a conversation's trail does. */
+
+.main, .chat { grid-column: 3; grid-row: 1; }
+.chat { justify-self: end; z-index: 2; display: flex; flex-direction: column; min-height: 0; width: min(36rem, 100%); border-left: 1px solid var(--rule-strong); background: var(--paper); }
+.chat[hidden] { display: none; }
+.chat-close { margin-left: auto; }
+.chat-scroll { flex: 1; overflow-y: auto; padding: 1.2rem var(--sp-5) 1.6rem; }
+.chat .phase .prose { font-size: var(--text-3); }
+.chat .talk-input { padding: .8rem var(--sp-5) 1rem; }
+.chat > .stop-confirm { margin: var(--sp-3) var(--sp-5) 0; }
+/* A tab with a live agent, its chat, a sitting or a dream, says so in the strip, in words, as a count does. */
+.strip-live { color: var(--accent, var(--focus)); font-size: var(--text-1); font-weight: 600; }
+
+.page {
+  max-width: calc(var(--measure) + 7rem);
+  padding: 3.2rem 3.5rem 9rem;
+}
+
+.says {
+  margin: 0 0 2.4rem;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: var(--text-2);
+}
+
+.says li + li { margin-top: .15rem; }
+
+.stale {
+  margin: 0 0 2rem;
+  padding: .75rem 1rem;
+  border-radius: var(--radius-2);
+  background: var(--stale-wash);
+  color: var(--stale);
+  font-size: var(--text-2);
+}
+
+.change + .change {
+  margin-top: 3.4rem;
+  padding-top: 3rem;
+  border-top: 1px solid var(--rule);
+}
+
+.change-head {
+  display: flex;
+  align-items: baseline;
+  gap: .9rem;
+  margin-bottom: 1.1rem;
+  font-size: var(--text-2);
+}
+
+.change-state { font-weight: 600; }
+.change-state.new, .change-state.rewritten { color: var(--yes); }
+.change-state.forgotten { color: var(--no); }
+.change-state.edges { color: var(--ink-soft); }
+
+/* An add or a remove carries its glyph, as a signed yes or no button does: color alone does not tell them apart in
+   every theme. */
+.change-state.new::before { content: "+"; }
+.change-state.forgotten::before { content: "\2212"; }
+.change-state::before { margin-right: .3em; }
+.forgotten-doc .doc-title { text-decoration: line-through; text-decoration-thickness: .06em; }
+
+.change-ref { color: var(--muted); }
+.change-head .segmented { margin-left: auto; }
+
+.forgotten-doc { padding-left: 1.2rem; border-left: 2px solid var(--no-wash); }
+
+/* A node, read. */
+
+.doc { max-width: var(--measure); }
+
+.doc-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem 1.1rem;
+  margin: 0 0 .9rem;
+  font-size: var(--text-2);
+  color: var(--muted);
+}
+
+.doc-meta .subject { color: var(--ink-soft); }
+
+.doc-title {
+  margin: 0 0 1.4rem;
+  font: 500 var(--text-7)/1.18 var(--serif);
+  color: var(--ink);
+  letter-spacing: -.012em;
+  text-wrap: balance;
+}
+
+.doc-section { margin-top: 2.2rem; }
+
+.doc-section h2 {
+  margin: 0 0 .6rem;
+  font: 600 var(--text-2)/1.2 var(--sans);
+  color: var(--muted);
+}
+
+.edges { list-style: none; margin: 0; padding: 0; }
+
+.edge {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  gap: 1rem;
+  padding: .45rem 0;
+  border-top: 1px solid var(--rule);
+  align-items: baseline;
+}
+
+.edge:last-child { border-bottom: 1px solid var(--rule); }
+.edge-rel { color: var(--muted); font-size: var(--text-2); }
+.edge-target { min-width: 0; }
+
+.edge-target { font: 400 var(--text-4)/1.4 var(--serif); }
+.edge-ref { margin-left: .5rem; color: var(--muted); font-size: var(--text-2); }
+.edge-dead { color: var(--muted); font: var(--text-2)/1.4 var(--mono); }
+
+/* An edit, as a diff over the whole file. */
+
+.diff-title { max-width: var(--measure); margin-bottom: 1.2rem; }
+
+.diff {
+  display: grid;
+  grid-template-columns: 1.8rem minmax(0, 1fr);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-3);
+  overflow-x: auto;
+  font: var(--text-2)/1.6 var(--mono);
+}
+
+.diff-line { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; }
+.diff-mark { color: var(--muted); text-align: center; user-select: none; }
+/* A node's text is markdown: its lines wrap at the wrap measure, the text itself that wide, past its padding. */
+.diff-text { box-sizing: content-box; max-width: var(--wrap-measure); white-space: pre-wrap; overflow-wrap: anywhere; padding-right: 1rem; }
+.diff-line.add { background: var(--yes-wash); }
+.diff-line.add .diff-mark { color: var(--yes); }
+.diff-line.del { background: var(--no-wash); }
+.diff-line.del .diff-mark { color: var(--no); }
+.diff-line.del .diff-text { color: var(--ink-soft); }
+
+/* The answer: the one place the yes is given. */
+
+.answer {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin: 0 -3.5rem;
+  padding: 1.6rem 3.5rem 1.4rem;
+  background: linear-gradient(to bottom, transparent, var(--paper) 1.2rem);
+}
+
+.answer-bar {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  max-width: var(--measure);
+  padding: .5rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-3);
+  background: var(--raised);
+  box-shadow: var(--shadow);
+}
+
+.answer-bar .spacer { flex: 1; }
+.answer-note { padding-left: .5rem; color: var(--muted); font-size: var(--text-2); }
+
+.reason {
+  max-width: var(--measure);
+  margin-bottom: .6rem;
+  padding: .9rem 1rem .7rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-3);
+  background: var(--raised);
+  box-shadow: var(--shadow);
+}
+
+.reason label { display: block; margin-bottom: .45rem; font-size: var(--text-2); color: var(--muted); }
+
+.reason-foot { display: flex; justify-content: flex-end; gap: 1rem; margin-top: .4rem; font-size: var(--text-2); color: var(--muted); }
+
+.queue-failing { color: var(--no); overflow-wrap: anywhere; }
+.queue-foot-keys { display: block; margin-top: .35rem; }
+
+/* A source's tag: its own text, neutral, filtered on within that source's inbox. */
+.tag-filter { margin-top: -.4rem; }
+
+/* A node read beside another is wide enough for two documents. */
+
+.page-wide { max-width: 84rem; }
+
+/* A page whose code takes the whole pane: a diff, a dream's settled.md. Everything on it keeps the measure but the code
+   areas: a block, the compared columns, a change and the answer. */
+.page-code { max-width: none; }
+.page-code > :not(.block, .compare, .change, .answer), .page-code .compare .prose { max-width: var(--measure); }
+
+.question-repo { font-family: var(--mono); font-size: var(--text-2); overflow-wrap: anywhere; }
+
+[data-stop] { scroll-margin-top: 1rem; }
+.file[data-stop] { scroll-margin-top: .5rem; }
+
+.block { margin-top: 2.6rem; }
+.block.at > .block-caption, .file.at > .file-head { color: var(--focus); }
+
+.block-caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .3rem 1rem;
+  margin: 0 0 .8rem;
+  font: 600 var(--text-2)/1.3 var(--sans);
+  color: var(--ink-soft);
+}
+
+.copy { margin-left: auto; }
+
+.block-path { font: 400 var(--text-2)/1.3 var(--mono); color: var(--muted); overflow-wrap: anywhere; }
+
+.block-text .prose { max-width: var(--measure); }
+
+/* Text blocks next to each other: columns, each with its own rule on top, so two arguments face each other. */
+.compare {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
+  gap: 2.4rem;
+  margin-top: 2.6rem;
+}
+
+.compare > .block { min-width: 0; margin-top: 0; padding-top: .9rem; border-top: 2px solid var(--rule-strong); }
+.compare .prose { font-size: var(--text-4); line-height: 1.62; }
+
+/* Code, read by line number. A line the source marks carries a bar and a bold number, not a color alone. */
+
+/* Code takes the whole width it sits in and never wraps: a long line scrolls the whole area sideways, so the lines stay
+   in step. The area is one grid and each line a subgrid of it, so every line is as wide as the longest and a mark's wash
+   runs to the end. */
+.code, .drows {
+  display: grid;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-3);
+  overflow-x: auto;
+  font: var(--text-2)/1.6 var(--mono);
+  background: var(--paper);
+}
+
+.code { grid-template-columns: 3.4rem minmax(max-content, 1fr); }
+.code-line { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; }
+.code-line.marked { background: var(--stale-wash); box-shadow: inset 3px 0 0 var(--stale); }
+.code-line.marked .ln { color: var(--stale); font-weight: 700; }
+/* A line that differs between a fix's before and after is tinted, removed on the before side and added on the after, and
+   the part of it that differs is stronger. */
+.code[data-side="before"] .code-line.changed { background: var(--no-wash); }
+.code[data-side="before"] .code-change { background: var(--diff-removed-strong); border-radius: var(--radius-1); }
+.code[data-side="after"] .code-line.changed { background: var(--yes-wash); }
+.code[data-side="after"] .code-change { background: var(--diff-added-strong); border-radius: var(--radius-1); }
+.ln { padding-right: .8rem; text-align: right; color: var(--muted); user-select: none; font-variant-numeric: tabular-nums; }
+.code-text { white-space: pre; padding-right: 1.2rem; }
+
+/* Prism's tokens in the window's theme: a handful of colors, set in tokens.css and followed from the Omarchy theme. */
+.token.comment, .token.prolog, .token.doctype, .token.cdata { color: var(--code-comment); font-style: italic; }
+.token.keyword, .token.boolean, .token.null, .token.important, .token.atrule { color: var(--code-keyword); }
+.token.string, .token.char, .token.attr-value, .token.template-string, .token.regex { color: var(--code-string); }
+.token.number, .token.constant, .token.symbol, .token.builtin { color: var(--code-number); }
+.token.function, .token.method, .token.class-name, .token.attr-name, .token.property { color: var(--code-function); }
+.token.namespace, .token.type-name, .token.decorator, .token.annotation, .token.variable { color: var(--code-type); }
+.token.operator, .token.punctuation { color: var(--ink-soft); }
+
+/* A diff over several files. */
+
+.file-list { list-style: none; margin: 0 0 .8rem; padding: .35rem; border: 1px solid var(--rule); border-radius: var(--radius-3); }
+
+.file-path { flex: 1; min-width: 0; font: var(--text-2)/1.4 var(--mono); overflow-wrap: anywhere; }
+.file-state { font-weight: 600; font-size: var(--text-2); white-space: nowrap; }
+.file-state.added { color: var(--yes); }
+.file-state.removed { color: var(--no); }
+.file-state.changed { color: var(--ink-soft); }
+.file-counts { display: inline-flex; gap: .5rem; font: var(--text-2)/1.4 var(--mono); white-space: nowrap; }
+.count-add { color: var(--yes); }
+.count-del { color: var(--no); }
+
+.diff-keys { display: flex; align-items: center; gap: .4rem; margin: 0 0 .6rem; font-size: var(--text-2); color: var(--muted); }
+.diff-keys .link + kbd { margin-right: .8rem; }
+
+.file + .file { margin-top: 1.4rem; }
+
+.file-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  gap: .8rem;
+  padding: .55rem .2rem;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: .5rem;
+}
+
+.file-same { color: var(--muted); font-size: var(--text-2); }
+
+.drows { grid-template-columns: 3rem 3rem 1.6rem minmax(max-content, 1fr); }
+/* A markdown file's diff wraps at the wrap measure, so its columns no longer widen to the longest line. */
+.drows[data-wrap] { grid-template-columns: 3rem 3rem 1.6rem minmax(0, 1fr); }
+.drows[data-wrap] .code-text { box-sizing: content-box; max-width: var(--wrap-measure); white-space: pre-wrap; overflow-wrap: anywhere; }
+/* Side by side, Before and After each take half the width and scroll sideways on their own, carried together by a script
+   so their lines stay paired. --cols, the longest line of the file, is every side's least text width, so all of them scroll
+   as far. */
+.drows.split { display: block; overflow: hidden; }
+.drow-side { display: grid; grid-template-columns: 3rem 1.6rem minmax(calc(var(--cols) * 1ch + 2ch), 1fr); overflow-x: auto; scrollbar-width: thin; }
+.drow { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; }
+.drow.add { background: var(--yes-wash); }
+.drow.add .diff-mark { color: var(--yes); }
+.drow.del { background: var(--no-wash); }
+.drow.del .diff-mark { color: var(--no); }
+.drow.del .code-text { color: var(--ink-soft); }
+.drow.empty { background: repeating-linear-gradient(135deg, transparent 0 6px, var(--canvas) 6px 7px); }
+
+.drow-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.drow-pair > .drow-side + .drow-side { border-left: 1px solid var(--rule); }
+
+/* A fold's words start where the code does, past the two line numbers and the mark. */
+.drow-fold { display: grid; grid-column: 1 / -1; grid-template-columns: 7.6rem minmax(0, 1fr); }
+.drow-fold-text { grid-column: 2; }
+
+/* Claims, each with whether it holds in words, and its evidence under it. */
+
+.claims-sum { margin: 0 0 .6rem; color: var(--muted); font-size: var(--text-2); }
+.claims ol { list-style: none; margin: 0; padding: 0; max-width: calc(var(--measure) + 8rem); }
+
+.claim {
+  display: grid;
+  grid-template-columns: 4.6rem minmax(0, 1fr);
+  gap: 1rem;
+  padding: .9rem 0;
+  border-top: 1px solid var(--rule);
+}
+
+.claim:last-child { border-bottom: 1px solid var(--rule); }
+.claim-mark { font-weight: 600; font-size: var(--text-2); padding-top: .25rem; }
+.claim.holds .claim-mark { color: var(--yes); }
+.claim.holds .claim-mark::before { content: "\2713  "; }
+.claim.fails .claim-mark { color: var(--no); }
+.claim.fails .claim-mark::before { content: "\2717  "; }
+.claim .prose { font-size: var(--text-4); line-height: 1.55; }
+.claim-evidence { margin-top: .5rem; padding-left: .9rem; border-left: 2px solid var(--rule-strong); }
+.claim-evidence .prose { font-size: var(--text-3); color: var(--ink-soft); }
+.claim-label { display: block; margin-bottom: .15rem; font-size: var(--text-1); font-weight: 600; color: var(--muted); }
+
+.unknown { padding: .9rem 1rem; border: 1px dashed var(--rule-strong); border-radius: var(--radius-3); color: var(--ink-soft); font-size: var(--text-2); }
+.unknown p { margin: 0 0 .6rem; }
+.unknown pre { margin: 0; overflow-x: auto; font: var(--text-2)/1.5 var(--mono); }
+
+/* A verdict: the choice the user picked stays pressed, a pressed button, while they add their words. */
+.reason-foot .button { margin-right: auto; }
+
+/* The words box under the choices: always there, a low field, so the question keeps the room. */
+.reason.words { margin: .6rem 0 0; padding: .6rem 1rem .5rem; box-shadow: none; }
+
+/* A field brain does not draw, shown as the source sent it, quieter than the block it belongs to. */
+.extras { margin-top: .6rem; padding: .5rem .8rem; border: 1px dashed var(--rule-strong); border-radius: var(--radius-2); color: var(--ink-soft); font-size: var(--text-2); }
+.extras p { margin: 0 0 .3rem; }
+.extras pre { margin: 0; overflow-x: auto; font: var(--text-1)/1.5 var(--mono); }
+
+/* What does not add up: said in words, on the block it is about and at the top of the question, never in color alone. */
+.drift-sum { max-width: var(--measure); margin: 0 0 .8rem; color: var(--stale); font-weight: 600; font-size: var(--text-2); }
+.drift { max-width: var(--measure); margin: 0 0 .8rem; padding: .6rem .9rem; border-left: 3px solid var(--stale); border-radius: 0 var(--radius-2) var(--radius-2) 0; background: var(--stale-wash); font-size: var(--text-2); }
+.drift-head { margin: 0 0 .2rem; font-weight: 600; color: var(--stale); }
+.drift ul { margin: 0; padding-left: 1.1rem; }
+.drift li { overflow-wrap: anywhere; }
+
+/* Marks on code: each span underlined where it sits, its weight a badge where it ends, nested marks inside their parent. */
+.tally { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem .9rem; margin: 0 0 .6rem; }
+.tally-label { font-weight: 600; color: var(--ink-soft); }
+.tally-sum { font: 600 var(--text-4)/1.3 var(--mono); }
+.tally-note { color: var(--muted); font-size: var(--text-2); }
+.tally.off .tally-sum, .tally.off .tally-note { color: var(--stale); }
+.tally.off .tally-note::before { content: "\26A0  "; }
+.tally .extras { flex-basis: 100%; }
+
+.mark-weight {
+  display: inline-block;
+  margin: 0 .15rem 0 .25rem;
+  padding: 0 .3rem;
+  border-radius: var(--radius-pill);
+  background: var(--focus);
+  color: var(--paper);
+  font: 700 var(--text-1)/1.45 var(--sans);
+  vertical-align: .1em;
+  user-select: none;
+}
+.mark .mark .mark-weight { background: var(--stale); }
+
+.mark-readout { display: flex; flex-wrap: wrap; gap: .2rem .8rem; min-height: 1.6rem; margin: .5rem 0 0; color: var(--ink-soft); font-size: var(--text-2); }
+.mark-step { color: var(--muted); font-variant-numeric: tabular-nums; }
+.mark-running { font-family: var(--mono); color: var(--ink); }
+.mark-extra { font: var(--text-1)/1.4 var(--mono); color: var(--muted); margin-left: .4rem; }
+
+/* Facts: a label over the source's value; a tone colours it and a sign says it. */
+.facts { display: flex; flex-wrap: wrap; gap: .6rem; margin: 0; }
+.fact { min-width: 8rem; padding: .5rem .8rem; border: 1px solid var(--rule); border-radius: var(--radius-3); background: var(--paper); }
+.fact dt { font-size: var(--text-2); color: var(--muted); }
+.fact dd { margin: .1rem 0 0; font: 600 var(--text-4)/1.3 var(--sans); overflow-wrap: anywhere; }
+.fact.tone-good { border-color: var(--yes); background: var(--yes-wash); }
+.fact.tone-good dd { color: var(--yes); }
+.fact.tone-good dd::before { content: "\2713  "; }
+.fact.tone-bad { border-color: var(--no); background: var(--no-wash); }
+.fact.tone-bad dd { color: var(--no); }
+.fact.tone-bad dd::before { content: "\2717  "; }
+.fact.value-0, .fact.value-1, .fact.value-2, .fact.value-3 { border-left: 7px solid var(--ink-soft); }
+.fact.value-1 { border-left-style: double; }
+.fact.value-2 { border-left-style: dashed; }
+.fact.value-3 { border-left-style: dotted; }
+.agreement { display: inline-flex; align-items: baseline; gap: .4rem; font-weight: 600; font-size: var(--text-2); }
+.agreement.agree { color: var(--yes); }
+.agreement.disagree { color: var(--no); }
+.agreement-full { margin: 0 0 .5rem; padding: .15rem .6rem; border: 1px solid currentColor; border-radius: var(--radius-pill); }
+.agreement-split { font-weight: 400; color: var(--ink-soft); }
+.queue-title .agreement { margin-right: .35rem; }
+
+/* A timeline: its steps as a strip of buttons, oldest first, each in its tone; the open steps pressed, and two of them
+   as columns. */
+.timeline-strip { display: flex; flex-wrap: wrap; gap: .4rem; list-style: none; margin: 0 0 .6rem; padding: 0; }
+.step-no { color: var(--muted); font-variant-numeric: tabular-nums; font-size: var(--text-2); }
+.step-when { color: var(--muted); font-size: var(--text-2); font-weight: 400; }
+.step-drift { color: var(--stale); font-size: var(--text-2); font-weight: 600; }
+.step-drift::before { content: "\26A0  "; }
+
+.steps-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 1.6rem; }
+.step { padding-top: .6rem; border-top: 2px solid var(--rule-strong); }
+.step.tone-good { border-top-color: var(--yes); }
+.step.tone-bad { border-top-color: var(--no); }
+.step-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem .8rem; margin: 0; font: 600 var(--text-3)/1.4 var(--sans); }
+.step > .block:first-of-type, .step > .compare:first-of-type { margin-top: 1.2rem; }
+.step .block { margin-top: 1.6rem; }
+
+.quiet-error { font-family: var(--mono); font-size: var(--text-2); overflow-wrap: anywhere; }
+
+.back { margin-bottom: 2rem; }
+
+/* The reading pane. */
+
+.side {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: 1px solid var(--rule);
+}
+
+.side-search { position: relative; padding: 1.2rem 1rem .6rem; }
+
+.side-search .hint { position: absolute; right: 1.6rem; top: 1.72rem; }
+
+.hits { list-style: none; margin: 0; padding: 0 .6rem; max-height: 50%; overflow-y: auto; }
+.hits:empty { display: none; }
+
+.hit { display: block; }
+.hit-title { display: block; font: 400 var(--text-3)/1.35 var(--serif); }
+.hit-snippet { display: block; margin: .15rem 0; font-size: var(--text-2); line-height: 1.4; color: var(--ink-soft); }
+.hit-snippet mark { background: none; color: var(--ink); font-weight: 600; }
+.hit-ref { display: block; font-size: var(--text-2); color: var(--muted); }
+.hits-note { padding: .4rem var(--sp-3) .6rem; font-size: var(--text-2); color: var(--muted); }
+.hits-foot { padding: .3rem var(--sp-3) .8rem; font-size: var(--text-2); color: var(--muted); border-bottom: 1px solid var(--rule); margin-bottom: .4rem; }
+
+/* The entries nearest to the write in view, while no search is typed: marked as this write's, by node. */
+
+.near-mark { padding: .2rem var(--sp-3) .1rem; font-size: var(--text-1); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-soft); }
+.near-head { padding: .5rem var(--sp-3) .1rem; font-size: var(--text-2); color: var(--muted); }
+.hit-ref .near-scope { margin-right: .45em; }
+
+/* A near entry read beside the node of the write it is near: two documents, the write first. */
+
+.beside { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 3rem; align-items: start; }
+.beside-entry { padding-left: 2rem; border-left: 1px solid var(--rule); }
+.beside .doc, .beside .diff-title { max-width: none; }
+
+.stack { flex: 1; overflow-y: auto; padding: .4rem 1rem 2rem; }
+
+.stack-empty { padding: 1rem .2rem; color: var(--muted); font-size: var(--text-2); line-height: 1.6; }
+
+.card {
+  margin-top: .8rem;
+  padding: 1rem 1.1rem 1.1rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-3);
+  background: var(--raised);
+}
+
+.card.pinned { border-color: var(--rule-strong); box-shadow: var(--shadow); }
+
+.card-head { display: flex; align-items: center; gap: .4rem; margin-bottom: .45rem; }
+.card-ref { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-2); color: var(--muted); }
+
+.card .doc-title { font-size: var(--text-4); margin-bottom: .6rem; }
+.card .prose { font-size: var(--text-3); line-height: 1.6; }
+.card .doc-section { margin-top: 1.1rem; }
+.card .edge { grid-template-columns: 4.8rem minmax(0, 1fr); gap: .6rem; padding: .3rem 0; }
+.card .edge-target:not(.edge-dead) { font-size: var(--text-3); }
+.card .edge-ref { display: none; }
+
+/* The command palette's rows: components.css draws the palette itself. */
+
+.palette-item { align-items: center; }
+.palette-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.palette-group { color: var(--muted); font-size: var(--text-2); }
+.palette-keys { display: inline-flex; gap: .2rem; }
+
+/* What just happened. */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.6rem;
+  z-index: 20;
+  max-width: min(34rem, calc(100vw - 2rem));
+  padding: .6rem 1rem;
+  border-radius: var(--radius-3);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: var(--text-2);
+  opacity: 0;
+  transform: translate(-50%, .5rem);
+  transition: opacity .18s ease, transform .18s ease;
+  pointer-events: none;
+}
+
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* Evidence: what brain prevented, one line of the story per part of brain, each over the cases that prove it, and the
+   cost under a rule at the end. The period to count sits in the queue column. */
+
+.evidence-period { display: grid; gap: .6rem; padding: 0 var(--sp-3) .8rem; font-size: var(--text-2); }
+.evidence-day { display: grid; gap: .2rem; color: var(--muted); }
+.evidence-period-acts { display: flex; gap: 1rem; }
+.evidence-line { max-width: var(--measure); }
+.evidence-line + .evidence-line { margin-top: 2.4rem; }
+.evidence-story { margin: 0 0 .7rem; font: 400 var(--text-5)/1.45 var(--serif); text-wrap: pretty; }
+.evidence-proof summary.link { display: list-item; }
+.evidence-open { margin: .6rem 0 0; font-size: var(--text-2); }
+.evidence-cases { margin: .5rem 0 0; padding: 0; list-style: none; font-size: var(--text-2); }
+.evidence-cases li { display: grid; gap: .1rem; padding: .45rem 0; border-top: 1px solid var(--rule); }
+.evidence-note { margin: -.3rem 0 .7rem; color: var(--muted); font-size: var(--text-2); }
+.evidence-subject { color: var(--ink); overflow-wrap: anywhere; }
+.evidence-detail { color: var(--ink-soft); overflow-wrap: anywhere; }
+.evidence-round { display: grid; gap: .1rem; margin-top: .4rem; }
+.evidence-text { margin: 0; font: inherit; color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+.evidence-none { margin: 0; color: var(--muted); font-size: var(--text-2); }
+.evidence-cost { max-width: var(--measure); margin: 3rem 0 0; padding-top: 1.4rem; border-top: 1px solid var(--rule-strong); color: var(--ink-soft); }
+
+@media (max-width: 1100px) {
+  :root { --queue-width: 12.5rem; --side-width: 19rem; }
+  .page { padding: 2.4rem 2rem 9rem; }
+  .answer { margin: 0 -2rem; padding-left: 2rem; padding-right: 2rem; }
+}
+
+@media (max-width: 760px) {
+  .beside, .steps-two { grid-template-columns: minmax(0, 1fr); }
+  .beside-entry { padding-left: 0; border-left: 0; }
+  body { overflow: auto; }
+  .app, .app.no-side { display: block; height: auto; }
+  .strip { flex-direction: row; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--rule); }
+  .queue { border-right: 0; border-bottom: 1px solid var(--rule); }
+  .main { overflow: visible; }
+  .chat { position: fixed; inset: 0 0 0 auto; }
+  .page { padding: 2rem 1rem 8rem; }
+  .answer { margin: 0 -1rem; padding-left: 1rem; padding-right: 1rem; }
+  .side { border-left: 0; border-top: 1px solid var(--rule); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast { transition: none; }
+}
+
+.pending-key { margin-left: auto; font-family: var(--mono, monospace); }

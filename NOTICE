@@ -1,0 +1,10 @@
+brain
+Copyright 2026 Carlos Kelkboom
+
+This product includes Mermaid 11.15.0 (https://mermaid.js.org), copyright 2014 - 2022 Knut Sveidqvist, under the MIT
+License. brain's window and every workspace serve it as src/Brain/Serving/shared/vendor/mermaid.min.js, the file the npm
+package ships as dist/mermaid.min.js, unchanged. Its license is in src/Brain/Serving/shared/vendor/mermaid.LICENSE.
+
+This product includes lit-html 3.3.3 (https://lit.dev), copyright 2017 Google LLC, under the BSD 3-Clause License.
+brain's window and every workspace serve it as src/Brain/Serving/shared/vendor/lit-html.js, the file the npm package
+ships as lit-html.js, unchanged. Its license is in src/Brain/Serving/shared/vendor/lit-html.LICENSE.

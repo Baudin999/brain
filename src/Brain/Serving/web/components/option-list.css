@@ -1,0 +1,10 @@
+/* The option list: a listbox of compact option rows, each its text, then a hint in small capitals and a check on the one
+   in use. The cursor's text turns to ink, and in the list the keys are in it is bold too. */
+
+.option-list { margin: 0; padding: 0; list-style: none; font-size: var(--text-2); }
+.option-list-item { gap: .6rem; }
+.option-list-text { flex: 1; color: var(--ink-soft); }
+.option-list-item[aria-selected="true"] .option-list-text { color: var(--ink); }
+.option-list-item[aria-current="true"] .option-list-text { font-weight: 600; }
+.option-list-hint { color: var(--muted); font-weight: 400; letter-spacing: .04em; text-transform: uppercase; font-size: var(--text-1); }
+.option-list-now { color: var(--yes); }

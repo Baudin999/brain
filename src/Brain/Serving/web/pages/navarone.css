@@ -1,0 +1,37 @@
+/* The Navarone tab: its flows, a problem's story and the lens, a modal over the tab. */
+
+.navarone-note { margin: var(--sp-2) 0 0; max-width: var(--measure); color: var(--muted); font-size: var(--text-2); }
+.navarone-flows { margin-top: var(--sp-5); }
+.navarone-flow-count { font-variant-numeric: tabular-nums; }
+.navarone-say { margin: var(--sp-3) 0 var(--sp-2); font: 400 var(--text-4)/1.45 var(--serif); color: var(--ink); }
+.navarone-page .keys { margin: 0 0 var(--sp-4); }
+.navarone-none { margin: var(--sp-4) 0 0; color: var(--muted); }
+
+/* A problem's story: each step a part read top to bottom, an agent's words in full. */
+
+.navarone-story { max-width: none; }
+.navarone-story-head .button { margin-top: var(--sp-4); }
+.navarone-steps { list-style: none; margin: var(--sp-5) 0 0; padding: 0; }
+.navarone-step { padding: var(--sp-4) 0; border-top: 1px solid var(--rule); }
+.navarone-step .compare { margin-top: var(--sp-3); }
+.navarone-step .block-path { margin-left: auto; font-weight: 400; }
+.navarone-words { margin: 0; max-width: var(--measure); font: 400 var(--text-3)/1.55 var(--serif); color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+.navarone-details { margin-top: var(--sp-5); }
+.navarone-actions { margin: var(--sp-3) 0 0; }
+
+/* The lens: over the main pane in its own cell, under the chat, so the chat stays beside it. Its views down the left,
+   the code in the middle. */
+
+.navarone-lens-host { grid-column: 3; grid-row: 1; z-index: 1; min-height: 0; }
+.navarone-lens { display: flex; flex-direction: column; height: 100%; outline: none; background: var(--paper); box-shadow: var(--shadow); }
+.navarone-lens-head { flex: none; flex-wrap: wrap; }
+.navarone-trail { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-1) var(--sp-2); min-width: 0; color: var(--muted); }
+.navarone-trail code { color: var(--ink); overflow-wrap: anywhere; }
+.navarone-lens-acts { display: flex; gap: var(--sp-2); margin-left: auto; }
+.navarone-lens-body { display: grid; grid-template-columns: max-content minmax(0, 1fr); flex: 1; min-height: 0; }
+.navarone-lens-views { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-4) var(--sp-3); border-right: 1px solid var(--rule); }
+.navarone-lens-code { overflow-y: auto; padding: var(--sp-4) var(--sp-5) var(--sp-7); }
+.navarone-lens-part + .navarone-lens-part { margin-top: var(--sp-5); }
+.navarone-lens-part .block { margin-top: var(--sp-3); }
+.navarone-lens-children { margin-top: var(--sp-3); padding-left: var(--sp-4); border-left: 2px solid var(--rule); }
+.navarone-page .field.search { margin: 0 0 var(--sp-3); max-width: var(--measure); }

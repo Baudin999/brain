@@ -1,0 +1,106 @@
+/* The tokens of brain's window and of a workspace's window, the one place a color, a text size, a radius or a step of
+   space is written as a value. Every other sheet and every style the scripts set names these. StyleTokenTests fails
+   the gate on a raw color, font size or radius anywhere else, and the Stylebook view shows each token as the windows
+   draw it. /theme.css, loaded last, sets the colors to the Omarchy theme's. */
+
+:root {
+  color-scheme: light dark;
+  --canvas: light-dark(#f5f6f8, #14161b);
+  --paper: light-dark(#ffffff, #1a1d23);
+  --raised: var(--paper);
+  --ink: light-dark(#1e2330, #e4e7ee);
+  --ink-soft: light-dark(#485063, #b3b9c6);
+  --muted: light-dark(#8a91a1, #7c8395);
+  --rule: light-dark(#e4e7ed, #272b34);
+  --rule-strong: light-dark(#d3d8e1, #343945);
+  --yes: light-dark(#2d6b5a, #7cc0a6);
+  --yes-wash: light-dark(#e5f1ec, #1a2c26);
+  --no: light-dark(#8b3a5b, #e08bad);
+  --no-wash: light-dark(#f6e7ee, #33202a);
+  --stale: light-dark(#8c6410, #e2b65a);
+  --stale-wash: light-dark(#faf1dc, #30281a);
+  --focus: light-dark(#3c6fd8, #7ea3f2);
+  --select: light-dark(#e9edf6, #232834);
+  /* Code's syntax colors, one per kind of token. /theme.css sets them to the Omarchy theme's magenta, green, yellow, blue
+     and cyan where they read on its background. */
+  --code-comment: var(--muted);
+  --code-keyword: light-dark(#8a3fa6, #c79bf2);
+  --code-string: light-dark(#2d6b5a, #8fd1a8);
+  --code-number: light-dark(#8c5a10, #e2b65a);
+  --code-function: light-dark(#2f5fc0, #7ea3f2);
+  --code-type: light-dark(#1d6f7a, #6fc7d3);
+  /* What git sees uncommitted against HEAD, in a workspace: a mark, the bar beside a changed line, a file's name or a
+     removed lines' place, and a wash behind a changed block's text. They follow the theme's yes, focus, no and stale, so
+     every Omarchy theme colours them. */
+  --git-added: var(--yes);
+  --git-added-wash: color-mix(in srgb, var(--yes) 16%, transparent);
+  --git-changed: var(--focus);
+  --git-changed-wash: color-mix(in srgb, var(--focus) 14%, transparent);
+  --git-deleted: var(--no);
+  --git-deleted-wash: color-mix(in srgb, var(--no) 16%, transparent);
+  --git-untracked: var(--stale);
+  --git-untracked-wash: color-mix(in srgb, var(--stale) 16%, transparent);
+  /* The part of a changed line that differs, on a fix's before and after: a stronger shade of the no and yes washes. */
+  --diff-removed-strong: color-mix(in srgb, var(--no) 32%, transparent);
+  --diff-added-strong: color-mix(in srgb, var(--yes) 32%, transparent);
+  /* A project chip's saturation and lightness, the hue being the project's own: what OriginTone makes of the colors
+     above, so every hue reads on paper, canvas and select, a highlighted queue row. /theme.css sets both to the
+     Omarchy theme's. */
+  --origin-light: 57% 27%;
+  --origin-dark: 61% 71%;
+  --shadow: 0 1px 2px rgba(30, 35, 48, .05), 0 8px 28px rgba(30, 35, 48, .07);
+  /* A pressed segment lifted off its track, and the palette floating over the window. */
+  --shadow-lift: 0 1px 2px rgba(0, 0, 0, .09);
+  --shadow-pop: 0 24px 80px rgba(20, 24, 33, .22);
+  /* The shade a modal sits on: the palette and the image viewer dim the window with it. */
+  --shade: color-mix(in srgb, var(--canvas) 55%, transparent);
+  --shade-blur: blur(2px);
+
+  --serif: "Iowan Old Style", "Charter", "Bitstream Charter", "Source Serif 4", "Noto Serif", Georgia, serif;
+  --sans: "Inter", "Adwaita Sans", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+
+  /* Text sizes: small print, the room's sans, body, reading prose, then three title sizes. A font size names a step,
+     never a size of its own. What sits smaller inside running text, its code and its tables, takes --text-smaller of
+     the text around it. */
+  --text-1: .75rem;
+  --text-2: .875rem;
+  --text-3: 1rem;
+  --text-4: 1.2rem;
+  --text-5: 1.5rem;
+  --text-6: 1.75rem;
+  --text-7: 2.25rem;
+  --text-smaller: .86em;
+
+  /* Radii: a mark or a key, a control or a row, a box or a card, and the pill of a chip. */
+  --radius-1: 4px;
+  --radius-2: 7px;
+  --radius-3: 10px;
+  --radius-pill: 999px;
+
+  /* Space, in quarter rems: a gap, a padding or a margin names a step. */
+  --sp-1: .25rem;
+  --sp-2: .5rem;
+  --sp-3: .75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+
+  --strip-width: 2.4rem;
+  --queue-width: 15rem;
+  --side-width: 23rem;
+  --measure: 40rem;
+  /* The width of brain code's information panel, on the right of a conversation. */
+  --panel-width: 30rem;
+  /* How wide markdown shown as text wraps, in brain's window: the diff of a node or of a .md file. Code never wraps. */
+  --wrap-measure: 120ch;
+  /* The widest a pane head's title and notices run. */
+  --head-measure: 70rem;
+}
+
+/* Colors follow color-scheme through light-dark(); /theme.css sets it to the Omarchy theme's mode. Only the shadow's
+   shape differs in the dark. */
+@media (prefers-color-scheme: dark) {
+  :root { --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 30px rgba(0, 0, 0, .35); }
+}

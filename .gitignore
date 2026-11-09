@@ -1,0 +1,11 @@
+# Build output only, rebuilt from source. The data lives in its own repo, BRAIN_HOME.
+cache/
+bin/*
+!bin/brain
+obj/
+src/*/bin/
+src/*/obj/
+tests/*/bin/
+tests/*/obj/
+TestResults/
+docs/brain/tmp/

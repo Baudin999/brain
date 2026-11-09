@@ -1,0 +1,48 @@
+/* The image viewer: an image in a box laid over the window, a space-6 in from every edge, on the shade the palette
+   uses, so it reads as a modal. The shade covers the window and takes the pointer, so nothing behind it answers a
+   click, and the box draws like the palette's. The framed variant sits inside its container, for the Stylebook. */
+
+.image-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: var(--shade);
+  backdrop-filter: var(--shade-blur);
+  cursor: grab;
+  touch-action: none;
+}
+
+.image-viewer[data-framed] { position: absolute; z-index: 0; }
+.image-viewer[data-dragging] { cursor: grabbing; }
+
+.image-viewer-box {
+  position: absolute;
+  inset: var(--sp-6);
+  overflow: hidden;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-3);
+  background: var(--paper);
+  box-shadow: var(--shadow-pop);
+}
+
+.image-viewer-stage {
+  position: absolute;
+  inset: 5%;
+  transform-origin: center;
+}
+
+.image-viewer-stage > :is(svg, img) {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+}
+
+.image-viewer-help {
+  position: absolute;
+  right: 1rem;
+  bottom: .6rem;
+  margin: 0;
+  color: var(--muted);
+  font: 400 var(--text-1)/1.4 var(--sans);
+}

@@ -1,0 +1,487 @@
+/* The named components of brain's window and of a workspace's window, each drawn once: here, or in its own sheet beside
+   its script, in shared/components when more than one window draws it, as toggle.css, or in brain's web/components when
+   only brain's window does, as select.css. A feature sheet places one, its margin or its flex, and never restyles it.
+   The Stylebook view in brain's window shows each in its states, a workspace's own among them. A [data-hover]
+   attribute draws the hover the pointer gives, and a [data-focus] attribute the focus the keys give, so the Stylebook
+   can show each at rest. */
+
+/* A control takes the type and the color of the place it sits, until its component sets its own. */
+
+button, input, textarea { font: inherit; color: inherit; }
+
+/* The button: an action, a step to open or a choice that stays pressed. A yes fills with the yes color, a no takes the
+   no color. A signed yes or no, the answer to a write, carries its glyph too, a plus or a minus, since color alone does
+   not tell them apart in every theme. A button in a tone, good or bad, carries a bar of the yes or the no color at its
+   edge. A highlighted button, an action that waits for the user and can be taken now, takes the focus color while it
+   is enabled. A key it answers to sits in it as a kbd. */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-2);
+  background: none;
+  padding: .3rem .7rem;
+  font: 500 var(--text-2)/1.4 var(--sans);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.button:is(:hover, [data-hover]):not(:disabled) { background: var(--select); }
+.button[aria-pressed="true"] { border-color: var(--ink); background: var(--select); font-weight: 600; }
+.button:disabled { opacity: .45; cursor: default; }
+.button kbd { background: transparent; }
+.button.yes { border-color: var(--yes); background: var(--yes); color: var(--paper); }
+.button.yes kbd { color: var(--paper); border-color: color-mix(in srgb, var(--paper) 45%, transparent); }
+.button.yes:is(:hover, [data-hover]):not(:disabled) { background: color-mix(in srgb, var(--yes) 88%, var(--ink)); }
+.button.no { color: var(--no); }
+.button.signed.yes::before { content: "+"; }
+.button.signed.no::before { content: "\2212"; }
+.button.tone-good { box-shadow: inset 3px 0 0 var(--yes); }
+.button.tone-bad { box-shadow: inset 3px 0 0 var(--no); }
+.button.highlight:not(:disabled) { border-color: var(--focus); background: color-mix(in srgb, var(--focus) 14%, transparent); color: var(--focus); font-weight: 600; }
+.button.highlight:is(:hover, [data-hover]):not(:disabled) { background: color-mix(in srgb, var(--focus) 24%, transparent); }
+
+/* The chip: the graph an item is the work of, a project's name in its project's color, which reads on canvas and on a
+   highlighted row's select in every theme, so a chip at rest never takes a background of its own. Personal, global and
+   no project are neutral. A source's tag is dotted, an item on older code says so in the stale color. As a button it
+   filters, and pressed it says so with a ring; as a fold's button, open says so the same way. */
+
+.chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .4em;
+  max-width: 100%;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-pill);
+  background: none;
+  padding: 0 .55em;
+  font: 500 var(--text-1)/1.5 var(--sans);
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chip[data-origin="project"] { color: light-dark(hsl(var(--hue) var(--origin-light)), hsl(var(--hue) var(--origin-dark))); }
+.chip.tag { border-style: dotted; }
+.chip-stale { color: var(--stale); }
+.chip-count { font-variant-numeric: tabular-nums; }
+button.chip { cursor: pointer; }
+button.chip:is(:hover, [data-hover]):not(:disabled) { background: var(--select); }
+.chip:is([aria-pressed="true"], [aria-expanded="true"]) { box-shadow: inset 0 0 0 1px currentColor; font-weight: 700; }
+.chip:disabled { opacity: .45; cursor: default; }
+
+/* The segmented switch: one of a few, on a track. A group of buttons pressed by aria-pressed, or a radiogroup checked
+   by aria-checked; the one on lifts off the track in paper. */
+
+.segmented {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: .15rem;
+  padding: 2px;
+  border-radius: var(--radius-2);
+  background: var(--canvas);
+}
+
+.segmented button {
+  border: 0;
+  border-radius: var(--radius-1);
+  background: none;
+  padding: .2rem .65rem;
+  font-size: var(--text-2);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.segmented button:is(:hover, [data-hover]):not(:disabled) { color: var(--ink); }
+.segmented button:is([aria-pressed="true"], [aria-checked="true"]) { background: var(--paper); color: var(--ink); font-weight: 600; box-shadow: var(--shadow-lift); }
+.segmented button:disabled { opacity: .45; cursor: default; }
+
+/* The row: one entry of a list, a whole line to click. Hovered, or the current one, it takes the select color, and the
+   current one, the item open in view, carries a bar of the accent at its start. A feature lays out what the row holds,
+   its display, grid or gap, and styles its own spans in it. A compact row sits in a tight list, as a diff's files. An
+   option is a listbox's entry, which the keys move a cursor over: aria-selected is the cursor and the pointer lights
+   nothing, so one entry is lit at a time. A menu row is an entry of a menu the keys move focus over: the focus is its
+   cursor and lights it as the pointer does, in place of the focus ring. A data-focus attribute draws that focus, so
+   the Stylebook can show it. A vertical row is a tab of the window's strip, its label turned a quarter left
+   to read upward; on a narrow window the strip lies flat and so does its tab. */
+
+.row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  position: relative;
+  width: 100%;
+  border: 0;
+  border-radius: var(--radius-2);
+  background: none;
+  padding: var(--sp-2) var(--sp-3);
+  text-align: left;
+  cursor: pointer;
+}
+
+.row:not(.option):is(:hover, [data-hover]):not(:disabled, [aria-disabled="true"]) { background: var(--select); }
+.row:is([aria-current="true"], [aria-selected="true"]) { background: var(--select); }
+.row[aria-current="true"]::before { content: ""; position: absolute; inset: var(--sp-1) auto var(--sp-1) 0; width: 3px; border-radius: var(--radius-1); background: var(--accent, var(--focus)); }
+.row:is(:disabled, [aria-disabled="true"]) { opacity: .45; cursor: default; }
+.row.compact { padding: var(--sp-1) var(--sp-2); }
+.row.menu:is(:focus, [data-focus]) { background: var(--select); outline: none; }
+.row.vertical { align-items: center; gap: var(--sp-2); writing-mode: vertical-rl; transform: rotate(180deg); padding: var(--sp-3) 0; color: var(--ink-soft); font-size: var(--text-2); }
+.row.vertical[aria-current="true"] { color: var(--ink); font-weight: 600; }
+.row.vertical[aria-current="true"]::before { inset: var(--sp-1) 0 var(--sp-1) auto; }
+
+@media (max-width: 760px) {
+  .row.vertical { writing-mode: horizontal-tb; transform: none; width: auto; padding: var(--sp-1) var(--sp-2); }
+  .row.vertical[aria-current="true"]::before { inset: auto var(--sp-1) 0; width: auto; height: 3px; }
+}
+
+/* The palette: a box over the window, on a shade that dims it. It holds what finds what to run as the keys type:
+   brain's command palette, its pickers and its model selector, and a workspace's bar. A command field heads it, a list
+   of option rows follows, and when nothing matches the none line says so. It also holds a confirm, as brain code's
+   window asks before it closes a session. */
+
+.palette {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 16vh;
+  background: var(--shade);
+  backdrop-filter: var(--shade-blur);
+}
+
+.palette[hidden] { display: none; }
+
+.palette-box {
+  width: min(36rem, calc(100vw - 2rem));
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-3);
+  background: var(--raised);
+  box-shadow: var(--shadow-pop);
+  overflow: hidden;
+  outline: none;
+}
+
+.palette-list { list-style: none; margin: 0; padding: .4rem; max-height: min(22rem, calc(84vh - 6rem)); overflow-y: auto; }
+.palette-none { padding: .8rem .75rem; color: var(--muted); }
+
+/* The tree row: a workspace's file or folder in its tree, an option row the keys move a cursor over, the file open its
+   current one. It sits on one line at the tree's small size, a step in from its folder for each tree-indent, and a
+   folder leads with its twisty, pointing down while it is open. */
+
+.row.tree { align-items: center; gap: 0; padding: 1px var(--sp-2); font: 400 var(--text-2)/1.5 var(--sans); color: var(--ink-soft); white-space: nowrap; }
+.row.tree[aria-current="true"] { color: var(--ink); font-weight: 600; }
+.tree-indent { flex: none; width: var(--sp-4); }
+.tree-twisty { flex: none; width: var(--sp-4); color: var(--muted); }
+.tree-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+/* The git change: a line, a block or a file git sees uncommitted against HEAD in a workspace, its state in data-change:
+   added, changed, deleted or untracked, each with its mark and its wash. A run of code or a block of markdown takes the
+   wash behind its text, since code has no colour by keyword and the colour is git's. A run in the margin takes a bar of
+   the mark at its edge and its numbers in the mark. A tree row names its file or folder in the mark. The git gap marks
+   where lines were removed: a line of the deleted mark across the top of what follows them. A git run is a run of code
+   lines, in the numbers or in the text: a block, so its wash spans the line, and a gap among runs takes no height, so
+   the numbers and the text stay level. */
+
+[data-change="added"] { --change: var(--git-added); --change-wash: var(--git-added-wash); }
+[data-change="changed"] { --change: var(--git-changed); --change-wash: var(--git-changed-wash); }
+[data-change="deleted"] { --change: var(--git-deleted); --change-wash: var(--git-deleted-wash); }
+[data-change="untracked"] { --change: var(--git-untracked); --change-wash: var(--git-untracked-wash); }
+
+.git-change[data-change] { background: var(--change-wash); }
+.git-change.margin[data-change] { background: none; box-shadow: inset -3px 0 0 var(--change); color: var(--change); }
+.git-gap { position: relative; }
+.git-run { display: block; }
+.git-run.git-gap { height: 0; }
+.git-gap::before { content: ""; position: absolute; inset: -1px 0 auto; height: 2px; border-radius: var(--radius-1); background: var(--git-deleted); }
+.row.tree[data-change] .tree-name { color: var(--change); }
+
+/* The git file row: a file in one of a workspace's git lists, an option row the keys move a cursor over. Its state's
+   letter leads in the state's mark and its path follows. */
+
+.row.git-file { align-items: baseline; gap: var(--sp-2); padding: 1px var(--sp-2); font: 400 var(--text-2)/1.5 var(--sans); color: var(--ink-soft); white-space: nowrap; }
+.row.git-file[aria-selected="true"] { color: var(--ink); font-weight: 600; }
+.git-file-state { flex: none; width: var(--sp-3); font: 600 var(--text-1)/1.5 var(--mono); color: var(--change); }
+.git-file-path { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+/* The git commit: a commit in a workspace's remote area, its short hash in the monospace font and its subject after it. */
+
+.git-commit { display: flex; align-items: baseline; gap: var(--sp-2); padding: 1px var(--sp-1); font: 400 var(--text-2)/1.5 var(--sans); color: var(--ink-soft); }
+.git-commit-hash { flex: none; color: var(--muted); font: 400 var(--text-1)/1.5 var(--mono); }
+.git-commit-subject { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* The pane head: the head over a pane, or over a view's panes, ruled off from what scrolls under it. Its title leads in
+   the serif and its small print follows in the muted sans, both at the pane's inset. A compact head is one line over a
+   narrow pane, the chat: a sans title, then its small print and its actions. A spread head is the head of a view that
+   fills the main pane, a conversation: its edge is the page's wider inset and its title the page's size. */
+
+.pane-head { padding: var(--sp-4) var(--sp-5) var(--sp-3); border-bottom: 1px solid var(--rule); color: var(--muted); font-size: var(--text-2); }
+.pane-title { margin: 0 0 var(--sp-2); max-width: var(--head-measure); font: 500 var(--text-5)/1.2 var(--serif); letter-spacing: -.01em; color: var(--ink); text-wrap: balance; overflow-wrap: anywhere; }
+.pane-title:last-child { margin-bottom: 0; }
+.pane-head.compact { display: flex; align-items: baseline; gap: var(--sp-3); }
+.pane-head.compact .pane-title { margin: 0; font: 600 var(--text-3)/1.3 var(--sans); letter-spacing: normal; }
+.pane-head.spread { padding: var(--sp-6) var(--sp-7) var(--sp-4); }
+.pane-head.spread .pane-title { font-size: var(--text-6); }
+
+@media (max-width: 1100px) {
+  .pane-head.spread { padding: var(--sp-5) var(--sp-6) var(--sp-4); }
+}
+
+/* The flush head: the head of a page that scrolls whole, as an inbox, the settings or a question opened on its own. It
+   sits in the page's own inset, so it carries no padding and no rule, and its title is the page's size. A compact
+   flush head is a column's head, as the queue's. */
+
+.pane-head.flush { padding: 0; border-bottom: 0; }
+.pane-head.flush .pane-title { font-size: var(--text-6); }
+.pane-head.flush.compact .pane-title { font-size: var(--text-3); }
+
+/* The icon button: one glyph to act on what it sits beside, as a card's pin and close. Pressed, it stays in ink. A
+   bubble carries a count in place of a glyph, a comment's number in the comment bar, its corner pointing at the text
+   it quotes: open, it fills with ink, and an orphan, whose text is gone, is dashed. */
+
+.icon {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 0;
+  border-radius: var(--radius-2);
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.icon:is(:hover, [data-hover]):not(:disabled) { background: var(--canvas); color: var(--ink); }
+.icon:is([aria-pressed="true"], [aria-current="true"]) { color: var(--ink); }
+.icon[aria-current="true"] { background: var(--select); }
+.icon:disabled { opacity: .45; cursor: default; }
+.icon[hidden] { display: none; }
+.icon svg { width: 14px; height: 14px; }
+.icon.bubble {
+  width: auto;
+  min-width: 1.6rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-pill) var(--radius-pill) var(--radius-pill) var(--radius-1);
+  background: var(--paper);
+  padding: 0 .35rem;
+  color: var(--ink-soft);
+  font: 600 var(--text-1)/1 var(--sans);
+  font-variant-numeric: tabular-nums;
+}
+
+.icon.bubble:is(:hover, [data-hover]):not(:disabled, [aria-expanded="true"]) {
+  border-color: var(--ink-soft);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.icon.bubble[aria-expanded="true"] { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.icon.bubble.orphan { border-style: dashed; color: var(--muted); }
+
+/* A floating icon lies over what scrolls under it, round, raised and shadowed, as the one that takes a conversation to its
+   end. */
+
+.icon.float { border: 1px solid var(--rule-strong); border-radius: var(--radius-pill); background: var(--raised); box-shadow: var(--shadow); color: var(--ink-soft); }
+.icon.float:is(:hover, [data-hover]):not(:disabled) { background: var(--raised); }
+
+/* The link: words that act, underlined in the rule color, in the type of the text around them; hovered, they turn to
+   ink. An accent link, a link in prose, takes the accent and keeps it. A plain link shows its underline only when
+   hovered, as an edge's target. A subtle link is the small print of the text around it, muted and with no underline,
+   as a way back with its key. A heading link is a title that acts: the title's own type and color. A rename link is a
+   title renamed in place: the text cursor, and a dotted underline when hovered. */
+
+.link {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--ink-soft);
+  text-decoration: underline;
+  text-decoration-color: var(--rule-strong);
+  text-underline-offset: .2em;
+  cursor: pointer;
+}
+
+.link:is(:hover, [data-hover]):not(:disabled, .accent) { color: var(--ink); }
+.link:disabled { opacity: .45; cursor: default; }
+.link.accent { color: var(--accent, var(--ink)); }
+.link.plain { text-decoration: none; }
+.link.plain:is(:hover, [data-hover]) { text-decoration: underline; text-decoration-color: var(--rule-strong); }
+.link.subtle {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  color: var(--muted);
+  font-size: var(--text-smaller);
+  text-decoration: none;
+}
+
+.link.subtle:is(:hover, [data-hover]):not(:disabled) { color: var(--ink); }
+.link.heading { color: inherit; letter-spacing: inherit; text-align: left; }
+.link.rename { text-decoration: none; cursor: text; }
+.link.rename:is(:hover, [data-hover]) { text-decoration: underline dotted var(--rule-strong); }
+
+/* The fold: a bar across a list where the lines it hides wait, as a diff's unchanged lines; it opens them. A feature
+   lays out what it holds. */
+
+.fold {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-block: 1px solid var(--rule);
+  border-radius: 0;
+  background: var(--canvas);
+  padding: .2rem 0;
+  text-align: left;
+  font: var(--text-2)/1.6 var(--sans);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.fold:is(:hover, [data-hover]):not(:disabled) { color: var(--ink); }
+
+/* The code mark: a span of code a source marks, underlined in the focus color where it sits. A mark inside another
+   is underlined in the stale color, on its wash. Hovered, or focused by the keys, it takes the select color in place of
+   the focus ring; the current one, mark-at, is lit in the focus color. A link mark, one a context links from, acts:
+   it reads in the focus color, dotted until hovered. */
+
+.mark {
+  border-bottom: 2px solid color-mix(in srgb, var(--focus) 55%, transparent);
+  border-radius: var(--radius-1);
+  padding-bottom: 1px;
+  cursor: default;
+}
+
+.mark .mark { border-bottom-color: var(--stale); background: color-mix(in srgb, var(--stale-wash) 70%, transparent); }
+.mark:is(:hover, :focus-visible, [data-hover], [data-focus]) { background: var(--select); outline: none; }
+.mark.mark-at { background: color-mix(in srgb, var(--focus) 18%, transparent); border-bottom-color: var(--focus); }
+.mark.mark-link { cursor: pointer; color: var(--focus); border-bottom-style: dotted; }
+.mark.mark-link:is(:hover, [data-hover]) { border-bottom-style: solid; }
+/* A link mark reads in the focus color throughout: the syntax colors of the code under it give way. */
+.mark.mark-link .token { color: inherit; }
+
+/* A floating button lies over the page, raised and shadowed, as the one beside a selection. */
+
+.button.float { background: var(--raised); box-shadow: var(--shadow); }
+
+/* The field: a box to type in, its border turning to the focus color while the keys are in it. Serif and mono set
+   its family. A writing field is the box one writes a phase or a reason in: prose at the reading size, raised. A search
+   field leaves room at its end for the key that reaches it. A bare field draws no box, since the box around it does:
+   a frame that is itself a field, or a card. A command field heads a box, ruled off from the list under it. A heading
+   field is a title renamed in place, underlined in the focus color. A div that holds a bare field and its label can
+   be the field, and it takes the focus while its field has it. A query field is such a frame, the lens's query bar:
+   rounder, ringed in the focus color while its field has the focus. A textarea field grows with its text, from two
+   lines (three for a writing field, one for a low field, set by --lines) to 40% of the window, then scrolls inside
+   itself, and shrinks as text goes. It has no resize handle. */
+
+.field {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-2);
+  background: var(--paper);
+  --pad-y: .4rem;
+  --lines: 2;
+  padding: var(--pad-y) .55rem;
+  font: 400 var(--text-2)/1.45 var(--sans);
+  color: var(--ink);
+}
+
+.field, .field:focus-visible { outline: none; }
+.field:disabled { opacity: .45; cursor: default; }
+textarea.field { field-sizing: content; resize: none; min-height: calc(var(--lines) * 1lh + 2 * var(--pad-y)); max-height: 40dvh; overflow-y: auto; }
+.field.serif { font-family: var(--serif); }
+.field.mono { font-family: var(--mono); font-weight: 500; }
+
+.field.writing {
+  border-radius: var(--radius-3);
+  background: var(--raised);
+  --pad-y: .65rem;
+  --lines: 3;
+  padding: var(--pad-y) .85rem;
+  font: 400 var(--text-4)/1.5 var(--serif);
+}
+
+.field.low { --lines: 1; }
+
+.field.search {
+  border-color: var(--rule);
+  border-radius: var(--radius-3);
+  padding: .55rem 2.2rem .55rem .8rem;
+  font-size: var(--text-3);
+}
+
+.field.search::-webkit-search-cancel-button { display: none; }
+.field.bare { --pad-y: 0; border: 0; border-radius: 0; background: none; padding: 0; }
+.field.command { border-bottom: 1px solid var(--rule); padding: 1rem 1.15rem; font-size: var(--text-3); }
+
+.field.heading {
+  border-bottom: 1px solid var(--focus);
+  font: 500 var(--text-6)/1.2 var(--serif);
+  letter-spacing: -.01em;
+}
+
+.field.query { border-radius: var(--radius-3); padding: var(--sp-1) var(--sp-2) var(--sp-1) var(--sp-3); }
+.field.query .field.bare { line-height: 1.7; }
+.field:not(.bare):is(:focus, :focus-within, [data-focus]) { border-color: var(--focus); }
+.field.query:is(:focus-within, [data-focus]) { box-shadow: 0 0 0 1px var(--focus); }
+
+/* The agent row: an agent a session sent in brain code's window, a compact row: its kind in ink, what it was sent to
+   do on a line of its own, its state in the muted ink, running in the focus color, failed in the no color, and a
+   readiness check's verdict in the yes or the no color. Drawn by shared/components/agent-row.js. */
+
+.row.agent-row { flex-wrap: wrap; }
+.agent-row-kind { color: var(--ink); font: 600 var(--text-2)/1.4 var(--sans); }
+.agent-row-what { flex-basis: 100%; min-width: 0; color: var(--ink-soft); font-size: var(--text-2); overflow-wrap: anywhere; }
+.agent-row-state { color: var(--muted); font-size: var(--text-1); }
+.agent-row[data-state="running"] .agent-row-state { color: var(--focus); }
+.agent-row[data-state="failed"] .agent-row-state { color: var(--no); }
+.agent-row[data-verdict="READY"] .agent-row-state { color: var(--yes); }
+.agent-row[data-verdict="NOT READY"] .agent-row-state { color: var(--no); }
+
+/* The agent message: words one agent sent another. One from another agent sits on canvas with a bar of the stale
+   color at its start and says who sent it; one the agent sent hangs under its call, ruled at its start. Drawn by
+   shared/components/agent-message.js. */
+
+.agent-message[data-way="from"] { padding: var(--sp-3) var(--sp-4); border-left: 3px solid var(--stale); border-radius: var(--radius-2); background: var(--canvas); }
+.agent-message[data-way="sent"] { margin-left: var(--sp-4); padding-left: var(--sp-3); border-left: 2px solid var(--rule); }
+.agent-message-from { margin: 0 0 var(--sp-1); color: var(--muted); font-size: var(--text-1); }
+
+/* The trail step: one step of a piece of work's story, on canvas, ruled at its start in the color of who wrote it: a
+   report in the strong rule, findings in the stale color, an answer in the focus color, and a landing in the yes
+   color. Drawn by shared/components/trail-step.js. */
+
+.trail-step { padding: var(--sp-3) var(--sp-4); border-left: 3px solid var(--rule-strong); border-radius: var(--radius-2); background: var(--canvas); }
+.trail-step[data-kind="findings"] { border-left-color: var(--stale); }
+.trail-step[data-kind="answer"] { border-left-color: var(--focus); }
+.trail-step[data-landed="true"] { border-left-color: var(--yes); }
+.trail-step-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-2); }
+.trail-step-title { margin: 0; color: var(--ink); font: 600 var(--text-3)/1.4 var(--sans); }
+.trail-step-when { color: var(--muted); font-size: var(--text-1); }
+.trail-step-label { margin: var(--sp-3) 0 0; color: var(--muted); font-size: var(--text-1); }
+.trail-step-commits { margin: var(--sp-1) 0 0; padding-left: var(--sp-4); color: var(--ink-soft); font-size: var(--text-2); }
+
+/* The Navarone signal: one signal a piece of work touched, ruled at its start in the color of how it ended: fixed and
+   kept in the yes color, replaced in the stale color, a clash in the no color on its wash, the rest in the strong
+   rule. Its end leads in ink, the code it is on follows in the monospace font, then each voice in full. Drawn by
+   shared/components/navarone-signal.js. */
+
+.navarone-signal { padding: var(--sp-2) var(--sp-3); border-left: 3px solid var(--rule-strong); }
+.navarone-signal:is([data-ended="fixed"], [data-ended="kept"]) { border-left-color: var(--yes); }
+.navarone-signal[data-ended="replaced"] { border-left-color: var(--stale); }
+.navarone-signal[data-ended="clash"] { border-left-color: var(--no); background: var(--no-wash); }
+.navarone-signal-end { margin: 0; color: var(--ink); font-weight: 600; }
+.navarone-signal-on { margin: 0; color: var(--muted); font: var(--text-1)/1.5 var(--mono); overflow-wrap: anywhere; }
+.navarone-signal-voice { margin-top: var(--sp-2); }
+.navarone-signal-who { margin: 0; color: var(--muted); font-size: var(--text-1); }
+.navarone-signal-words { margin: 0; color: var(--ink-soft); white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* The verdict: a readiness check's READY in the yes color or NOT READY in the no color, large, its questions under it.
+   Drawn by shared/components/verdict.js. */
+
+.verdict-word { margin: 0 0 var(--sp-2); font: 600 var(--text-6)/1.2 var(--sans); }
+.verdict[data-verdict="READY"] .verdict-word { color: var(--yes); }
+.verdict[data-verdict="NOT READY"] .verdict-word { color: var(--no); }

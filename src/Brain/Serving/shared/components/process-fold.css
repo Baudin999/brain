@@ -1,0 +1,30 @@
+/* The process fold: a chip that counts what runs, and under it, folded out, a raised list drawn over the page, its
+   right edge at the chip's, so nothing under it moves. Each process a line: its command in mono cut with an ellipsis,
+   a build slot it holds in the no color, its state, running in the focus color or idle in the stale color, and its
+   stop. */
+
+.process-fold { position: relative; display: inline-flex; }
+
+.process-fold-list {
+  position: absolute;
+  top: calc(100% + var(--sp-1));
+  right: 0;
+  z-index: 10;
+  width: max-content;
+  min-width: 22rem;
+  max-width: min(var(--measure), 80vw);
+  max-height: 50vh;
+  overflow-y: auto;
+  padding: var(--sp-2);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-3);
+  background: var(--raised);
+  box-shadow: var(--shadow);
+}
+
+.process-fold-jobs { display: grid; gap: var(--sp-1); margin: 0; padding: 0; list-style: none; }
+.process-fold-job { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-1) var(--sp-2); }
+.process-fold-command { flex: 1; min-width: 0; overflow: hidden; color: var(--ink); font: var(--text-1)/1.5 var(--mono); text-overflow: ellipsis; white-space: nowrap; }
+.process-fold-slot { color: var(--no); font-size: var(--text-1); font-weight: 600; white-space: nowrap; }
+.process-fold-state { color: var(--focus); font-size: var(--text-1); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.process-fold-state[data-state="idle"] { color: var(--stale); }

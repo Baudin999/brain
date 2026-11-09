@@ -1,0 +1,27 @@
+/* The tool call: a quiet line in a box of its own, so it reads as something to click. The tool's name in the soft ink,
+   what it worked on in the muted one, a brain query marked by a chip-like label in the focus color. Hovered it takes the
+   select color, the one the panel shows is pressed, and a failed call names itself in the no color. */
+
+.tool-call {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  width: 100%;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-2);
+  background: none;
+  padding: var(--sp-1) var(--sp-3);
+  color: var(--muted);
+  font: var(--text-1)/1.5 var(--mono);
+  text-align: left;
+  cursor: pointer;
+}
+
+.tool-call:is(:hover, [data-hover]) { background: var(--select); }
+.tool-call[aria-pressed="true"] { border-color: var(--focus); background: var(--select); }
+.tool-call-name { flex: none; color: var(--ink-soft); font-weight: 600; }
+.tool-call-subject { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tool-call-kind { flex: none; color: var(--focus); font-family: var(--sans); font-weight: 600; }
+.tool-call-state { flex: none; font-family: var(--sans); }
+.tool-call[data-state="failed"] .tool-call-name, .tool-call[data-state="failed"] .tool-call-state { color: var(--no); }
+.tool-call[data-state="running"] .tool-call-state { color: var(--focus); }

@@ -1,0 +1,15 @@
+/* The pending bar: a line of buttons along the bottom of the page it sits on, over a raised strip. Each button is a
+   compact row of the project's chip and its two counts. */
+
+.pending-bar {
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-3);
+  padding: var(--sp-1) var(--sp-3);
+  border-top: 1px solid var(--rule);
+  background: var(--raised);
+}
+
+.pending-bar-item { width: auto; align-items: center; gap: var(--sp-2); }

@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>brain</AssemblyName>
+    <RootNamespace>Brain</RootNamespace>
+    <!-- The agent keeper calls libc through LibraryImport, whose generated stubs need it. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.11" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.31.0" />
+    <PackageReference Include="Microsoft.ML.Tokenizers" Version="2.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Serving/web/*" LogicalName="web/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Serving/shared/*" LogicalName="shared/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Serving/shared/components/*" LogicalName="shared/components/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Serving/shared/vendor/mermaid.min.js" LogicalName="shared/vendor/mermaid.min.js" />
+    <EmbeddedResource Include="Serving/shared/vendor/lit-html.js" LogicalName="shared/vendor/lit-html.js" />
+    <EmbeddedResource Include="Serving/shared/vendor/prism.js" LogicalName="shared/vendor/prism.js" />
+    <EmbeddedResource Include="Workspace/web/*" LogicalName="workspace/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Serving/web/components/*" LogicalName="web/components/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Serving/web/pages/*" LogicalName="web/pages/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Code/web/*" LogicalName="code/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Code/web/components/*" LogicalName="code/components/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Code/web/pages/*" LogicalName="code/pages/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="../../harness/**/*" LogicalName="harness/%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Brain.Tests" />
+  </ItemGroup>
+</Project>

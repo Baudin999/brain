@@ -1,0 +1,48 @@
+/* The Stylebook view in brain's window: each token as a sample over its name and value, then each component in its
+   states. It uses tokens.css's tokens and app.css's page, and styles nothing outside the Stylebook. */
+
+.stylebook { max-width: none; }
+
+.sb-group h2 { margin-bottom: var(--sp-3); }
+
+.sb-tokens { display: grid; gap: var(--sp-2) var(--sp-5); margin: 0; padding: 0; list-style: none; }
+.sb-tokens:has(> .sb-tile) { grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: var(--sp-4); }
+
+.sb-token { display: grid; align-items: baseline; gap: var(--sp-1) var(--sp-4); min-width: 0; }
+.sb-line { grid-template-columns: 9rem 14rem minmax(0, 1fr); }
+.sb-line .sb-sample { grid-column: 3; grid-row: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); }
+.sb-tile { grid-template-columns: minmax(0, 1fr); }
+.sb-name { font: 500 var(--text-1)/1.4 var(--mono); color: var(--ink); overflow-wrap: anywhere; }
+.sb-value { font: var(--text-1)/1.4 var(--mono); color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.sb-swatch, .sb-corner, .sb-lifted { display: block; height: 3rem; margin-bottom: var(--sp-1); border: 1px solid var(--rule-strong); }
+.sb-swatch { border-radius: var(--radius-2); }
+.sb-corner { background: var(--canvas); }
+.sb-lifted { border-color: var(--rule); border-radius: var(--radius-3); background: var(--raised); }
+.sb-line .sb-space { display: block; height: var(--sp-3); align-self: center; background: var(--focus); }
+
+.sb-row { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--sp-3) var(--sp-5); padding: var(--sp-3) 0; border-top: 1px solid var(--rule); }
+.sb-row-label { flex: 0 0 9rem; padding-top: var(--sp-1); color: var(--muted); font-size: var(--text-2); }
+.sb-state { display: inline-flex; flex-direction: column; align-items: flex-start; gap: var(--sp-1); }
+.sb-state-name { font: var(--text-1)/1.4 var(--mono); color: var(--muted); }
+.sb-state > .row:not(.vertical) { width: 13rem; }
+.sb-state > .row.vertical { width: var(--strip-width); }
+.sb-state > .field { width: 15rem; }
+.sb-inset { padding: var(--sp-4); }
+.sb-code { font: var(--text-2)/1.6 var(--mono); }
+.sb-pane { width: 30rem; max-width: 100%; border: 1px solid var(--rule); border-radius: var(--radius-2); background: var(--paper); overflow: hidden; }
+.sb-pane-small { margin: 0; }
+.sb-pane-wide { width: 44rem; }
+.sb-panel { display: flex; height: 22rem; }
+.sb-panel .info-panel { flex: 1; }
+/* The process fold folds out under its chip, leftward from the chip's right edge, so its sample gives it the room. */
+.sb-fold-room { display: flex; justify-content: flex-end; min-height: 13rem; padding: var(--sp-3); }
+.sb-viewer { position: relative; width: 22rem; max-width: 100%; height: 12rem; border: 1px solid var(--rule); border-radius: var(--radius-2); overflow: hidden; }
+.sb-plain-list { list-style: none; margin: 0; padding: var(--sp-1) var(--sp-2); }
+/* The frame a workspace's git runs sit in, as its reader frames them: numbers beside the text, in the monospace font. */
+.sb-code-runs { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--sp-3); width: 24rem; font: var(--text-2)/1.6 var(--mono); }
+.sb-code-runs pre { margin: 0; font: inherit; }
+.sb-numbers { color: var(--muted); text-align: right; }
+.sb-prose { width: 24rem; font-size: var(--text-3); }
+/* The pending bar sits at the bottom of its page, so its sample is a page of its own, tall enough for the bar. */
+.sb-bar { position: relative; height: 3.5rem; }

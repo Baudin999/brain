@@ -1,0 +1,38 @@
+/* The permission request: a tool call that waits for the user's yes, a raised box with a bar of the focus color at its
+   start, so it stands out of the conversation it sits in. Its head names the tool, and the subagent that asked in the
+   muted ink; what the call does reads in the monospace font on canvas, a file's change in the git colors; its words
+   field and its Allow and Deny buttons share a line. While its answer is on its way, it dims. */
+
+.permission-request {
+  display: grid;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--rule-strong);
+  border-left: 3px solid var(--focus);
+  border-radius: var(--radius-3);
+  background: var(--raised);
+  box-shadow: var(--shadow);
+}
+
+.permission-request[data-state="answering"] { opacity: .6; }
+.permission-request-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-2); color: var(--ink); font: 600 var(--text-2)/1.4 var(--sans); }
+.permission-request-tool { font-family: var(--mono); }
+.permission-request-who { color: var(--muted); font-weight: 400; }
+.permission-request-path { margin: 0; color: var(--ink-soft); font: 500 var(--text-1)/1.5 var(--mono); overflow-wrap: anywhere; }
+.permission-request-note { margin: 0; color: var(--muted); font-size: var(--text-1); }
+
+.permission-request-code {
+  max-height: 20rem;
+  margin: 0;
+  overflow: auto;
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius-2);
+  background: var(--canvas);
+  color: var(--ink);
+  font: var(--text-1)/1.5 var(--mono);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.permission-request-answer { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
+.permission-request-words { flex: 1; min-width: 12rem; width: auto; }

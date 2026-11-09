@@ -1,0 +1,1741 @@
+{
+  "granted": 213,
+  "problems": [
+    {
+      "id": "0000001",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Children.AgentKeeper.Run(IReadOnlyList\u003Cstring\u003E)",
+      "fingerprint": "8f670f09a2a7c66a3c86ad63ae2edf5c432899f3e7c26a8dba50375af8c2c4db",
+      "value": 12,
+      "resolution": null
+    },
+    {
+      "id": "0000002",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Commands.AddCommand.Draft(BrainEnv, Options)",
+      "fingerprint": "bb57a290826350102b58426add3c2f51c85598b7bbf9a5f5932d1210c2147ab4",
+      "value": 13,
+      "resolution": null
+    },
+    {
+      "id": "0000003",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Commands.ConversationCommand.Run(BrainEnv, IReadOnlyList\u003Cstring\u003E)",
+      "fingerprint": "81b83789e94b229fb64a9b6292280af18f1d5f1419c5ea7da7ff3190291d03f9",
+      "value": 24,
+      "resolution": null
+    },
+    {
+      "id": "0000004",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Commands.InstallCommand.Run(BrainEnv, IReadOnlyList\u003Cstring\u003E, Installation)",
+      "fingerprint": "167b47edf43f3a08c4246d7e824a00feb7916c742966045a1c831c9bf5e69f02",
+      "value": 13,
+      "resolution": null
+    },
+    {
+      "id": "0000005",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Commands.MigrateCommand.Run(BrainEnv, IReadOnlyList\u003Cstring\u003E)",
+      "fingerprint": "29e541e7157fe50c91fe9c7a1d9fe68474193b199be765476a0c1c48fa4a99a0",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000006",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Commands.UiCommand.Hello(HttpClient, ServeFiles)",
+      "fingerprint": "e90ef38846a90c43692905e738dc3664b4a66ef4ea186434c18b1856e991dd48",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000007",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Commands.UpdateCommand.Revise(Node, Asked)",
+      "fingerprint": "a474435084090023376564452afd4bd029184588c1409577c1725d5025c90b43",
+      "value": 13,
+      "resolution": null
+    },
+    {
+      "id": "0000008",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Conversations.ConversationState.Parse(string, string)",
+      "fingerprint": "960978347df02ca8fd4591540b861140c050107b6b935596ed2b6a5c552e33f6",
+      "value": 14,
+      "resolution": null
+    },
+    {
+      "id": "0000009",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Conversations.ConversationState.Row(string, string)",
+      "fingerprint": "8ca5f7b14f4666fa0eb523bc9466ad1c15073c05523d00a0055c297a8c490d55",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000010",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Conversations.Parking.Read(BrainEnv, string)",
+      "fingerprint": "ebd221eb475824571e3d0af5e6018f357215bc6a16c5db99b2d249177f3e1be0",
+      "value": 16,
+      "resolution": null
+    },
+    {
+      "id": "0000011",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Conversations.Trail.Comments(string)",
+      "fingerprint": "c3f76ba5d4248c74bc624343ce321af6419b399211fe8c23ce84d6a9f3be94a5",
+      "value": 12,
+      "resolution": null
+    },
+    {
+      "id": "0000012",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Dreaming.Dreamer.Settle(BrainEnv, Conversation, DateTimeOffset)",
+      "fingerprint": "b229114cd15d955620f5aabd87f76ee4c55706f4bb38e89bca353567b3bc73f7",
+      "value": 13,
+      "resolution": null
+    },
+    {
+      "id": "0000013",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Installing.EmbeddingModel.Download(EmbedderProfile, string, string, Action\u003Clong\u003E)",
+      "fingerprint": "87d7e00ffc61745c6a76302042c45040a1dd61af9f0b935d507f19b871870b83",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000014",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Installing.Installer.Run()",
+      "fingerprint": "d59e39decb9be93f25e39b7b933fdd165ebdf59e11b5b981cdb0509e2bc61844",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000015",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Installing.Installer.Show(InstallPlan)",
+      "fingerprint": "73dcc7c9850a64c3335c2eed3ee1da83754d02abea66effdc4ea21908db62e83",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000016",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Installing.LineDiff.Script(string[], string[])",
+      "fingerprint": "cdb97d4eace823f1109d817e7f766535fdc9d3e17aef22424d564851d985a383",
+      "value": 13,
+      "resolution": null
+    },
+    {
+      "id": "0000017",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Judging.Verdict.Read(JsonElement)",
+      "fingerprint": "ba56b416fbbf0a3beaf41bb4f289c9049cee8d37ff04c8063532ce235bcb2a27",
+      "value": 12,
+      "resolution": null
+    },
+    {
+      "id": "0000018",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Questions.Drift.Check(CodeSpan, IReadOnlyList\u003CCodeMark\u003E, (CodeMark Mark, int From, int To)?, List\u003Cstring\u003E)",
+      "fingerprint": "5ba7e9732959aff4d1e9f07303507c360e7ef88ad8cd7fd5d20d2f0cafbfa36e",
+      "value": 17,
+      "resolution": null
+    },
+    {
+      "id": "0000019",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Questions.QuestionBlock.Problem(bool)",
+      "fingerprint": "3dbfd1092503501d59d57d5f4536f3488d84e2c2c538bc44f8cee1a6cdb4a486",
+      "value": 20,
+      "resolution": null
+    },
+    {
+      "id": "0000020",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Search.Evidence.Tier.get",
+      "fingerprint": "5ca5a5809860e0b38fc1b716f75b392e7bf41877afeb02758791b57cddf904e6",
+      "value": 15,
+      "resolution": null
+    },
+    {
+      "id": "0000021",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Serving.ChatRoom.Start(ChatStartRequest)",
+      "fingerprint": "8ea893dbcb2662b762f736bc909192d61e61e259fbd377a6c6cb05d98b70d226",
+      "value": 17,
+      "resolution": null
+    },
+    {
+      "id": "0000022",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Serving.ConversationRoom.Say(SayRequest)",
+      "fingerprint": "05e38eb9e1c34c3238daabb375f2195587e22b3d0dfa028eb521174bbf701de9",
+      "value": 13,
+      "resolution": null
+    },
+    {
+      "id": "0000023",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Serving.EntryOrder.Of(string, string)",
+      "fingerprint": "5794aec9e33e930e60392e1ed17c78d519d535302360b3acec0d73a57924583e",
+      "value": 17,
+      "resolution": null
+    },
+    {
+      "id": "0000024",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Serving.OmarchyTheme.Stylesheet(IReadOnlyDictionary\u003Cstring, string\u003E)",
+      "fingerprint": "2d3adf7cfa4366214a8d10bad4175f695dceda97f0b9bb7826c95bd888390bc8",
+      "value": 23,
+      "resolution": {
+        "reason": "Stylesheet maps one palette onto the stylebook\u0027s tokens, and each branch is one fallback to brain\u0027s own color when the theme\u0027s does not read; this change added a call, not a path, and splitting the mapping would only hide the fallbacks apart.",
+        "fingerprint": "2d3adf7cfa4366214a8d10bad4175f695dceda97f0b9bb7826c95bd888390bc8",
+        "value": 23
+      }
+    },
+    {
+      "id": "0000025",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Serving.OpenAgent.Sent(JsonElement)",
+      "fingerprint": "c2ad3ef81f15e6f4b69f4a1997ab5c642d8047724de91103f80abe56444a2d31",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000026",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Serving.ReviewServer.Route(HttpListenerRequest, HttpListenerResponse)",
+      "fingerprint": "2d485a07ca277804cd541308636764a3afeaccf72f5779377c4d5f8c2e42fd17",
+      "value": 37,
+      "resolution": null
+    },
+    {
+      "id": "0000027",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Serving.ReviewServer.Api(HttpListenerRequest, HttpListenerResponse, string, string)",
+      "fingerprint": "82df1bf3d0ff5fc4ab3c943d101400726745238c0bee760f745d0730748890da",
+      "value": 131,
+      "resolution": {
+        "reason": "ReviewServer.Api is one switch over every route of the window, 131 paths; I changed one route\u0027s view type. The fix is a route table of small handlers per area, which is a redesign of the server\u0027s dispatch.",
+        "fingerprint": "82df1bf3d0ff5fc4ab3c943d101400726745238c0bee760f745d0730748890da",
+        "value": 131
+      }
+    },
+    {
+      "id": "0000028",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Serving.ReviewServer.Change(HttpListenerRequest, string)",
+      "fingerprint": "f38b94d26621510e2c40fc9c1d8ffb70fffa3267f9834fbd546466d2a277a749",
+      "value": 27,
+      "resolution": null
+    },
+    {
+      "id": "0000029",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Serving.ReviewViews.Change(Graph, StagedChange)",
+      "fingerprint": "92d9ba7b95a4b2a214cc0a03c316bd7a7c2fbe53544983dd1b38718efe43c451",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000030",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Serving.ServeProcess.FromProc(int)",
+      "fingerprint": "a0ddaa43e62e8b20f03b5e2036060b9334901b6480d65bdc8f54e814791c9770",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000031",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Serving.Sky.Entries()",
+      "fingerprint": "af77c2bd1b28035e4b5432bedeb5583e7a39fbfaded13c0b5ab483fc9f24582b",
+      "value": 13,
+      "resolution": null
+    },
+    {
+      "id": "0000032",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Serving.SkyLayout.Place(IReadOnlyList\u003CGroup\u003E, IReadOnlyList\u003CStar\u003E, IReadOnlyList\u003C(int From, int To)\u003E, IReadOnlyList\u003C(int From, int To)\u003E)",
+      "fingerprint": "a1d2cc611e36d88ad2d552a857ee4fbc929370d845343eb4b62ca54dca364c44",
+      "value": 14,
+      "resolution": null
+    },
+    {
+      "id": "0000033",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Serving.SkyLayout.Middles(IReadOnlyList\u003CGroup\u003E, double[], IReadOnlyList\u003CStar\u003E, IReadOnlyList\u003C(int From, int To)\u003E)",
+      "fingerprint": "4b936da8911d717195dcf966a72bd61eb79ae4709cf8187e2667539f16fb29f0",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000034",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Staging.PendingStore.Answer(string, string, bool, string)",
+      "fingerprint": "e8fb1f5e0c1202c3a827f24cbb267f0c30ca245f39fd111bb532761d9cd68dae",
+      "value": 16,
+      "resolution": null
+    },
+    {
+      "id": "0000035",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Staging.PendingStore.Apply(PendingWrite)",
+      "fingerprint": "e70f7146c4ab5d8a6cde5dfbf6052d8ddd5287f89591fc25b4265566a67d909b",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000036",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Stats.NavaroneEvidence.Read(string, DateOnly?, DateOnly?)",
+      "fingerprint": "aef9ca05e778464a328963bd9591c66c334234f3e2429cc528b5f96ffcd64176",
+      "value": 13,
+      "resolution": null
+    },
+    {
+      "id": "0000037",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Workspace.WorkspaceGit.ReadPatch(string, string)",
+      "fingerprint": "210d9322954673625b2fd037e10ed99a353fa44cca2bcbd781ec40ba08ad04b5",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000041",
+      "check": "cognitive",
+      "symbol": "brain::Brain.Commands.MigrateCommand.Run(BrainEnv, IReadOnlyList\u003Cstring\u003E)",
+      "fingerprint": "29e541e7157fe50c91fe9c7a1d9fe68474193b199be765476a0c1c48fa4a99a0",
+      "value": 20,
+      "resolution": null
+    },
+    {
+      "id": "0000042",
+      "check": "cognitive",
+      "symbol": "brain::Brain.Conversations.Parking.Read(BrainEnv, string)",
+      "fingerprint": "ebd221eb475824571e3d0af5e6018f357215bc6a16c5db99b2d249177f3e1be0",
+      "value": 17,
+      "resolution": null
+    },
+    {
+      "id": "0000043",
+      "check": "cognitive",
+      "symbol": "brain::Brain.Installing.Installer.Show(InstallPlan)",
+      "fingerprint": "73dcc7c9850a64c3335c2eed3ee1da83754d02abea66effdc4ea21908db62e83",
+      "value": 16,
+      "resolution": null
+    },
+    {
+      "id": "0000044",
+      "check": "cognitive",
+      "symbol": "brain::Brain.Installing.LineDiff.Script(string[], string[])",
+      "fingerprint": "cdb97d4eace823f1109d817e7f766535fdc9d3e17aef22424d564851d985a383",
+      "value": 16,
+      "resolution": null
+    },
+    {
+      "id": "0000045",
+      "check": "cognitive",
+      "symbol": "brain::Brain.Questions.Drift.Check(CodeSpan, IReadOnlyList\u003CCodeMark\u003E, (CodeMark Mark, int From, int To)?, List\u003Cstring\u003E)",
+      "fingerprint": "5ba7e9732959aff4d1e9f07303507c360e7ef88ad8cd7fd5d20d2f0cafbfa36e",
+      "value": 21,
+      "resolution": null
+    },
+    {
+      "id": "0000046",
+      "check": "cognitive",
+      "symbol": "brain::Brain.Questions.Sources.All(string)",
+      "fingerprint": "c8059e0195477cceb4307430840ce34812572fd60354cec41c956c05a4c5ee6d",
+      "value": 16,
+      "resolution": null
+    },
+    {
+      "id": "0000047",
+      "check": "cognitive",
+      "symbol": "brain::Brain.Serving.EntryOrder.Of(string, string)",
+      "fingerprint": "5794aec9e33e930e60392e1ed17c78d519d535302360b3acec0d73a57924583e",
+      "value": 23,
+      "resolution": null
+    },
+    {
+      "id": "0000048",
+      "check": "cognitive",
+      "symbol": "brain::Brain.Serving.OmarchyTheme.Stylesheet(IReadOnlyDictionary\u003Cstring, string\u003E)",
+      "fingerprint": "2d3adf7cfa4366214a8d10bad4175f695dceda97f0b9bb7826c95bd888390bc8",
+      "value": 23,
+      "resolution": {
+        "reason": "Same mapping: the fallbacks sit flat in one if block, read top to bottom, and this change added none.",
+        "fingerprint": "2d3adf7cfa4366214a8d10bad4175f695dceda97f0b9bb7826c95bd888390bc8",
+        "value": 23
+      }
+    },
+    {
+      "id": "0000049",
+      "check": "cognitive",
+      "symbol": "brain::Brain.Serving.ReviewServer.Route(HttpListenerRequest, HttpListenerResponse)",
+      "fingerprint": "2d485a07ca277804cd541308636764a3afeaccf72f5779377c4d5f8c2e42fd17",
+      "value": 28,
+      "resolution": null
+    },
+    {
+      "id": "0000050",
+      "check": "cognitive",
+      "symbol": "brain::Brain.Serving.ReviewServer.Api(HttpListenerRequest, HttpListenerResponse, string, string)",
+      "fingerprint": "82df1bf3d0ff5fc4ab3c943d101400726745238c0bee760f745d0730748890da",
+      "value": 92,
+      "resolution": {
+        "reason": "Same switch as the cyclomatic signal: Api routes every request in one method. The fix is the same route table.",
+        "fingerprint": "82df1bf3d0ff5fc4ab3c943d101400726745238c0bee760f745d0730748890da",
+        "value": 92
+      }
+    },
+    {
+      "id": "0000051",
+      "check": "cognitive",
+      "symbol": "brain::Brain.Serving.ReviewServer.Change(HttpListenerRequest, string)",
+      "fingerprint": "f38b94d26621510e2c40fc9c1d8ffb70fffa3267f9834fbd546466d2a277a749",
+      "value": 27,
+      "resolution": null
+    },
+    {
+      "id": "0000052",
+      "check": "cognitive",
+      "symbol": "brain::Brain.Serving.Sky.Entries()",
+      "fingerprint": "af77c2bd1b28035e4b5432bedeb5583e7a39fbfaded13c0b5ab483fc9f24582b",
+      "value": 19,
+      "resolution": null
+    },
+    {
+      "id": "0000053",
+      "check": "cognitive",
+      "symbol": "brain::Brain.Serving.SkyLayout.Place(IReadOnlyList\u003CGroup\u003E, IReadOnlyList\u003CStar\u003E, IReadOnlyList\u003C(int From, int To)\u003E, IReadOnlyList\u003C(int From, int To)\u003E)",
+      "fingerprint": "a1d2cc611e36d88ad2d552a857ee4fbc929370d845343eb4b62ca54dca364c44",
+      "value": 19,
+      "resolution": null
+    },
+    {
+      "id": "0000054",
+      "check": "cognitive",
+      "symbol": "brain::Brain.Serving.SkyLayout.Middles(IReadOnlyList\u003CGroup\u003E, double[], IReadOnlyList\u003CStar\u003E, IReadOnlyList\u003C(int From, int To)\u003E)",
+      "fingerprint": "4b936da8911d717195dcf966a72bd61eb79ae4709cf8187e2667539f16fb29f0",
+      "value": 18,
+      "resolution": null
+    },
+    {
+      "id": "0000057",
+      "check": "lcom4",
+      "symbol": "brain::Brain.BrainException",
+      "fingerprint": "dd65cff3f2d411ec579ef0d58a528cbf12af84bd86e3c525e0a31846b5bd1b10",
+      "value": 2,
+      "resolution": null
+    },
+    {
+      "id": "0000058",
+      "check": "lcom4",
+      "symbol": "brain::Brain.Children.ClaudeRuns",
+      "fingerprint": "78b862ad0f0e62af104fc127aedee87045826e8df4300e724d3a1d011e52ebc3",
+      "value": 2,
+      "resolution": {
+        "reason": "Both pieces are the door\u0027s one registry, the static Running list under Gate: Start adds a claude to it and Forget takes it out, Now reads it and StopAll stops what Now reads. The metric counts no static field, so it sees two pieces where every method works on the same list.",
+        "fingerprint": "78b862ad0f0e62af104fc127aedee87045826e8df4300e724d3a1d011e52ebc3",
+        "value": 2
+      }
+    },
+    {
+      "id": "0000059",
+      "check": "lcom4",
+      "symbol": "brain::Brain.Children.Posix",
+      "fingerprint": "30f0f30cec46f0501bff159c531506ca6770d288c33e62b37d9fe906f9736975",
+      "value": 5,
+      "resolution": null
+    },
+    {
+      "id": "0000060",
+      "check": "lcom4",
+      "symbol": "brain::Brain.Conversations.Trail",
+      "fingerprint": "0f89c8d475e02683fd40e9bed24281021f0bd8419dd42e7a1a444e8ccc322e43",
+      "value": 2,
+      "resolution": null
+    },
+    {
+      "id": "0000061",
+      "check": "lcom4",
+      "symbol": "brain::Brain.FoldedEdge",
+      "fingerprint": "eac05dbf8d01f92c960899f676b7d2e933022fd6d2ee73ab16a1af9bc411f31e",
+      "value": 2,
+      "resolution": null
+    },
+    {
+      "id": "0000062",
+      "check": "lcom4",
+      "symbol": "brain::Brain.Git.Watch",
+      "fingerprint": "a6c7d29e8ae4a495ac1796e5fc64abb452e6263ac2cb16c12c374222e0921a8b",
+      "value": 2,
+      "resolution": null
+    },
+    {
+      "id": "0000063",
+      "check": "lcom4",
+      "symbol": "brain::Brain.Installing.Tree",
+      "fingerprint": "06cdfac428005ff459263be4cff5f2538c905c6b9bda8a1cf8d81f0ca362aa65",
+      "value": 2,
+      "resolution": null
+    },
+    {
+      "id": "0000064",
+      "check": "lcom4",
+      "symbol": "brain::Brain.Node",
+      "fingerprint": "e8710ec93d470703db833ab119806a0bf29320f4dca2a7701bb7800359ecfa77",
+      "value": 2,
+      "resolution": null
+    },
+    {
+      "id": "0000065",
+      "check": "lcom4",
+      "symbol": "brain::Brain.ProcessEnv",
+      "fingerprint": "373e98b58a5e138b419f85833eb335a19c397d9b505bfc9e5fd194ed38280c29",
+      "value": 2,
+      "resolution": {
+        "reason": "ProcessEnv is what this process runs in, read once at its start: its environment variables, and where its binary lies, from which the packaged harness, the model folder and the checkout are found. Both pieces are static reads of the process\u0027s own surroundings with no state; this change only adds the reading of BRAIN_CODE_SESSION beside CLAUDE_CODE_SESSION_ID.",
+        "fingerprint": "373e98b58a5e138b419f85833eb335a19c397d9b505bfc9e5fd194ed38280c29",
+        "value": 2
+      }
+    },
+    {
+      "id": "0000066",
+      "check": "lcom4",
+      "symbol": "brain::Brain.Search.EmbedderProfile",
+      "fingerprint": "06db47c4840ce6302b886c4306e4196732b5ef765eaee94f98e0493281827639",
+      "value": 4,
+      "resolution": null
+    },
+    {
+      "id": "0000067",
+      "check": "lcom4",
+      "symbol": "brain::Brain.Search.OnnxEmbedder",
+      "fingerprint": "848d90c55bfd1d44f42213b4ffb6d11b6038bf4b8e8d2e020af468c0ef55547f",
+      "value": 2,
+      "resolution": null
+    },
+    {
+      "id": "0000068",
+      "check": "lcom4",
+      "symbol": "brain::Brain.Serving.ReviewViews",
+      "fingerprint": "636d12c4380940c84120202ffaf6773c04a1ba50297f3427f08ee54e2aa2bc9e",
+      "value": 2,
+      "resolution": {
+        "reason": "ReviewViews is a static namespace of pure functions that build the window\u0027s views from the graph; it holds no state, so the two pieces share nothing to split on. Focuses sits beside Pending and Answered, the other lists the window reads.",
+        "fingerprint": "636d12c4380940c84120202ffaf6773c04a1ba50297f3427f08ee54e2aa2bc9e",
+        "value": 2
+      }
+    },
+    {
+      "id": "0000069",
+      "check": "lcom4",
+      "symbol": "brain::Brain.Serving.ServeProcess",
+      "fingerprint": "78eabc7847fd15803f49b7439ef99bf43c029bc39689430328b05ff64d3d77f1",
+      "value": 2,
+      "resolution": null
+    },
+    {
+      "id": "0000070",
+      "check": "lcom4",
+      "symbol": "brain::Brain.Stats.Figures",
+      "fingerprint": "dfd668f9e5d19aa88cd4b3abcdd6100b0579179892cddf90542eeb04622707ab",
+      "value": 2,
+      "resolution": null
+    },
+    {
+      "id": "0000071",
+      "check": "lcom4",
+      "symbol": "brain::Brain.Subjects",
+      "fingerprint": "911fe21fad97c47191c7689362d6629c34e48d718800b9995d499a2d9fbbf795",
+      "value": 2,
+      "resolution": null
+    },
+    {
+      "id": "0000072",
+      "check": "lcom4",
+      "symbol": "brain::Brain.Usage.Failures",
+      "fingerprint": "6eb90595032605a3f3af1f54b60f081215080db5b65907d3fa0ce072dbf14205",
+      "value": 2,
+      "resolution": null
+    },
+    {
+      "id": "0000073",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.BrainSettings.Change(string, string, JsonNode)",
+      "fingerprint": "0fb8883f4c04bcd6af106bdc7f536aa1dc6ee460379e12417fbcb2dad412f6f8",
+      "value": 17,
+      "resolution": null
+    },
+    {
+      "id": "0000074",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Children.ProcessTree.Read()",
+      "fingerprint": "6c44201a8d55d364571a5ae3799c4921605eaa1b90555504a2dcebaa6ccb22e8",
+      "value": 20,
+      "resolution": {
+        "reason": "Read only picks the table\u0027s source, /proc where it is and ps elsewhere; each helper reads one source\u0027s format with plain guards: FromProc adds 3, walking /proc\u0027s pid folders, Stat adds 7, one process\u0027s stat fields and the read failures it survives, FromPs adds 1, and FromPs(string, int) adds 7, the ps columns that must each parse. This change only reads two more stat fields in Stat, the CPU time, and adds no decision. Inlined they would be one method that mixes two formats.",
+        "fingerprint": "6c44201a8d55d364571a5ae3799c4921605eaa1b90555504a2dcebaa6ccb22e8",
+        "value": 20
+      }
+    },
+    {
+      "id": "0000075",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Cli.Run(BrainEnv, IReadOnlyList\u003Cstring\u003E)",
+      "fingerprint": "33ef0ee71d95eb51d22b3cd814ce8c0f56f14998ec4bc7c2435e120ba0e53b8c",
+      "value": 16,
+      "resolution": null
+    },
+    {
+      "id": "0000076",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Commands.InitCommand.Run(BrainEnv, IReadOnlyList\u003Cstring\u003E)",
+      "fingerprint": "b63ea5562d83a9c392e33ce452eec5d0bb632661624dcfc830a1e35b73b60cb8",
+      "value": 15,
+      "resolution": null
+    },
+    {
+      "id": "0000077",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Commands.LandCommand.Run(BrainEnv, IReadOnlyList\u003Cstring\u003E)",
+      "fingerprint": "ea96939f02a063c1042151480f6748e2ed4a172ad6d161c47c0325d5cafe8ef9",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000078",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Commands.RecordCommand.Run(BrainEnv, IReadOnlyList\u003Cstring\u003E)",
+      "fingerprint": "8ff60380e301e5956dc6097f04ae7aee59fec58971e85abea5f6ba1a5b7fb7bc",
+      "value": 29,
+      "resolution": null
+    },
+    {
+      "id": "0000079",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Commands.UiCommand.Run(BrainEnv, bool, int)",
+      "fingerprint": "3509287007d8156feb8a184823ca15260e3caecfc19b4be3ae2cdc129b598a92",
+      "value": 20,
+      "resolution": null
+    },
+    {
+      "id": "0000080",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Commands.UpdateCommand.Run(BrainEnv, IReadOnlyList\u003Cstring\u003E)",
+      "fingerprint": "0ffe80d7c642f19ba4ee8986a733d005ad0d90e8da5cc925f5bf6dcb37c49c57",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000081",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Commands.WalkCommand.Run(BrainEnv, IReadOnlyList\u003Cstring\u003E)",
+      "fingerprint": "7eb5b652c235d503b71e9ac4742ef22ff7da3d4c2fbf202dd4fc4b1917c798c8",
+      "value": 13,
+      "resolution": null
+    },
+    {
+      "id": "0000082",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Commands.WorkspaceCommand.Run(BrainEnv, IReadOnlyList\u003Cstring\u003E)",
+      "fingerprint": "7d42e6bb40aded8f885ab1c641e7bd09f93f2950ff272e7a1dc1702de0a5b235",
+      "value": 26,
+      "resolution": null
+    },
+    {
+      "id": "0000083",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Conversations.Trail.Read(string)",
+      "fingerprint": "97b07aa123ae57ba9d58bf9fa065e79e29455b8d2fe9a78bdd66dc912aa75a43",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000084",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Dreaming.DreamDraft.Parse(string, string)",
+      "fingerprint": "a6b7b50d0bbb1e88d622045018dc10e10eb2647b303b079829447756a3853995",
+      "value": 12,
+      "resolution": null
+    },
+    {
+      "id": "0000085",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Git.Blobs(string, IReadOnlyList\u003Cstring\u003E)",
+      "fingerprint": "f6830b33f25758223e474909131cbce189e1976aef4a1d37a18fce21e419faee",
+      "value": 13,
+      "resolution": null
+    },
+    {
+      "id": "0000086",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Installing.HarnessChoice.Keeping(string, HarnessRoot)",
+      "fingerprint": "a415dc518fb96d3a5dd06650c978d3d3669dc523386e3d8dd72bc762b053a291",
+      "value": 12,
+      "resolution": null
+    },
+    {
+      "id": "0000087",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Installing.Installer.Apply(List\u003CPlacement\u003E, InstallPlan)",
+      "fingerprint": "d3f232c724f96983e6b984341c9fc41c386d4306dce2719d12a2c88f1f4b3624",
+      "value": 16,
+      "resolution": null
+    },
+    {
+      "id": "0000088",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Installing.InstallPlan.Build(Installation, string, string, string, HarnessChoice)",
+      "fingerprint": "d88d7e51c25a3bac5a8d1b3114cbfaa09e40c4d81db5e98aca350f5079d86deb",
+      "value": 16,
+      "resolution": null
+    },
+    {
+      "id": "0000089",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Installing.LineDiff.Unified(string, string, string)",
+      "fingerprint": "b0c83ae4a7b145f55e891f185941da8c5350b297d3dab5d1e30ca59abc325fc4",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000090",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Installing.Placement.Shown(bool)",
+      "fingerprint": "fab5dd5e144cef6a819fc7b6e8de21713c57e44eba3dc5834cf4184267f67ae5",
+      "value": 16,
+      "resolution": null
+    },
+    {
+      "id": "0000091",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Installing.SettingsFile.Merge(IEnumerable\u003Cbyte[]\u003E, string, string, string)",
+      "fingerprint": "941df028c8a6231bc70a7349febae2a62c91b194365835bd8acfe76b45e22806",
+      "value": 19,
+      "resolution": null
+    },
+    {
+      "id": "0000092",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Installing.Uninstaller.Run()",
+      "fingerprint": "9f8e81be17a4c884a2ad6765f5828698da5c95bb5ae892a33750d7e9162c2167",
+      "value": 26,
+      "resolution": null
+    },
+    {
+      "id": "0000093",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Judging.FreeRules.Problem(JudgedEntry, IReadOnlyList\u003Cstring\u003E)",
+      "fingerprint": "f894854fb650edf031bf2f0c0b67146d49fcb9a84b555a4d88657d28562a87d7",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000094",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Judging.JudgeGate.Pass(BrainEnv, Graph, IReadOnlyList\u003CJudgedEntry\u003E)",
+      "fingerprint": "03522bdf0604f80bd51880c26c7d009fa95d12cf11d077d0e009685abf059f93",
+      "value": 16,
+      "resolution": null
+    },
+    {
+      "id": "0000095",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Merge.MergeParser.Parse(TextReader)",
+      "fingerprint": "6dbf5fda3287255d764e633f1de241f02ffbfa97c99c0b86f64563790c553667",
+      "value": 16,
+      "resolution": null
+    },
+    {
+      "id": "0000096",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Migrating.LegacyNode.Reader(string)",
+      "fingerprint": "3c2b125fd052477cca2e4f5ed2f43221de04484fbfd0ad0c3a3b7ca242baf679",
+      "value": 19,
+      "resolution": null
+    },
+    {
+      "id": "0000097",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.NodeDraft.Parse(string)",
+      "fingerprint": "382220af358d953e4137f311249978218b6878d87970e485ffacd8a1038bc9de",
+      "value": 12,
+      "resolution": null
+    },
+    {
+      "id": "0000098",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.NodeParser.Parse(string, string)",
+      "fingerprint": "1244e1ddbb0bd1af0282ddab319c7a8a577845c421b9f0242f8c59895817a553",
+      "value": 27,
+      "resolution": null
+    },
+    {
+      "id": "0000099",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Questions.SourceCommand.Run(string, string, IReadOnlyList\u003Cstring\u003E, TimeSpan)",
+      "fingerprint": "7c0083d54468e54e5256b36a80419ddafe274c87a1a3f3f01485918b9fb6c0ec",
+      "value": 18,
+      "resolution": null
+    },
+    {
+      "id": "0000100",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Questions.SourceContext.Run(Source, string, string, TimeSpan)",
+      "fingerprint": "e03aaeea36f351bff9d2c32452ac4088f3b7fe290815e8da216685e23a2205af",
+      "value": 16,
+      "resolution": null
+    },
+    {
+      "id": "0000101",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Questions.Sources.All(string)",
+      "fingerprint": "b3e75cff8940cda71d18c5552358ef68785ded8f43b63133e78592057c6015a1",
+      "value": 11,
+      "resolution": {
+        "reason": "All reads the lines and Parse turns one line into a Source. Problem names the three ways a line cannot run, as guard ifs, and Column reads one optional column. Each is a single step only All uses, and the decisions are the line format itself.",
+        "fingerprint": "b3e75cff8940cda71d18c5552358ef68785ded8f43b63133e78592057c6015a1",
+        "value": 11
+      }
+    },
+    {
+      "id": "0000102",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Search.OnnxEmbedder.loaded",
+      "fingerprint": "c516c9db4beab4e0f201dd50d84b61a994e0d13977d1f9e1723d6cf75b27eb24",
+      "value": 12,
+      "resolution": null
+    },
+    {
+      "id": "0000103",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Search.Ranking.Rank(BrainEnv, IReadOnlyList\u003CScope\u003E, IReadOnlyCollection\u003CPlacedNode\u003E, List\u003CPlacedNode\u003E, string, Func\u003CPlacedNode, IEnumerable\u003C(PlacedNode Node, double Weight)\u003E\u003E, int, int)",
+      "fingerprint": "621ec5d6608798c6100f829aa58149afa0bde8f6bd39163cd4cfd7d24f9ce223",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000104",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Search.Ranking.Fuse\u003CTHit\u003E(BrainEnv, IReadOnlyList\u003CScope\u003E, IReadOnlyCollection\u003CPlacedNode\u003E, List\u003CPlacedNode\u003E, Probe, Action\u003CDictionary\u003Cstring, (PlacedNode Node, double Score)\u003E\u003E, Func\u003CIEnumerable\u003CFound\u003E, Func\u003CPlacedNode, Evidence\u003E, IEnumerable\u003CTHit\u003E\u003E)",
+      "fingerprint": "46b9e13b4a40a99eb2eaf1e4e8fa66cd5ef249f7a0ff405e4da460b1279d7a87",
+      "value": 17,
+      "resolution": null
+    },
+    {
+      "id": "0000105",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Serving.ConversationRoom.Comments(IReadOnlyList\u003CCommentDraft\u003E, int)",
+      "fingerprint": "ec633f73f082c06af06a9b8911455da8792fc4f8f648944325d20bfcbca784f7",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000106",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Serving.GpuWatch.Start(TimeProvider)",
+      "fingerprint": "0639bed73d1e0cdbb4261f6a85ce56c84f0ee378b031369b0d476b9dc66b2055",
+      "value": 18,
+      "resolution": null
+    },
+    {
+      "id": "0000107",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Serving.OmarchyTheme.Watch(TimeProvider)",
+      "fingerprint": "b784655294cf2241cc2f7311556d9a9350ab8438c3885f5a13ad6ad81b44c8a6",
+      "value": 83,
+      "resolution": {
+        "reason": "Watch only starts the watcher and calls Reload; the count of 83 is the whole theme-to-stylesheet pipeline behind Reload, a chain of single-purpose steps, not a method that was cut up. AccentTokens adds 3, Apart adds 2, Color adds 2, Contrast adds 2, Follow adds 1, Hsl adds 4, Luminance adds 1, Mix adds 2, OriginTone adds 7, ParseLines adds 7, Read adds 3, Reload adds 4, Resolve adds 9, Rgb adds 4, RunCommand adds 7, Sheet adds 1, Stylesheet adds 6, SurfaceTokens adds 3, SyntaxTokens adds 3, ToldApart adds 1, YesNoTokens adds 5. Each decision lives in the step that owns its fact: a palette key\u0027s fallback in Resolve, a contrast floor in its token group, a process failure in RunCommand. Inlining them into Watch would make one 83-path method, the opposite of simpler.",
+        "fingerprint": "b784655294cf2241cc2f7311556d9a9350ab8438c3885f5a13ad6ad81b44c8a6",
+        "value": 83
+      }
+    },
+    {
+      "id": "0000108",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Serving.OpenAgent.Start(AgentStart, string, string, TimeProvider)",
+      "fingerprint": "5c09b1fe1b3e509cbd9874cdb2e0ced9820d858f317b406fb8b7c89eec7d5a5a",
+      "value": 44,
+      "resolution": {
+        "reason": "Start wires claude\u0027s two streams to their readers. Listen and Error each read one stream; Event, Said, Streamed, Done and Describe each read one kind of claude\u0027s stream-json event. Inlined, Start would be one method that reads every event kind of the protocol. This change only moved its process start into ClaudeStream.Info and calls ClaudeStream\u0027s members in one style.",
+        "fingerprint": "5c09b1fe1b3e509cbd9874cdb2e0ced9820d858f317b406fb8b7c89eec7d5a5a",
+        "value": 44
+      }
+    },
+    {
+      "id": "0000109",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Serving.PerfLog.Append(IReadOnlyList\u003CPerfRow\u003E, Func\u003Clong, GpuSample\u003E)",
+      "fingerprint": "02675dcb9cd72dcd27fd290362a5779cd55b45e5815e4015d017ef0df6b38a7a",
+      "value": 14,
+      "resolution": null
+    },
+    {
+      "id": "0000110",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Serving.SkyLayout.Free(Area, int, Taken, (double X, double Y), double, double)",
+      "fingerprint": "1cfe30ef470bc245046aaa26709ecde1a90f8fabf28e19f90c0a34cf48e8274b",
+      "value": 12,
+      "resolution": null
+    },
+    {
+      "id": "0000111",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Serving.WebCalls.Answer(HttpListenerContext, string, string, TextWriter, Action\u003CHttpListenerRequest, HttpListenerResponse\u003E)",
+      "fingerprint": "20fb397ee8899b4615ac38478280dfbbc07dbd44a8cc27f937be8b0de76a0165",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000112",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Staging.PendingStore.Undo(string, string, Graph)",
+      "fingerprint": "b8704da52008b9cc75fec0cfc30bb56602b5151658da7a78b55bd1f8fa432814",
+      "value": 18,
+      "resolution": null
+    },
+    {
+      "id": "0000113",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Staging.WaitingNotice.Tick()",
+      "fingerprint": "7603132e0ab321bad44883d83d784b356b7c659b7bbbc857619d7cabee2254d3",
+      "value": 25,
+      "resolution": null
+    },
+    {
+      "id": "0000114",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Stats.JudgeMetric.Measure(IReadOnlyList\u003CUsageEvent\u003E)",
+      "fingerprint": "44ed612f1f6f433c9882af457583ef49c1f5b430d41d570f9d15698d63ac4ae4",
+      "value": 19,
+      "resolution": null
+    },
+    {
+      "id": "0000116",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Stats.ReuseMetric.Measure(IReadOnlyList\u003CUsageEvent\u003E)",
+      "fingerprint": "63f5d0a8930c2a9320a05e1ab8b09f4fc5a6a8569703485b0faeafa221b5efaa",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000117",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Voices.TranscriptFilter.Read(string)",
+      "fingerprint": "19a067bc388431febbd12a27525888704a44ceb4b0e0de72e303189416b1fec9",
+      "value": 14,
+      "resolution": null
+    },
+    {
+      "id": "0000118",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Workspace.RootWatch.RootWatch(ProjectFiles, IReadOnlyList\u003Cstring\u003E, Records, TimeProvider, Action\u003CChanges\u003E)",
+      "fingerprint": "b1ba46e6e3e4603c4efadb80f63188df1da48d7ba1de20d1adf37a71753037cb",
+      "value": 19,
+      "resolution": null
+    },
+    {
+      "id": "0000119",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Workspace.WorkspaceGit.Status()",
+      "fingerprint": "14dcecc12f0919b214f66a9faac10b9407b97453837d6d2740d5716a591a4655",
+      "value": 14,
+      "resolution": null
+    },
+    {
+      "id": "0000121",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Children.ClaudeRun.Jobs(ProcessTree, int, bool)",
+      "fingerprint": "d7fa2cdfa6c7c3bce4010095c852e3e4009899125f31fae26262cc2e8ae8b430",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000122",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Commands.UiCommand.Run(BrainEnv, bool, int)",
+      "fingerprint": "224aa3c746544416a87848c5aaf590885c662d55d20c7bd710c57502153bf289",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000123",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Conversations.ConversationPlaces.Named(BrainEnv, string)",
+      "fingerprint": "f863c4efbbf4ee2d5109c85f4c9a3d4493d2ed39e4fd18422ef6ad68aae17584",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000124",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.EdgeLinker.Target(Graph, PlacedNode, string, bool)",
+      "fingerprint": "5db9acc6f4e2211f33a1943acf2fb23abe5b5b4df7ff16ebc792541aa7f3e5f6",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000125",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Git.Start(string, IReadOnlyList\u003Cstring\u003E, bool, string)",
+      "fingerprint": "70524dc868a742ddcdb70680b957692b4d3f37c7e4a4b7d02990fe59f60c0dd8",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000126",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Git.GitRun.Answer(string, string, bool)",
+      "fingerprint": "be69b775698c176b268939e027b3ae2959eaff8aa938aa5a62bce5a88fad938b",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000127",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Installing.Installer.CurrentMode(bool)",
+      "fingerprint": "cd3dbc46656abae51c49742f909bc50d618b91d68c547e4b3b0dbd2b9b9c6e84",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000128",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Installing.LineDiff.Range(int, int)",
+      "fingerprint": "e281db136f7800e5a26396bcba665c75b19ee642eb9e7af0df7821d0fadfd66a",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000129",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Installing.Manifest.Record(string, string, string)",
+      "fingerprint": "362359d60f17639cf088133eb0f71ba123126d3fff66875dbd79700aa8fbc638",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000130",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Installing.Placement.Heading(bool)",
+      "fingerprint": "a51e014b969a5c32d04b196599e6bc172acd4818b6edf01ef49bf005b69a9751",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000131",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Questions.QuestionBlock.Problem(bool)",
+      "fingerprint": "3dbfd1092503501d59d57d5f4536f3488d84e2c2c538bc44f8cee1a6cdb4a486",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000132",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Search.OnnxEmbedder.Tokens.Read(TokenizerKind, string)",
+      "fingerprint": "5d2a3377b905b2915fde26b8ea627869f438f190fc5b56eaa9369535aa2255af",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000133",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Search.Ranking.Terms(List\u003Cstring\u003E, bool)",
+      "fingerprint": "16c3bf4cb3211fda03d010efaae515364b17e07bbfdd0e94058b3e0da6a24606",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000134",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Serving.ChatRoom.Close(string, bool)",
+      "fingerprint": "11f989d8e1455975353c6e8ca98a5728574c17e6be88423bc9b131d33ccd23f9",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000135",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Serving.ConversationRoom.Origin(string, string)",
+      "fingerprint": "3b981d0d176bf7f9613b4278fa5d785a260086d76f82f83e2049a308123c19a7",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000136",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Serving.OmarchyTheme.Resolve(Dictionary\u003Cstring, string\u003E, bool)",
+      "fingerprint": "591df9aec52d322adf2a9f0789619fedc29efd02e4d3723a21d8194d28e74f76",
+      "value": 1,
+      "resolution": {
+        "reason": "lightModeFile is the one fact colors.toml cannot carry: whether light.mode sits beside it; the caller knows the file system, Resolve only the palette. This change added four Put lines, no path.",
+        "fingerprint": "591df9aec52d322adf2a9f0789619fedc29efd02e4d3723a21d8194d28e74f76",
+        "value": 1
+      }
+    },
+    {
+      "id": "0000137",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Serving.OpenAgent.Said(JsonElement, bool)",
+      "fingerprint": "82062829fc38a19b923bff0dffe12550bc6c26444caaa3e24ec70f5ff7922ad9",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000138",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Serving.OpenAgent.Describe(JsonElement, bool)",
+      "fingerprint": "5f16678ffb11d95c8efd1cca9f3ce87128d7a52e6aba847edb50f5fb331a981e",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000139",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Serving.ReviewServer.Serve(bool, CancellationToken)",
+      "fingerprint": "bb08809cac4679a588b5d7f969dc4f5a11d3da644b9b2b2868c5c7960ccb6e00",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000140",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Serving.ReviewServer.Change(HttpListenerRequest, string)",
+      "fingerprint": "f38b94d26621510e2c40fc9c1d8ffb70fffa3267f9834fbd546466d2a277a749",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000141",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Serving.ReviewServer.ChatChange(HttpListenerRequest, string)",
+      "fingerprint": "c9894b5857e62631b3a46f384d583c616fd48e4cdefb9b925625a73e7d5b9407",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000142",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Staging.PendingStore.Answer(string, string, bool, string)",
+      "fingerprint": "e8fb1f5e0c1202c3a827f24cbb267f0c30ca245f39fd111bb532761d9cd68dae",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000143",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Staging.WaitingNotice.Show(int)",
+      "fingerprint": "0c6e7e9f0f0ca57104d8e61c06caccb43233a59c638e4f45e9fef82b5dc46f10",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000144",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Stats.Figures.Count(long, string, string)",
+      "fingerprint": "7fe254585f0cff7fd25e3068cf8cf11049698080df7c814deb72702df0e7fd69",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000145",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Stats.Figures.Percent(long, long)",
+      "fingerprint": "59b7e41cbd6110431add3ae8d5cb298fadbc879ec3e1dacf5cd8b9548b396f39",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000146",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Workspace.WorkspaceGit.Patch(string, bool)",
+      "fingerprint": "332367245201ffe0fa9e331b76553df91c5a0d502ed7e597ab3b33f715c0a359",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000147",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Workspace.WorkspaceGit.State(char, char)",
+      "fingerprint": "580925517986c6f16f542b2cd6f057a67d411b90fa2f896aca371cc0151f6dc4",
+      "value": 2,
+      "resolution": null
+    },
+    {
+      "id": "0000149",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Stats.NavaroneEvidence.Sections.get",
+      "fingerprint": "c717f49e40c70684077aa11af40c0c091b4d646ce1068a1b9f2ca3cd5dde57a9",
+      "value": 26,
+      "resolution": {
+        "reason": "Sections is the entry point of two reports, Fixes and Refusals. Problems groups the period\u0027s events per worktree and id. SecondFix and ReasonBefore look up a case\u0027s context in the whole log. AddAfter leaves out an absent after, CodeBlock builds a code part and CodeOf fetches stored code through a cache. Each is one named step used by these reports alone.",
+        "fingerprint": "c717f49e40c70684077aa11af40c0c091b4d646ce1068a1b9f2ca3cd5dde57a9",
+        "value": 26
+      }
+    },
+    {
+      "id": "0000150",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Stats.NavaroneEvidence.Read(string, DateOnly?, DateOnly?)",
+      "fingerprint": "8079330c754915392de805664e153e7435db4909cdc978e37d0b27a4dd485bd6",
+      "value": 12,
+      "resolution": {
+        "reason": "Read guards, loads and builds. Load is the one step that runs the command and types the events, with its two catches for a failing command and unreadable JSON; inlined it would nest a try and a loop inside the guards.",
+        "fingerprint": "8079330c754915392de805664e153e7435db4909cdc978e37d0b27a4dd485bd6",
+        "value": 12
+      }
+    },
+    {
+      "id": "0000151",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Commands.StatsCommand.Run(BrainEnv, IReadOnlyList\u003Cstring\u003E)",
+      "fingerprint": "f57828d759c48f3708268dd5df27e95daf3e6f9dae13cb1befef14ed143121a4",
+      "value": 11,
+      "resolution": {
+        "reason": "Run parses, prints the heading and loops over the sections. Print writes one section: its title, story, note, cases and lines, each an optional part. Day parses one option. Each is a step only Run uses.",
+        "fingerprint": "f57828d759c48f3708268dd5df27e95daf3e6f9dae13cb1befef14ed143121a4",
+        "value": 11
+      }
+    },
+    {
+      "id": "0000152",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Stats.NavaroneEvent.Parse(JsonElement, int)",
+      "fingerprint": "68e5177a747089784849427865cb8873a23957baecee5a6f523860c6977b8ffe",
+      "value": 11,
+      "resolution": {
+        "reason": "Parse checks the event is an object with a type and a worktree, reads its time, then reads each field, the repo falling back to the worktree when the log names none. Field, Flag and Number each read one JSON field and guard its kind, so a malformed event never throws; each is a one-purpose reader only Parse uses.",
+        "fingerprint": "68e5177a747089784849427865cb8873a23957baecee5a6f523860c6977b8ffe",
+        "value": 11
+      }
+    },
+    {
+      "id": "0000154",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Serving.ReviewViews.Change(Graph, StagedChange)",
+      "fingerprint": "9ec37a8c3f08bf0506aec3c2fbac3098dd311b8d38d1d8428e4fc07575c01628",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000155",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Code.CodeServer.Api(HttpListenerRequest, HttpListenerResponse, string)",
+      "fingerprint": "83e4c3fe6e7b0fb06c4dd874c55bfb40927a9dec7917ca84559d48a36fa12932",
+      "value": 25,
+      "resolution": null
+    },
+    {
+      "id": "0000156",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Windows.WindowServer.Route(HttpListenerRequest, HttpListenerResponse)",
+      "fingerprint": "d8f922356d263e6e0946816a0b0477d203f8d622d2fcc270c1629a06f4bca9ff",
+      "value": 13,
+      "resolution": {
+        "reason": "Route is the server\u0027s door: the stranger check, then one guard per kind of caller that hands it on and returns: the command with the key to Keyed, the browser to Page, the window\u0027s launch to Launch, the window\u0027s session to Session. Its paths are those guards; each caller\u0027s calls live in its own method.",
+        "fingerprint": "d8f922356d263e6e0946816a0b0477d203f8d622d2fcc270c1629a06f4bca9ff",
+        "value": 13
+      }
+    },
+    {
+      "id": "0000157",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Windows.WindowServer.Events(HttpListenerResponse, string)",
+      "fingerprint": "174781794ad32f3e2b47c68abc88c32ff3e472b4d6d122daee2f8eba74b72b02",
+      "value": 11,
+      "resolution": {
+        "reason": "Events is the event stream\u0027s loop: take or heartbeat, end on the window\u0027s goodbye, and leave the stream and start the grace however the connection went. The catch filter names the three ways a gone connection throws, and each counts as a path. It moved unchanged from the workspace\u0027s server.",
+        "fingerprint": "174781794ad32f3e2b47c68abc88c32ff3e472b4d6d122daee2f8eba74b72b02",
+        "value": 11
+      }
+    },
+    {
+      "id": "0000158",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Workspace.WorkspaceServer.Api(HttpListenerRequest, HttpListenerResponse, string)",
+      "fingerprint": "b6250645a1650e409ad7b524eddcdfe1e1502ed7cba44c5b73f482f33c56b84f",
+      "value": 44,
+      "resolution": {
+        "reason": "Api is the workspace\u0027s route table: one arm per call, each one line that hands to ProjectFiles or WorkspaceGit, and the when guards that keep a write to the window\u0027s origin. It is unchanged by this change but for the plumbing calls that left it for WindowServer. Splitting the table would hide it, not simplify it.",
+        "fingerprint": "b6250645a1650e409ad7b524eddcdfe1e1502ed7cba44c5b73f482f33c56b84f",
+        "value": 44
+      }
+    },
+    {
+      "id": "0000159",
+      "check": "cognitive",
+      "symbol": "brain::Brain.Code.CodeServer.Api(HttpListenerRequest, HttpListenerResponse, string)",
+      "fingerprint": "83e4c3fe6e7b0fb06c4dd874c55bfb40927a9dec7917ca84559d48a36fa12932",
+      "value": 18,
+      "resolution": null
+    },
+    {
+      "id": "0000160",
+      "check": "cognitive",
+      "symbol": "brain::Brain.Windows.WindowServer.Route(HttpListenerRequest, HttpListenerResponse)",
+      "fingerprint": "2ae218e6856439f6fef3ea804bdd9bd1ab0a628065aff6939834fd9e3d1352d0",
+      "value": 31,
+      "resolution": null
+    },
+    {
+      "id": "0000161",
+      "check": "cognitive",
+      "symbol": "brain::Brain.Workspace.WorkspaceServer.Api(HttpListenerRequest, HttpListenerResponse, string)",
+      "fingerprint": "b6250645a1650e409ad7b524eddcdfe1e1502ed7cba44c5b73f482f33c56b84f",
+      "value": 27,
+      "resolution": {
+        "reason": "Api is the workspace\u0027s route table: one arm per call, each one line that hands to ProjectFiles or WorkspaceGit. It reads top to bottom as a list of calls; its cognitive weight is the arms\u0027 count, which dropped as the plumbing calls left for WindowServer.",
+        "fingerprint": "b6250645a1650e409ad7b524eddcdfe1e1502ed7cba44c5b73f482f33c56b84f",
+        "value": 27
+      }
+    },
+    {
+      "id": "0000162",
+      "check": "lcom4",
+      "symbol": "brain::Brain.Code.ClaudeFiles",
+      "fingerprint": "21a152e390f763ee9210cc05c2a683965e57bd6789fd2d67476ca61a54d10b90",
+      "value": 4,
+      "resolution": null
+    },
+    {
+      "id": "0000163",
+      "check": "lcom4",
+      "symbol": "brain::Brain.Windows.WindowClient",
+      "fingerprint": "3901654d18183a2a663108df5a048c79e8d4a9ebcedc0771406bbbef6aabe734",
+      "value": 2,
+      "resolution": null
+    },
+    {
+      "id": "0000164",
+      "check": "lcom4",
+      "symbol": "brain::Brain.Workspace.WorkspaceServer",
+      "fingerprint": "b5f5df2f75be425b5f8d6f054a35ba91fcd0aed82ec03be71f8467c0f0724945",
+      "value": 2,
+      "resolution": {
+        "reason": "Name and Title are pure functions of the root, by which the constructor names the window, its log and its WindowKind. They use no field because the fields are built from them; they belong with the workspace that names itself.",
+        "fingerprint": "b5f5df2f75be425b5f8d6f054a35ba91fcd0aed82ec03be71f8467c0f0724945",
+        "value": 2
+      }
+    },
+    {
+      "id": "0000165",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Code.CodeSession.Start(string, string, string, string, ClaudeFiles, Action\u003Cstring\u003E, Action\u003Cstring, CodeQuestions\u003E)",
+      "fingerprint": "2ec3ceb59d0949502eddadb54da2a26e2580317bd22b3297470226466a8e9950",
+      "value": 31,
+      "resolution": {
+        "reason": "Start wires one claude process: Listen reads its output until it ends and says why a session that failed ended, Event reads one stream-json event of it, and of those Began starts a turn on init, Answered reads claude\u0027s answer to an interrupt, and Ended ends a turn on its result without reading an interrupted turn as failed. Error keeps the last lines of its errors. Each helper is one event or one stream of the process; inlined they would be one method that reads two streams and parses each event. This change only hands Listen the run it reads, since a session carried over a reload as ended has none.",
+        "fingerprint": "2ec3ceb59d0949502eddadb54da2a26e2580317bd22b3297470226466a8e9950",
+        "value": 31
+      }
+    },
+    {
+      "id": "0000166",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Code.Transcript.From(int, string, CodeLive)",
+      "fingerprint": "61ea4abad9677421ffcac116c9a552f92d49aa1fd4bbfaa2451b4abe6301ae95",
+      "value": 11,
+      "resolution": {
+        "reason": "From reads what was written since its last read and hands back the events from the reader\u0027s position in this reading, with the text the agent is writing until this reading holds its message. Read is its one helper: it reads the bytes added and turns each whole line into events. The live text is one guard on what From holds under its lock; a helper would only move it.",
+        "fingerprint": "61ea4abad9677421ffcac116c9a552f92d49aa1fd4bbfaa2451b4abe6301ae95",
+        "value": 11
+      }
+    },
+    {
+      "id": "0000167",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Commands.CodeCommand.Run(BrainEnv, IReadOnlyList\u003Cstring\u003E)",
+      "fingerprint": "0d8f5f84f0c2a91ae3241101fc857d10371a02d572a9eadffcfa54ee610652d6",
+      "value": 29,
+      "resolution": {
+        "reason": "Run parses the command line and picks one of its three runs, each a step with its own meaning: Serve runs the window\u0027s server; Permission is the hook\u0027s run, which reads the request and writes the decision, and Asked hands it to the server and waits, deny when the server is gone; Positionals tells the folder from the agent, Open finds or starts the server and raises its window, Started posts the start, Ended watches a session that fails at once, and Checked turns the server\u0027s refusal into the command\u0027s message. This change moves the server\u0027s start into StartServer, which Open and a reloading server\u0027s successor share, and adds no decision.",
+        "fingerprint": "0d8f5f84f0c2a91ae3241101fc857d10371a02d572a9eadffcfa54ee610652d6",
+        "value": 29
+      }
+    },
+    {
+      "id": "0000168",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Windows.WindowClient.Running(ServeFiles, string, string)",
+      "fingerprint": "164d121bacfbcc17627d71b822b984e67aff6a7c87e7b59030ce89872afca507",
+      "value": 11,
+      "resolution": {
+        "reason": "Hello adds the try and its filter, which names the ways a server that went away answers, and the check of its status; Running only reads the port and the key and checks the hello. Inlined, the four exception types would sit in the middle of Running\u0027s checks.",
+        "fingerprint": "164d121bacfbcc17627d71b822b984e67aff6a7c87e7b59030ce89872afca507",
+        "value": 11
+      }
+    },
+    {
+      "id": "0000172",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Windows.WindowServer.Session(HttpListenerRequest, HttpListenerResponse, string, string)",
+      "fingerprint": "2c7bd7038cd0402512c28ba9ded0974239825b049fd0bcf5ac89991fcf84e52d",
+      "value": 15,
+      "resolution": {
+        "reason": "Session is the route table of the window\u0027s session: one arm per call of the plumbing, the two writes guarded to the window\u0027s origin, and the rest handed to the window\u0027s own api.",
+        "fingerprint": "2c7bd7038cd0402512c28ba9ded0974239825b049fd0bcf5ac89991fcf84e52d",
+        "value": 15
+      }
+    },
+    {
+      "id": "0000174",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Windows.WindowServer.Serve(CancellationToken)",
+      "fingerprint": "0492bd3dbf93c06ffcc16b8c4f698d0112c30f6edf8fadd286cec9a95b84503d",
+      "value": 14,
+      "resolution": {
+        "reason": "Serve runs what lives while the server serves: Listen picks the port, and FollowTheme, RecordCpu and Stop are what its thread and its timers run. It moved unchanged from the workspace\u0027s server, which loses it.",
+        "fingerprint": "0492bd3dbf93c06ffcc16b8c4f698d0112c30f6edf8fadd286cec9a95b84503d",
+        "value": 14
+      }
+    },
+    {
+      "id": "0000175",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Code.CodeServer.Reads(HttpListenerRequest, HttpListenerResponse, string)",
+      "fingerprint": "39ab6f27e7f29b00efca9189dc077a9845f510f2a53813f64f51f8acf6f47c5f",
+      "value": 1,
+      "resolution": {
+        "reason": "Reads is the window\u0027s route table: the path is the request itself, not a flag a caller chose, and each case is one named call; a case added here is one more line, never a branch that changes behaviour.",
+        "fingerprint": "39ab6f27e7f29b00efca9189dc077a9845f510f2a53813f64f51f8acf6f47c5f",
+        "value": 1
+      }
+    },
+    {
+      "id": "0000176",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Code.CodeServer.Acts(HttpListenerRequest, HttpListenerResponse, string)",
+      "fingerprint": "98217b04ae6128abbf9d5d26d9a1dba50740d5662857053980e59de9cfb72644",
+      "value": 1,
+      "resolution": {
+        "reason": "Acts picks the window\u0027s action by the request\u0027s path, a route table with one call per case and no logic of its own; the path is the request\u0027s own, not a flag the caller chose. The reload joins the table as one more case.",
+        "fingerprint": "98217b04ae6128abbf9d5d26d9a1dba50740d5662857053980e59de9cfb72644",
+        "value": 1
+      }
+    },
+    {
+      "id": "0000177",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Windows.WindowServer.Page(HttpListenerResponse, string)",
+      "fingerprint": "b8397b6ee03630d3cbf646a2c9b32c18a444b938650f3f0a642eb3922c7ba432",
+      "value": 1,
+      "resolution": {
+        "reason": "path is the request\u0027s own path: Page answers when it is one of the page\u0027s files and says false when it is not, so Route goes on to the API. No caller chooses a behaviour; the browser\u0027s request does.",
+        "fingerprint": "b8397b6ee03630d3cbf646a2c9b32c18a444b938650f3f0a642eb3922c7ba432",
+        "value": 1
+      }
+    },
+    {
+      "id": "0000178",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Code.Transcript.From(int, string, CodeLive)",
+      "fingerprint": "de52b4ee6fea340649b47e78a04d4313f2d82e10e5dc67565b1ca4404550c34a",
+      "value": 1,
+      "resolution": {
+        "reason": "from is the position the window read to, sent back as data; it picks no behaviour. Its one branch is the guard that reads from the first event when that position does not hold in this reading. live is data too: the text shown until the transcript holds it.",
+        "fingerprint": "de52b4ee6fea340649b47e78a04d4313f2d82e10e5dc67565b1ca4404550c34a",
+        "value": 1
+      }
+    },
+    {
+      "id": "0000179",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Code.CodeSessions.Start(string, string, string)",
+      "fingerprint": "3783180a5f80b17cfc833f8f2d86bd2ba3925843c45d949f65c42b7d812cd8d1",
+      "value": 13,
+      "resolution": null
+    },
+    {
+      "id": "0000180",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Code.CodeSessions.Start(string, string, string)",
+      "fingerprint": "e5e4ae7e2b02baf999edd0fcf7289db57372a654ec68b2bf9a294748fa36f73d",
+      "value": 15,
+      "resolution": {
+        "reason": "Start reads guard, resolve, return; Continued(string, string?) is the one rule of a moved session (its id, its window, the folder it ran in) and RanIn(string) is the transcript lookup under it, each a named step in plain ifs. This change adds one guard, that no session starts once a reload handed the sessions on.",
+        "fingerprint": "e5e4ae7e2b02baf999edd0fcf7289db57372a654ec68b2bf9a294748fa36f73d",
+        "value": 15
+      }
+    },
+    {
+      "id": "0000181",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Code.CodeServer.Keyed(HttpListenerRequest, HttpListenerResponse, string)",
+      "fingerprint": "5b2f828672273436daf80aaf26c7755c093ef08e380252e8e6fa8a09e380a2f2",
+      "value": 13,
+      "resolution": {
+        "reason": "Keyed is the route table of the keyed calls: one arm per call, read a session, start one, hand in a permission request, hand in a session\u0027s questions, and the refusal of any other. Its paths are the switch\u0027s arms and the tuple patterns they match on method and path; each arm is one call to the step that does the work.",
+        "fingerprint": "5b2f828672273436daf80aaf26c7755c093ef08e380252e8e6fa8a09e380a2f2",
+        "value": 13
+      }
+    },
+    {
+      "id": "0000182",
+      "check": "lcom4",
+      "symbol": "brain::Brain.Serving.WebCalls",
+      "fingerprint": "e265d27aef1b0c42de3bdeb4765dc1ca49706a7d5aafe678e80a54ead41a9f8c",
+      "value": 2,
+      "resolution": {
+        "reason": "WebCalls is the one HTTP vocabulary every server of brain speaks, all static and stateless: the boundary that answers a request and the helpers that send and refuse on one side, and reading the request\u0027s body on the other. Read and Body are one step, the body read whole by its length or to its end when chunked; they share no field with the senders because no method here holds one. Splitting the body read into its own class would move one method every server imports beside the others it imports from here.",
+        "fingerprint": "e265d27aef1b0c42de3bdeb4765dc1ca49706a7d5aafe678e80a54ead41a9f8c",
+        "value": 2
+      }
+    },
+    {
+      "id": "0000183",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Code.CodeServer.Started(HttpListenerRequest, HttpListenerResponse)",
+      "fingerprint": "75a0e263a85176a186d8db59bfd4526cd349b1bfd1d789121901f063e12fed4b",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000184",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Code.AskContract.AnswerProblem(string, AskQuestion, AskReply)",
+      "fingerprint": "29e501d973d58a036e40a2ab7d641f5de60f8a043fcee162f371b09bf76ae94e",
+      "value": 11,
+      "resolution": {
+        "reason": "AnswerProblem is the four rules an answer to one question keeps, each one plain guard in order: some answer, only its own options, one choice unless multiple, words only where it takes words. The rest of its paths are the ?? and || that read the fields the window may leave out. Split, the rules would scatter over helpers that each hold one if.",
+        "fingerprint": "29e501d973d58a036e40a2ab7d641f5de60f8a043fcee162f371b09bf76ae94e",
+        "value": 11
+      }
+    },
+    {
+      "id": "0000185",
+      "check": "lcom4",
+      "symbol": "brain::Brain.Code.AskContract",
+      "fingerprint": "313bd7b384acadd6303276a429dc48ac3d2cf38ea95e65fba3de38c22c1607fc",
+      "value": 2,
+      "resolution": {
+        "reason": "AskContract is the one contract of brain ask, kept in one place so the command and the server never disagree. One piece says what a document must say: Read, Checked, Problems and their helpers. The other says what an answer must say: ReplyProblem and AnswerProblem, plus the two texts the agent reads, Answers and Closed. Both are the shape of an AskQuestion, checked when it is asked and when it is answered; they share no field because the class has none.",
+        "fingerprint": "313bd7b384acadd6303276a429dc48ac3d2cf38ea95e65fba3de38c22c1607fc",
+        "value": 2
+      }
+    },
+    {
+      "id": "0000186",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Code.AskContract.Checked(AskDocument)",
+      "fingerprint": "a9ba7b783bdfcde54421b68698e5aeca9429cc71143f0dee25cf0cb24a1f5128",
+      "value": 19,
+      "resolution": {
+        "reason": "Checked walks the document one level at a time and each helper checks one level of it: Problems the document, its wait and its list, QuestionProblems one question\u0027s text, recommend, why and multiple, OptionProblems its options\u0027 labels and the recommendation among them. Inlined, the three loops and their names would sit in one method of nested loops.",
+        "fingerprint": "a9ba7b783bdfcde54421b68698e5aeca9429cc71143f0dee25cf0cb24a1f5128",
+        "value": 19
+      }
+    },
+    {
+      "id": "0000187",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Code.Transcript.Read()",
+      "fingerprint": "4f78fac86fa0bb1e5bb37f5afe599fbc0c52d935845091e734933ebea859c2bc",
+      "value": 14,
+      "resolution": null
+    },
+    {
+      "id": "0000188",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Code.Transcript.Parse(string)",
+      "fingerprint": "408ce48617c535d3cec7e6518b9637eac227d2a658816629a1a4c38523915dbc",
+      "value": 60,
+      "resolution": {
+        "reason": "Parse is one parser of one transcript line, and its helpers are the kinds of block a transcript holds, one helper each: AddWords adds 3, At adds 1, Cut adds 1, DataUrl adds 5, FromAgent adds 7, FromUser adds 7, ImagesOf adds 4, InputOf adds 3, MessageId adds 1, Peer adds 4, ResultText adds 3, ToolCall adds 8, Whole adds 1 and WithImages adds 2. The count is the number of block kinds the transcript format has. This change adds the image block: ImagesOf finds the image blocks of a content array, DataUrl reads one with a guard per field it needs, and WithImages puts the user\u0027s images with his words.",
+        "fingerprint": "408ce48617c535d3cec7e6518b9637eac227d2a658816629a1a4c38523915dbc",
+        "value": 60
+      }
+    },
+    {
+      "id": "0000189",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Code.Transcript.Parse(string)",
+      "fingerprint": "076faf341ea08d0bc0f503d6be24bd7e51eaa445c4f5b79e9cecc4f9ce893a42",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000190",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Code.SentAgents.View(Transcript, string, WorkSignals, Landings)",
+      "fingerprint": "1809cee85752bf561f99b7edcac69d29b1aa5c3ffa0790294a50759edcd06ba8",
+      "value": 23,
+      "resolution": {
+        "reason": "View reads one sent agent\u0027s transcript into its view, and its helpers are the facts the view states, one each: NavaroneRuns.get adds 5, Now.get adds 4, Questions.get adds 3, RunsNavarone adds 5 and TrailOf adds 4. RunsNavarone only changed where it reads a Bash command, from the event\u0027s text to its input field, so the counts are the view\u0027s own.",
+        "fingerprint": "1809cee85752bf561f99b7edcac69d29b1aa5c3ffa0790294a50759edcd06ba8",
+        "value": 23
+      }
+    },
+    {
+      "id": "0000191",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Code.SentAgents.Read(Transcript)",
+      "fingerprint": "29c99e70540a45f594cd80fc1c24c77f3290ed7f95127e335bc302008c072398",
+      "value": 35,
+      "resolution": {
+        "reason": "Read lists the session\u0027s agents in plain steps: the failed calls, the metas with the calls whose meta is not written yet, the builders, an Agent per meta, then the order. FailedCalls(IReadOnlyList\u003CCodeEvent\u003E) picks the calls that gave back an error and WithUnwritten(IReadOnlyList\u003CCodeEvent\u003E, IReadOnlyList\u003CSentMeta\u003E) adds an agent its call sent before Claude Code wrote its meta. The rest are the facts one agent\u0027s files say, which Agent holds as one record so the list and an agent\u0027s view read them alike: its .ctor(SentMeta, IReadOnlyList\u003CCodeEvent\u003E, IReadOnlySet\u003Cstring\u003E, IReadOnlyList\u003Cstring\u003E) gathers them, KindOf(string) maps the type to a view, StateOf(SentMeta, IReadOnlySet\u003Cstring\u003E) running, finished, stopped or failed, WorkOf(IReadOnlyList\u003Cstring\u003E) the builder a validator\u0027s brief names, and Verdict() a readiness check\u0027s word.",
+        "fingerprint": "29c99e70540a45f594cd80fc1c24c77f3290ed7f95127e335bc302008c072398",
+        "value": 35
+      }
+    },
+    {
+      "id": "0000192",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Code.Trail.Of(Worker, IReadOnlyList\u003CWorker\u003E)",
+      "fingerprint": "97fdf07af408c115a19ef45c054a6e10b02225e246a34e8a517207a41b27f803",
+      "value": 39,
+      "resolution": {
+        "reason": "Of tells one piece of work as its steps in time order, and its helpers are the voices of that story: BuilderSteps(Worker, HashSet\u003Cstring\u003E) cuts the builder\u0027s events into turns at each validator\u0027s message and numbers its words by turn, ValidatorSteps(string, Worker) takes the findings it sent and its report, InOrder(List\u003CCodeStep\u003E) orders the steps and numbers the findings, FindingsOf(CodeEvent, string) and CallsOf(IReadOnlyList\u003CCodeEvent\u003E, string) pick calls by tool, and Turn, with Take(CodeEvent), Called(CodeEvent), Gave(CodeEvent), Words() and FastForward(string), holds what one turn of an agent said, committed and landed. Each is one rule of the transcript\u0027s shape; inlined they would be one method doing the builder\u0027s, the validator\u0027s and git\u0027s reading at once.",
+        "fingerprint": "97fdf07af408c115a19ef45c054a6e10b02225e246a34e8a517207a41b27f803",
+        "value": 39
+      }
+    },
+    {
+      "id": "0000193",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Code.Transcript.FromUser(JsonElement)",
+      "fingerprint": "e9a64114b1d2a878482fe0bc371060a693c900c2147e543607d04a363c933123",
+      "value": 14,
+      "resolution": null
+    },
+    {
+      "id": "0000194",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Code.Transcript.FromAgent(JsonElement)",
+      "fingerprint": "efc8c9b1e4640cefc2e72ad01b90f11678ee2f6d2ebedb1a9228e19f67799b9e",
+      "value": 15,
+      "resolution": null
+    },
+    {
+      "id": "0000195",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Code.WorkSignals.Of(string, long)",
+      "fingerprint": "91f6c84449b28ed7ccc00e6fbf88dbc0bf279226ee4893fd0cbc2b4c537f3a65",
+      "value": 19,
+      "resolution": {
+        "reason": "Of reads the log and the disputes once the mark changed and caches the result per worktree. Ended(IReadOnlyList\u003CNavaroneEvent\u003E, IReadOnlySet\u003C(string Worktree, string Id)\u003E, string) takes the worktree\u0027s stories from the log\u0027s one grouping and marks those the disputes hold as clashes, and Story tells each: Take(NavaroneEvent) dispatches on the event type, one case a step, Named(NavaroneEvent) and Accepted() are two of those steps. The count is the story\u0027s rules, met one named step at a time.",
+        "fingerprint": "91f6c84449b28ed7ccc00e6fbf88dbc0bf279226ee4893fd0cbc2b4c537f3a65",
+        "value": 19
+      }
+    },
+    {
+      "id": "0000196",
+      "check": "control-coupling",
+      "symbol": "brain::Brain.Code.SentAgents.Agent.KindOf(string)",
+      "fingerprint": "e471943ff4a6b80bfb84479750b3390d2af0d47e1b4bc6e07ea6a99079be3fcf",
+      "value": 1,
+      "resolution": null
+    },
+    {
+      "id": "0000197",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Code.SentAgents.Read(Transcript)",
+      "fingerprint": "a5c19b8ced091c871e37184da5e1bc6afe2d79ca9ee08fc5f78bd940a177b992",
+      "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000198",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Code.SentAgents.Agent.Agent(SentMeta, IReadOnlyList\u003CCodeEvent\u003E, IReadOnlySet\u003Cstring\u003E, IReadOnlyList\u003Cstring\u003E)",
+      "fingerprint": "31454ccba62ef162977200f4d09d381950137e35babb388e6357bba8ad13ac4e",
+      "value": 19,
+      "resolution": null
+    },
+    {
+      "id": "0000201",
+      "check": "lcom4",
+      "symbol": "brain::Brain.Code.BrainQuery",
+      "fingerprint": "905c2c38382f6bb0b0175e5be3826060f92dea21d43ea839ba65f5bd2f10a9b1",
+      "value": 2,
+      "resolution": null
+    },
+    {
+      "id": "0000204",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Code.BrainQuery.Items(string)",
+      "fingerprint": "9ba0a1caf5356e89964724241bc5233b502553337f6a2a8e6724a7ac36ba35f7",
+      "value": 13,
+      "resolution": {
+        "reason": "Items reads a brain query\u0027s output by the shape of each line, and its helpers are the line shapes brain prints: IsRef adds 1, Item adds 4 for a ref line, an indented ref line and a walk\u0027s header, and Neighbour adds 5 for a walk\u0027s edge line. Inlined they are one switch over the shapes of brain\u0027s own output, which is the format, and the verb steers only the walk\u0027s header, which is no found node.",
+        "fingerprint": "9ba0a1caf5356e89964724241bc5233b502553337f6a2a8e6724a7ac36ba35f7",
+        "value": 13
+      }
+    },
+    {
+      "id": "0000208",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Code.CodeServer.Reads(HttpListenerRequest, HttpListenerResponse, string)",
+      "fingerprint": "39ab6f27e7f29b00efca9189dc077a9845f510f2a53813f64f51f8acf6f47c5f",
+      "value": 13,
+      "resolution": {
+        "reason": "Reads is a flat route table of the window\u0027s reads: each of its ten cases is one call that sends what one read gives, and the default refuses any other path. Its cyclomatic count is its number of routes; this change adds the file explorer\u0027s three, places, a folder listed and an image read, each one call into ImageFolders. Splitting the table would scatter one list of the server\u0027s reads over two methods.",
+        "fingerprint": "ebac55d8f3628272eaf850da724a1044850929a0713366920d93385ca917f329",
+        "value": 11
+      }
+    },
+    {
+      "id": "0000209",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Code.AttachedImages.Checked(IReadOnlyList\u003CCodeImage\u003E)",
+      "fingerprint": "928269cf1dbdb438b37b5e38c95d4e7ba6f023a4e3fc365f81f06c947912ead9",
+      "value": 11,
+      "resolution": {
+        "reason": "Checked(IReadOnlyList\u003CCodeImage\u003E?) is the list: a guard for none and a loop. Checked(CodeImage) adds 8 because it holds the five rules of an image claude takes, one guard each in the order they can be told: a media type Claude reads, base64, not empty, at most Largest bytes, and bytes that open as that type\u0027s. Inlined, the list would hold all five inside its loop; apart, each guard reads on its own.",
+        "fingerprint": "928269cf1dbdb438b37b5e38c95d4e7ba6f023a4e3fc365f81f06c947912ead9",
+        "value": 11
+      }
+    },
+    {
+      "id": "0000210",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Children.ClaudeRun.End(int)",
+      "fingerprint": "d2eee5e0cb26625fb8d213a0d3626ff06e5ec824256266d76beed1e7b781a0f7",
+      "value": 11,
+      "resolution": {
+        "reason": "End reads guard, resolve, return: a job gone answers false, a pid that is not one of claude\u0027s jobs is refused, then the family is asked to end, waited for, and what is left is read and killed, each a named statement. Each helper is one named step it repeats each round: Remember adds 3, adding the job and what is below it only while the job is still the process that started then, Alive adds 2, which remembered processes still run as themselves, and Signal adds 1, one signal to each. Inlined, the wait loop would hold two nested loops and the start checks, which is harder to read than the steps by name.",
+        "fingerprint": "d2eee5e0cb26625fb8d213a0d3626ff06e5ec824256266d76beed1e7b781a0f7",
+        "value": 11
+      }
+    },
+    {
+      "id": "0000211",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Code.CodeServer.Acts(HttpListenerRequest, HttpListenerResponse, string)",
+      "fingerprint": "98217b04ae6128abbf9d5d26d9a1dba50740d5662857053980e59de9cfb72644",
+      "value": 12,
+      "resolution": {
+        "reason": "Acts is the window\u0027s route table: one case per endpoint, each a call to the handler of that path, with no logic of its own. A case that closes an ask joins it, as every endpoint did before it; its count is the endpoints, and a table of them is read straight down.",
+        "fingerprint": "441bf87acaa076fa2d26a240f9dde0a8844979fcd3d12ef43e418b445c24d640",
+        "value": 11
+      }
+    },
+    {
+      "id": "0000212",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Code.AskContract.ReplyProblem(IReadOnlyList\u003CAskQuestion\u003E, IReadOnlyList\u003CAskReply\u003E)",
+      "fingerprint": "df761d97f3492b8ab5edea0e9ff08336ef9eaab800c407a0aae46a4976b9396e",
+      "value": 11,
+      "resolution": {
+        "reason": "ReplyProblem walks the replies against the questions and AnswerProblem judges one question\u0027s answer: an answer with neither an option nor words, an option that is none of the question\u0027s, and several options for a question that takes one. Each is one rule of the contract, so inlined they would be the same checks in a loop body.",
+        "fingerprint": "df761d97f3492b8ab5edea0e9ff08336ef9eaab800c407a0aae46a4976b9396e",
+        "value": 11
+      }
+    },
+    {
+      "id": "0000213",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Code.PastSessions.Title(string)",
+      "fingerprint": "14a638ca4f650036fbf9f4b735ecccd57bfd0d4a3b6eed1da1d56c2c2842a6b1",
+      "value": 13,
+      "resolution": null
+    }
+  ]
+}
