@@ -29,6 +29,9 @@ internal sealed class CodeSession : IDisposable
 
     private const int ErrorLines = 20;
 
+    /// <summary>The most of the user's first words the window is sent: the whole of a long one would ride every list.</summary>
+    private const int PromptLength = 2000;
+
     /// <summary>The id of each interrupt request opens with this, so its control response is known.</summary>
     private const string InterruptPrefix = "interrupt-";
 
@@ -154,12 +157,37 @@ internal sealed class CodeSession : IDisposable
         }
 
         var agents = 0;
+        string? name = null;
+        string? prompt = null;
         if (Follow() is { } read)
         {
             agents = sent.Running(read);
+            name = read.Name();
+            prompt = Prompted(read);
         }
 
-        return new CodeSessionView(Id, Agent, Cwd, alive, answering, why, started, running, asks.All(), questions.All(), agents);
+        var title = name;
+        if (title is null && prompt is not null)
+        {
+            title = PastSessions.Headline(prompt);
+        }
+
+        return new CodeSessionView(Id, Agent, Cwd, alive, answering, why, started, running, asks.All(), questions.All(), agents, name, title, prompt);
+    }
+
+    /// <summary>The name the user gave the session with <c>/rename</c>, or null when it has none.</summary>
+    public string? Name() => Follow()?.Name();
+
+    /// <summary>The user's first words of the transcript <paramref name="read"/>, cut when long, or null when he said none.</summary>
+    private static string? Prompted(Transcript read)
+    {
+        var prompt = read.FirstPrompt();
+        if (prompt is null || prompt.Length <= PromptLength)
+        {
+            return prompt;
+        }
+
+        return prompt[..PromptLength] + "...";
     }
 
     /// <summary>

@@ -1078,6 +1078,12 @@ public sealed partial class CodeServerTests : IDisposable
               printf '%s\n' "$line" >> "$here/claude.said"
               case "$line" in *'"control_request"'*) continue ;; esac
               case "$line" in *quitnow*) exit 3 ;; esac
+              case "$line" in *'/rename '*)
+                name=${line#*/rename }; name=${name%%\"*}
+                printf '{"type":"custom-title","customTitle":"%s","sessionId":"%s"}\n' "$name" "$id" >> "$dir/$id.jsonl"
+                echo '{"type":"result","subtype":"success"}'
+                continue ;;
+              esac
               printf '{"type":"system","subtype":"init","session_id":"%s"}\n' "$id"
               case "$line" in
                 *'"type":"image"'*) printf '%s\n' "$line" >> "$dir/$id.jsonl" ;;

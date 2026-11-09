@@ -88,7 +88,8 @@ internal sealed record CodeConversation(int From, IReadOnlyList<CodeEvent> Event
 /// One session as the window lists it: its id, which is Claude Code's session id, its agent and folder, whether its
 /// claude still runs and is answering, why it stopped, when it started, what runs under it, the permission requests
 /// that wait for the user, the questions it asked him through <c>brain ask</c>, open and answered, and how many of the
-/// agents it sent still run.
+/// agents it sent still run. Its name is the title the user gave it with <c>/rename</c>, its prompt the first words he
+/// said, cut when long, and its title what the list heads it with: the name, or else the prompt's first words.
 /// </summary>
 internal sealed record CodeSessionView(
     string Id,
@@ -101,7 +102,10 @@ internal sealed record CodeSessionView(
     IReadOnlyList<RunningJob> Running,
     IReadOnlyList<CodeAsk> Asks,
     IReadOnlyList<CodeQuestions> Questions,
-    int Agents)
+    int Agents,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Name,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Title,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Prompt)
 {
     /// <summary>
     /// Whether the session runs work a reload would stop: a turn, a process or an agent it started, or a permission
@@ -367,6 +371,9 @@ internal sealed record CodeAttached(string? Folder);
 /// <summary>The session a call stops.</summary>
 internal sealed record CodeSessionRef(string? Session);
 
+/// <summary>The user's new name for a session.</summary>
+internal sealed record CodeRename(string? Session, string? Name);
+
 /// <summary>A process of a session the user stops: the session, and the process by its pid.</summary>
 internal sealed record CodeProcessRef(string? Session, int Pid);
 
@@ -390,6 +397,7 @@ internal sealed record CodeAgents(IReadOnlyList<string> Agents);
 [JsonSerializable(typeof(CodePlaces))]
 [JsonSerializable(typeof(CodeAttached))]
 [JsonSerializable(typeof(CodeSessionRef))]
+[JsonSerializable(typeof(CodeRename))]
 [JsonSerializable(typeof(CodeProcessRef))]
 [JsonSerializable(typeof(CodeProcessEnd))]
 [JsonSerializable(typeof(CodeAgents))]

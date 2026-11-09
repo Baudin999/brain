@@ -1425,11 +1425,11 @@
       "id": "0000176",
       "check": "control-coupling",
       "symbol": "brain::Brain.Code.CodeServer.Acts(HttpListenerRequest, HttpListenerResponse, string)",
-      "fingerprint": "6f0e37a8742cd3f2a4d32723b7131a599bb0280ef45f3d1e4b40550113c010cf",
+      "fingerprint": "d0c22b5eecf0659603e5f53f9f6a7f375e6e71c15742651011e2093b9181ebb0",
       "value": 1,
       "resolution": {
-        "reason": "Acts picks the window\u0027s action by the request\u0027s path, a route table with one call per case and no logic of its own; the path is the request\u0027s own, not a flag the caller chose. The workspace\u0027s launch joins the table as one more case.",
-        "fingerprint": "6f0e37a8742cd3f2a4d32723b7131a599bb0280ef45f3d1e4b40550113c010cf",
+        "reason": "Acts picks the window\u0027s action by the request\u0027s path, a route table with one call per case and no logic of its own; the path is the request\u0027s own, not a flag the caller chose. The rename joins the table as one more case.",
+        "fingerprint": "d0c22b5eecf0659603e5f53f9f6a7f375e6e71c15742651011e2093b9181ebb0",
         "value": 1
       }
     },
@@ -1721,8 +1721,8 @@
       "id": "0000211",
       "check": "cyclomatic",
       "symbol": "brain::Brain.Code.CodeServer.Acts(HttpListenerRequest, HttpListenerResponse, string)",
-      "fingerprint": "6f0e37a8742cd3f2a4d32723b7131a599bb0280ef45f3d1e4b40550113c010cf",
-      "value": 13,
+      "fingerprint": "d0c22b5eecf0659603e5f53f9f6a7f375e6e71c15742651011e2093b9181ebb0",
+      "value": 14,
       "resolution": {
         "reason": "Acts is the window\u0027s route table: one case per endpoint, each a call to the handler of that path, with no logic of its own. A case that closes an ask joins it, as every endpoint did before it; its count is the endpoints, and a table of them is read straight down.",
         "fingerprint": "441bf87acaa076fa2d26a240f9dde0a8844979fcd3d12ef43e418b445c24d640",

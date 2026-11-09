@@ -49,6 +49,7 @@ internal sealed partial class Transcript(string path)
     private readonly StringBuilder partial = new();
     private long offset;
     private string generation = NextGeneration();
+    private string? name;
 
     /// <summary>The transcript's file.</summary>
     public string Location { get; } = path;
@@ -117,6 +118,7 @@ internal sealed partial class Transcript(string path)
             offset = 0;
             partial.Clear();
             events.Clear();
+            name = null;
             spoken.Clear();
             brainCalls.Clear();
             generation = NextGeneration();
@@ -138,12 +140,48 @@ internal sealed partial class Transcript(string path)
         partial.Append(whole[(end + 1)..]);
         foreach (var line in whole[..end].Split('\n'))
         {
+            Titled(line);
             var (said, message) = Parse(line);
             events.AddRange(said.Select(brainCalls.Itemised));
             if (message is not null && said.Any(one => one.Kind == CodeEvent.Said))
             {
                 spoken.Add(message);
             }
+        }
+    }
+
+    /// <summary>Keeps the title a <c>custom-title</c> line holds: Claude Code writes one for each <c>/rename</c>, and the last one stands.</summary>
+    private void Titled(string line)
+    {
+        if (!line.Contains("\"custom-title\"", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        var title = Field(line, "customTitle");
+        if (title.Length > 0)
+        {
+            name = title;
+        }
+    }
+
+    /// <summary>The name the user gave the session with <c>/rename</c>, or null when it has none, with what was written since the last read.</summary>
+    public string? Name()
+    {
+        lock (gate)
+        {
+            Read();
+            return name;
+        }
+    }
+
+    /// <summary>The user's first words of the session, whole, or null when he said none, with what was written since the last read.</summary>
+    public string? FirstPrompt()
+    {
+        lock (gate)
+        {
+            Read();
+            return events.Find(one => one.Kind == CodeEvent.User)?.Text;
         }
     }
 

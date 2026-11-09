@@ -353,6 +353,9 @@ internal sealed class CodeServer : IDisposable
             case "/api/say":
                 Acting(response, () => Say(request));
                 break;
+            case "/api/rename":
+                Acting(response, () => Rename(request));
+                break;
             case "/api/interrupt":
                 Acting(response, () => Interrupt(request));
                 break;
@@ -584,6 +587,17 @@ internal sealed class CodeServer : IDisposable
         records.Time("say", $"{session.Id} {images.Count}", null, () =>
         {
             session.Say(words, images);
+            return true;
+        });
+    }
+
+    /// <summary>The user's new name for a session, a record of its own; refused when the name breaks the rule.</summary>
+    private void Rename(HttpListenerRequest request)
+    {
+        var asked = Read(request, CodeJson.Default.CodeRename);
+        records.Time("rename", asked?.Session ?? string.Empty, null, () =>
+        {
+            sessions.Rename(asked?.Session, asked?.Name);
             return true;
         });
     }

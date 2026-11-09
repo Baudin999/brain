@@ -52,7 +52,7 @@ import {
 import { composerAttach, composerQuote } from '/components/composer.js';
 import { quoteOfSelection, quotePlace, quoteView } from '/components/quote.js';
 import { attachProblem, dataUrlOf, imageOfFile, isImageFile, thumbnailOf } from '/attach.js';
-import { sessionListView } from '/components/session-list.js';
+import { sessionListView, nameProblem } from '/components/session-list.js';
 import { newSessionView } from '/components/new-session.js';
 import { questionsRowView } from '/components/questions-row.js';
 import { sessionPage, closeLabel } from '/pages/session.js';
@@ -97,6 +97,9 @@ const state = {
   following: 0,
   // Each conversation's events read so far, by its key: a session's id, or the id of the call that sent an agent.
   conversations: new Map(),
+  // The session whose name the user is writing in its row, { id, problem, focus }, or null; focus asks the next draw to
+  // put the cursor in the field.
+  renaming: null,
   // The page in view: a session's, the page of every open question, or the settings.
   page: 'session',
   // Which kinds of the second flow the conversation draws, how the agents panel draws, and whether the conversation and
@@ -361,6 +364,35 @@ async function pick(id) {
     await readShown();
     scrollWhenDrawn(id);
     if (viewsShown()?.code) await openWorkspace();
+  });
+}
+
+function startRename(id) {
+  state.renaming = { id, problem: null, focus: true };
+  draw();
+}
+
+function cancelRename() {
+  if (!state.renaming) return;
+  state.renaming = null;
+  draw();
+}
+
+// Applies the name the user wrote: a name that breaks the rule, or that the server refuses, stays in the field with why.
+async function rename(session, name) {
+  const problem = nameProblem(name, session, state.sessions);
+  if (problem) {
+    state.renaming.problem = problem;
+    draw();
+    return;
+  }
+  await act('session.rename', session.id, null, async () => {
+    try {
+      await ask('/api/rename', { session: session.id, name: name.trim() });
+      state.renaming = null;
+    } catch (error) {
+      state.renaming.problem = error.message;
+    }
   });
 }
 
@@ -1071,6 +1103,12 @@ async function changed(id) {
 function draw() {
   const host = document.getElementById('app');
   render(page(), host);
+  if (state.renaming?.focus) {
+    state.renaming.focus = false;
+    const field = host.querySelector('.code-session-rename');
+    field?.focus();
+    field?.select();
+  }
   if (awayNow() !== state.away) {
     state.away = !state.away;
     render(page(), host);
@@ -1179,7 +1217,7 @@ function page() {
       <nav class="code-side" aria-label="Sessions">
         <header class="pane-head"><h1 class="pane-title">Sessions</h1>${reloadView(state.reload, state.reloading, { onReload: reload })}${historyButtonView({ onOpen: showHistory })}${settingsCogView(state.page === 'settings', { onOpen: showSettings })}</header>
         ${questionsRowView(state.sessions, questionsInView, { onOpen: showQuestions })}
-        ${sessionListView(state.sessions, current, { onPick: pick })}
+        ${sessionListView(state.sessions, current, state.renaming, { onPick: pick, onRenameStart: startRename, onRename: rename, onRenameCancel: cancelRename })}
         ${newSessionView(state.agents, folderOfView(), { onStart: start })}
         ${state.problem ? html`<p class="code-problem" role="status">${state.problem}</p>` : nothing}
       </nav>

@@ -83,15 +83,21 @@ internal sealed class PastSessions(ClaudeFiles claude)
                 continue;
             }
 
-            var first = one.Text.Trim().Split('\n')[0].Trim();
-            if (first.Length > TitleLength)
-            {
-                return first[..TitleLength] + "...";
-            }
-
-            return first;
+            return Headline(one.Text);
         }
 
         return null;
+    }
+
+    /// <summary>The first words of the user's <paramref name="prompt"/>: its first line, cut when long.</summary>
+    public static string Headline(string prompt)
+    {
+        var first = prompt.Trim().Split('\n')[0].Trim();
+        if (first.Length > TitleLength)
+        {
+            return first[..TitleLength] + "...";
+        }
+
+        return first;
     }
 }

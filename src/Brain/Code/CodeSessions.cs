@@ -170,6 +170,26 @@ internal sealed partial class CodeSessions(string program, ClaudeFiles claude, A
         throw new BrainException($"no session {id} in the window");
     }
 
+    /// <summary>
+    /// Names the session <paramref name="id"/> <paramref name="name"/> by sending <c>/rename</c> into it, so Claude Code
+    /// keeps the name in the transcript, where <c>claude --resume</c> finds it too. Refused when the name breaks
+    /// <see cref="SessionName"/>'s rule against the other sessions' names, and once the session stopped.
+    /// </summary>
+    public void Rename(string? id, string? name)
+    {
+        var session = Of(id);
+        var others = new List<string>();
+        foreach (var other in All())
+        {
+            if (other != session && other.Name() is { } taken)
+            {
+                others.Add(taken);
+            }
+        }
+
+        session.Say("/rename " + SessionName.Checked(name, others), []);
+    }
+
     /// <summary>Every session, the oldest first.</summary>
     public IReadOnlyList<CodeSession> All()
     {
