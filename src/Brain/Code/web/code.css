@@ -78,19 +78,18 @@
 .code-head-actions { display: flex; align-items: center; gap: var(--sp-2); }
 .code-head-meta { margin: 0; overflow-wrap: anywhere; font-family: var(--mono); }
 
-/* The conversation: the user's words on canvas, the agent's prose on the page, the tool calls and runs between them. */
+/* The conversation: the user's words in a user message, the agent's prose on the page, the tool calls and runs between them. */
 
 .code-frame { position: relative; display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .code-to-end { position: absolute; right: var(--sp-6); bottom: var(--sp-4); }
 .code-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: var(--sp-5) var(--sp-6) var(--sp-6); }
 .code-events { display: flex; flex-direction: column; gap: var(--sp-3); max-width: var(--measure); }
 .code-asks { display: grid; gap: var(--sp-3); max-width: var(--measure); margin-top: var(--sp-4); }
-.code-user { padding: var(--sp-3) var(--sp-4); border-radius: var(--radius-3); background: var(--canvas); }
 .code-said { padding: 0 var(--sp-1); }
 .code-interrupted { margin: 0; padding: 0 var(--sp-1); color: var(--muted); font-size: var(--text-1); }
 
 .code-images { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
-.code-user .code-images:not(:first-child) { margin-top: var(--sp-2); }
+.user-message .code-images:not(:first-child) { margin-top: var(--sp-2); }
 
 /* The session's body: its conversation and composer, and the agents it sent beside them. */
 

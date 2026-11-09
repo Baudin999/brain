@@ -467,6 +467,11 @@ textarea.field { field-sizing: content; resize: none; min-height: calc(var(--lin
 .agent-message[data-way="sent"] { margin-left: var(--sp-4); padding-left: var(--sp-3); border-left: 2px solid var(--rule); }
 .agent-message-from { margin: 0 0 var(--sp-1); color: var(--muted); font-size: var(--text-1); }
 
+/* The user message: the user's own words in a conversation, a bubble at the conversation's end edge, washed in the
+   focus blue and edged in a stronger shade of it, its corner at the end and bottom tight as a speech bubble's. */
+
+.user-message { align-self: flex-end; max-width: 85%; padding: var(--sp-3) var(--sp-4); border: 1px solid var(--you-edge); border-radius: var(--radius-3) var(--radius-3) var(--radius-1) var(--radius-3); background: var(--you-wash); color: var(--ink); }
+
 /* The trail step: one step of a piece of work's story, on canvas, ruled at its start in the color of who wrote it: a
    report in the strong rule, findings in the stale color, an answer in the focus color, and a landing in the yes
    color. Drawn by shared/components/trail-step.js. The outline of a step, .trail-outline, is one such step in a line in the

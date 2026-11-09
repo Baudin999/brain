@@ -521,7 +521,7 @@ public sealed partial class CodeServerTests : IDisposable
 
             await window.Eval("const box = document.querySelector('.code-words'); box.value = 'hello'; box.dispatchEvent(new Event('input')); box.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))").ConfigureAwait(false);
             await window.Until("document.querySelector('.code-said .prose')?.textContent.trim()", "I heard you").ConfigureAwait(false);
-            await window.Until("document.querySelector('.code-user .prose')?.textContent.trim()", "hello").ConfigureAwait(false);
+            await window.Until("document.querySelector('.user-message .prose')?.textContent.trim()", "hello").ConfigureAwait(false);
             await window.Until("document.querySelector('.code-words').value", string.Empty).ConfigureAwait(false);
 
             Assert.True(window.Exceptions.Count == 0, string.Join('\n', window.Exceptions));

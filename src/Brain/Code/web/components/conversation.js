@@ -98,7 +98,7 @@ function sentOf(event, agents) {
 function eventView(event, agents, onAgent) {
   switch (event.kind) {
     case 'user':
-      return html`<div class="code-user">${wordsView(event)}${imagesView(event.images)}</div>`;
+      return html`<div class="user-message">${wordsView(event)}${imagesView(event.images)}</div>`;
     case 'text':
       return html`<div class="code-said">${said(event)}</div>`;
     case 'agent':

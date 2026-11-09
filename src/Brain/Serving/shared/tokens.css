@@ -21,6 +21,10 @@
   --stale-wash: light-dark(#faf1dc, #30281a);
   --focus: light-dark(#3c6fd8, #7ea3f2);
   --select: light-dark(#e9edf6, #232834);
+  /* The user's own words in a conversation: the focus blue washed behind them, and a stronger shade of it at their edge,
+     so they stand apart from the agent's prose in every Omarchy theme. */
+  --you-wash: color-mix(in srgb, var(--focus) 14%, var(--paper));
+  --you-edge: color-mix(in srgb, var(--focus) 45%, transparent);
   /* Code's syntax colors, one per kind of token. /theme.css sets them to the Omarchy theme's magenta, green, yellow, blue
      and cyan where they read on its background. */
   --code-comment: var(--muted);

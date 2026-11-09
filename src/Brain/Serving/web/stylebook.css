@@ -33,6 +33,7 @@
 .sb-pane { width: 30rem; max-width: 100%; border: 1px solid var(--rule); border-radius: var(--radius-2); background: var(--paper); overflow: hidden; }
 .sb-pane-small { margin: 0; }
 .sb-pane-wide { width: 44rem; }
+.sb-conversation { display: flex; flex-direction: column; padding: var(--sp-4); }
 .sb-panel { display: flex; height: 22rem; }
 .sb-panel .info-panel { flex: 1; }
 /* The process fold folds out under its chip, leftward from the chip's right edge, so its sample gives it the room. */

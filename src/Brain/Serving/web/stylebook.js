@@ -5,7 +5,7 @@
 // sheet in components/, and its head names that sheet. The option list, the model selector and the embedding model
 // picker are drawn here by their own functions, which their modules offer on window, and so are the markdown component,
 // the image viewer, and brain code's image thumbnail, file explorer, permission request, question, stop confirm,
-// process fold, agent row, agent flow, agent message, trail step, Navarone signal, verdict, tool call, tool run, information panel
+// process fold, agent row, agent flow, user message, agent message, trail step, Navarone signal, verdict, tool call, tool run, information panel
 // and tool detail. A component shown hovered carries data-hover and one shown focused data-focus, which its sheet draws
 // as the pointer's hover and the keys' focus.
 'use strict';
@@ -616,6 +616,10 @@ function demoAgentMessage(from) {
   return h('div', { class: 'sb-pane sb-pane-wide' }, templateNode(message));
 }
 
+function demoUserMessage() {
+  return h('div', { class: 'sb-pane sb-pane-wide sb-conversation' }, h('div', { class: 'user-message' }, markdownView('Does the lens keep its sections folded?')));
+}
+
 function demoTrailStep(step) {
   const shown = { agent: 'a6bc33033f88b2057', at: '2026-11-06T19:37:06Z', text: '', landed: null, ...step };
   const view = trailStepView(shown, markdownView('All eight findings are fixed; the gate is green.'));
@@ -831,6 +835,9 @@ function componentsView() {
         ['three pieces of work and an agent of no work', demoAgentFlow(DEMO_FLOW)],
         ['the validator open', demoAgentFlow(DEMO_FLOW.slice(5, 7), 'f7')],
       ])),
+    h('section', { class: 'doc-section sb-group' },
+      h('h2', {}, 'User message, .user-message, components.css'),
+      stateRow('in a conversation', [['the user’s words', demoUserMessage()]])),
     h('section', { class: 'doc-section sb-group' },
       h('h2', {}, 'Agent message, .agent-message, shared/components/agent-message.js'),
       stateRow('in a conversation', [['from another agent', demoAgentMessage('validator')], ['sent by the agent', demoAgentMessage(null)]])),

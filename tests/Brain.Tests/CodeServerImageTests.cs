@@ -249,9 +249,9 @@ public sealed partial class CodeServerTests
             Assert.Equal(string.Empty, await window.Eval("document.querySelector('.code-words').value").ConfigureAwait(false));
 
             await window.Eval("const box = document.querySelector('.code-words'); box.value = 'look'; box.dispatchEvent(new Event('input')); box.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))").ConfigureAwait(false);
-            await window.Until("String(document.querySelectorAll('.code-user .image-thumb').length)", "2").ConfigureAwait(false);
+            await window.Until("String(document.querySelectorAll('.user-message .image-thumb').length)", "2").ConfigureAwait(false);
             await window.Until("String(document.querySelectorAll('.code-attached .image-thumb').length)", "0").ConfigureAwait(false);
-            await window.Eval("document.querySelector('.code-user .image-thumb-open').click()").ConfigureAwait(false);
+            await window.Eval("document.querySelector('.user-message .image-thumb-open').click()").ConfigureAwait(false);
             await window.Until("String(document.querySelectorAll('.image-viewer img').length)", "1").ConfigureAwait(false);
 
             Assert.Contains(Pictures(), await File.ReadAllTextAsync(Path.Combine(brain.Home, "cache", CodeServer.Folder, "attached-from")).ConfigureAwait(false), StringComparison.Ordinal);
