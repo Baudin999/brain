@@ -275,7 +275,6 @@
   background: var(--stale);
 }
 
-
 /* Where the work ends: the landing a terminal in the yes color, or a dashed one that says where the work stands. */
 
 .agent-flow-end {
