@@ -465,7 +465,7 @@ internal sealed class CodeServer : IDisposable
     private CodeSentList Sent(HttpListenerRequest request)
     {
         var session = sessions.Of(request.QueryString["session"]);
-        return records.Time("sent", session.Id, ReadBudgetMs, session.Agents);
+        return records.Time("sent", session.Id, ReadBudgetMs, () => session.Agents(signals, records));
     }
 
     private CodeAgentView SentAgent(HttpListenerRequest request)
@@ -511,6 +511,11 @@ internal sealed class CodeServer : IDisposable
         if (choice is null)
         {
             throw new BrainException("settings need a choice of tool calls and brain calls");
+        }
+
+        if (choice.Agents is not (CodeSettingsView.Flow or CodeSettingsView.List))
+        {
+            throw new BrainException($"the agents panel draws as {CodeSettingsView.Flow} or {CodeSettingsView.List}, not {choice.Agents}");
         }
 
         return settings.Save(choice);

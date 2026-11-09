@@ -1,5 +1,5 @@
 {
-  "granted": 216,
+  "granted": 218,
   "problems": [
     {
       "id": "0000001",
@@ -1597,12 +1597,12 @@
       "id": "0000191",
       "check": "split-complexity",
       "symbol": "brain::Brain.Code.SentAgents.Read(Transcript)",
-      "fingerprint": "863af49d3686350ca37ec0f91894669a97dc2029ce38a1049d7baf59e462bc8e",
-      "value": 39,
+      "fingerprint": "1f93ce4aa7d38d807975b1ca79df69c32c46f7978e6b05d39536ef6ff63971b7",
+      "value": 34,
       "resolution": {
-        "reason": "Read stays a short walk: calls, metas, agents, order. The ctor reads one agent\u0027s state, start, end and now; KindOf maps a type to a kind; NowOf(string-free) reads the last tool call or words; StateOf picks one of four states; Verdict reads the two words a check opens with; WorkOf finds the builder a brief names; FailedCalls collects error results; WithUnwritten adds a meta for a call with none yet. Each answers one question about one agent and none is a branch of Read cut in pieces.",
-        "fingerprint": "863af49d3686350ca37ec0f91894669a97dc2029ce38a1049d7baf59e462bc8e",
-        "value": 39
+        "reason": "Read stays a short walk: calls, metas, agents, order. The .ctor reads one agent\u0027s state, start, end and now; KindOf maps a type to a kind; NowOf reads the last tool call or words; StateOf picks one of four states; Verdict reads the two words a check opens with; WorkOf finds the builder a brief names; WithUnwritten adds the agents whose meta Claude Code has not written yet. Each answers one question about one agent. FailedCalls left the sum: Worktrees uses it too.",
+        "fingerprint": "1f93ce4aa7d38d807975b1ca79df69c32c46f7978e6b05d39536ef6ff63971b7",
+        "value": 34
       }
     },
     {
@@ -1758,15 +1758,23 @@
       "resolution": null
     },
     {
-      "id": "0000214",
+      "id": "0000217",
       "check": "split-complexity",
-      "symbol": "brain::Brain.Code.SentAgents.Listed(List\u003CAgent\u003E)",
-      "fingerprint": "49221cfc8fc9e27916486298aeb0a0cf7f1e639ce6266a022e031876d1a3c642",
+      "symbol": "brain::Brain.Code.SentAgents.Agent.NavaroneRuns.get",
+      "fingerprint": "67d770311785d252552f6e4597b39407ef7434c51c2ed0e87a7227ac109b64b7",
       "value": 11,
+      "resolution": null
+    },
+    {
+      "id": "0000218",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Code.Worktrees.Of(string, DateTimeOffset?, IReadOnlyList\u003CCodeEvent\u003E, IReadOnlyList\u003CIReadOnlyList\u003CCodeEvent\u003E\u003E, string)",
+      "fingerprint": "2481bf83ef4bb582b51652cb472fa58c5a73588ea8b249660a3707245ed158c3",
+      "value": 25,
       "resolution": {
-        "reason": "Listed makes one CodeSent per agent from facts that span agents. CheckedBy matches a check\u0027s brief, then falls to the next builder or validator sent; IsWork names the one test of those two kinds; OutlineOf shortens the steps PieceOf takes from Trail.Of. Each is its own question about one agent.",
-        "fingerprint": "49221cfc8fc9e27916486298aeb0a0cf7f1e639ce6266a022e031876d1a3c642",
-        "value": 11
+        "reason": "Of decides given or opened, then removed, then gone. Ran finds the first Bash call of a verb whose result was no error, and when it ran; Named reads one Bash line, its cd, its git -C and its verb; PathAfterOptions skips the option words and their values; Resolved makes a path full in a folder. Ran is about the agent\u0027s events and the other three about one shell line; inlined they would be one method that mixes the two.",
+        "fingerprint": "2481bf83ef4bb582b51652cb472fa58c5a73588ea8b249660a3707245ed158c3",
+        "value": 25
       }
     },
     {

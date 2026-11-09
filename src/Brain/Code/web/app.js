@@ -8,7 +8,7 @@
 // view, and each conversation's events read so far. A page draws from it and never changes it; a click calls an action
 // here, which changes it and draws. The tool calls of the conversation, the second flow, open in the information panel
 // on the right, which shows the call the user last clicked and changes on no other act; the settings choose which kinds
-// of that flow are drawn, and the server keeps them. The server says on the window's event stream which session
+// of that flow are drawn and whether the agents panel draws a flow or a list, and the server keeps them. The server says on the window's event stream which session
 // changed; the window then reads only the events past those it has. A state change only draws: the conversation scrolls
 // to its newest event only where new events arrived, and only when it was at its end, as a terminal does; nothing an
 // agent does picks a session or opens a page, and a new agent or round only marks its session. A permission request
@@ -86,8 +86,8 @@ const state = {
   conversations: new Map(),
   // The page in view: a session's, the page of every open question, or the settings.
   page: 'session',
-  // Which kinds of the second flow the conversation draws, as the server keeps them.
-  settings: { tools: true, brain: true },
+  // Which kinds of the second flow the conversation draws, and how the agents panel draws, as the server keeps them.
+  settings: { tools: true, brain: true, agents: 'flow' },
   // The selected text the Quote button offers to put in the composer, { text, top, left }, or null.
   quote: null,
   // The tool call the information panel shows, { key, id }: the key of the conversation it is in and the call's id, or
@@ -399,6 +399,13 @@ function historyKeyed(event) {
 async function setKind(id, on) {
   await act('settings.set', `${id} ${on}`, null, async () => {
     state.settings = await ask('/api/settings', { ...state.settings, [id]: on });
+  });
+}
+
+// Draws the agents panel as a flow or as a list, and the server keeps the choice.
+async function setShows(shows) {
+  await act('settings.set', `agents ${shows}`, null, async () => {
+    state.settings = await ask('/api/settings', { ...state.settings, agents: shows });
   });
 }
 
@@ -962,7 +969,7 @@ function mainView() {
     folded, onFold: fold, onEndProcess: endProcess, ending: isEnding,
   };
   if (state.page === 'questions') return questionsPage(state.sessions, actions);
-  if (state.page === 'settings') return settingsPage(state.settings, { onChange: setKind });
+  if (state.page === 'settings') return settingsPage(state.settings, { onChange: setKind, onShows: setShows });
   const session = state.sessions.find((one) => one.id === state.selected);
   if (!session) {
     return html`<div class="quiet"><h2>No session in view</h2><p>Pick one on the side, or start a new one.</p></div>`;

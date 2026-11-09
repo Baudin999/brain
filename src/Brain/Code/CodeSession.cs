@@ -203,15 +203,18 @@ internal sealed class CodeSession : IDisposable
         return true;
     }
 
-    /// <summary>Every agent the session sent, in the order it sent them; none until claude wrote its transcript.</summary>
-    public CodeSentList Agents()
+    /// <summary>
+    /// Every agent the session sent, in the order it sent them, each builder with its work's Navarone signals from
+    /// <paramref name="signals"/>; none until claude wrote its transcript.
+    /// </summary>
+    public CodeSentList Agents(WorkSignals signals, Records records)
     {
         if (Follow() is not { } read)
         {
             return new CodeSentList([]);
         }
 
-        return new CodeSentList(sent.All(read));
+        return new CodeSentList(sent.All(read, signals, new Landings(Cwd, records)));
     }
 
     /// <summary>

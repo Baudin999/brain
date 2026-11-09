@@ -1,5 +1,5 @@
 // The session page: one session's conversation, live, under a head that names its agent, its folder and its id, and
-// the composer under it, with the agents it sent listed beside it. Closing stops the session's claude and everything it
+// the composer under it, with the agents it sent beside it, drawn as the settings choose, a flow or a list. Closing stops the session's claude and everything it
 // runs; while it is answering, the button says so. The processes its agent started that still run wait behind a chip
 // beside the close button, which folds them out over the conversation, each with its own stop, so the head keeps its
 // height as they come and go. An agent the session sent opens its own view on the agent page,
@@ -63,7 +63,7 @@ export function sessionPage(session, conversation, agents, actions) {
         ${openQuestionsView(session, { onShow: onShowQuestion })}
         ${composerView(session, { onSend, onInterrupt, stopping, confirm, onConfirm, onKeep, onExplore, onChange })}
       </div>
-      ${agentListView(agents, null, { onOpen: onAgent })}
+      ${agentListView(agents, null, { shows: kinds.agents, root: session.agent, onOpen: onAgent })}
     </div>
   `;
 }

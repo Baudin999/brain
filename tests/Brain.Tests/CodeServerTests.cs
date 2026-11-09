@@ -335,13 +335,16 @@ public sealed partial class CodeServerTests : IDisposable
     }
 
     /// <summary>
-    /// The window in a real browser: the agents a session sent show beside its conversation, and a validator opens on the
-    /// trail of its work, its round's findings drawn as markdown, with its conversation one click away.
+    /// The window in a real browser: the agents a session sent show beside its conversation, drawn as the list, and a
+    /// validator opens on the trail of its work, its round's findings drawn as markdown, with its conversation one click
+    /// away.
     /// </summary>
     [WindowFact]
     public async Task TheWindowShowsASessionsAgentsAndAValidatorsTrail()
     {
         var id = await SentThree().ConfigureAwait(false);
+        Directory.CreateDirectory(Path.Combine(brain.Home, "cache", "code"));
+        await File.WriteAllTextAsync(Path.Combine(brain.Home, "cache", "code", "settings.json"), """{"agents":"list"}""").ConfigureAwait(false);
         var window = await Headless.Open(windows[0], Path.Combine(brain.Root, "chromium")).ConfigureAwait(false);
         try
         {
@@ -389,7 +392,7 @@ public sealed partial class CodeServerTests : IDisposable
     private static string Call(string tool, string type, string description) =>
         $$$"""{"type":"assistant","message":{"content":[{"type":"tool_use","id":"{{{tool}}}","name":"Agent","input":{"subagent_type":"{{{type}}}","description":"{{{description}}}","run_in_background":true}}]}}""";
 
-    private static string Stamp(int second) => $"2026-11-06T19:00:{second:00}Z";
+    private static string Stamp(int second) => new DateTimeOffset(2026, 11, 6, 19, 0, 0, TimeSpan.Zero).AddSeconds(second).ToString("yyyy-MM-ddTHH:mm:ssZ", System.Globalization.CultureInfo.InvariantCulture);
 
     private static string Brief(int second, string text) =>
         $$$"""{"type":"user","timestamp":"{{{Stamp(second)}}}","message":{"role":"user","content":"{{{text}}}"}}""";
@@ -406,8 +409,10 @@ public sealed partial class CodeServerTests : IDisposable
     private static string Peer(int second, string from, string text) =>
         $$$"""{"type":"user","isMeta":true,"timestamp":"{{{Stamp(second)}}}","origin":{"kind":"peer","from":"{{{from}}}","name":"validator","body":"{{{text}}}"},"message":{"role":"user","content":"Another Claude session sent a message"}}""";
 
-    private static string Bash(int second, string tool) =>
-        $$$"""{"type":"assistant","timestamp":"{{{Stamp(second)}}}","message":{"content":[{"type":"tool_use","id":"{{{tool}}}","name":"Bash","input":{"command":"git commit -m x","description":"Commit"}}]}}""";
+    private static string Bash(int second, string tool) => Bash(second, tool, "git commit -m x");
+
+    private static string Bash(int second, string tool, string command) =>
+        $$$"""{"type":"assistant","timestamp":"{{{Stamp(second)}}}","message":{"content":[{"type":"tool_use","id":"{{{tool}}}","name":"Bash","input":{"command":"{{{command}}}","description":"Commit"}}]}}""";
 
     private static string BashResult(int second, string tool, string text) =>
         $$$"""{"type":"user","timestamp":"{{{Stamp(second)}}}","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"{{{tool}}}","content":"{{{text}}}"}]}}""";

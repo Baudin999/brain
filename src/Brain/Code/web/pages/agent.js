@@ -81,7 +81,7 @@ function detailsView(view) {
       <summary class="fold">Details</summary>
       <div class="code-details-body">
         <p>Agent ${sent.agent}, a ${sent.type}, sent by the call ${sent.tool}</p>
-        ${sent.worktree ? html`<p>Worktree ${sent.worktree}</p>` : nothing}
+        ${sent.worktree ? html`<p>Worktree ${sent.worktree.path}</p>` : nothing}
         ${sent.started ? html`<p>Started ${sent.started}</p>` : nothing}
         ${sent.ended ? html`<p>Last wrote ${sent.ended}</p>` : nothing}
         ${trail}

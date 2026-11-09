@@ -1,11 +1,14 @@
-// The agent list: every agent a session sent, in the order it sent them, beside the conversation, each as the shared
-// agent row. A piece of work reads as one trail joined by a line: the checks, the builder, each validator with its
+// The agents panel beside the conversation: every agent a session sent, drawn as the settings choose, as the shared
+// agent flow, a diagram of blocks and lines from the open agent on, or as the list.
+//
+// The agent list: every agent a session sent, in the order it sent them, each as the shared agent row. A piece of work reads as one trail joined by a line: the checks, the builder, each validator with its
 // checks, and between them the steps that passed between the agents, as the server outlines them. A click opens the
 // agent's own view, a step's the view of the agent that wrote it, at that step. The list is drawn from what the server
 // says and holds no state of its own.
 import { html, nothing } from '/lit-html.js';
 import { agentRowView } from '/components/agent-row.js';
 import { trailOutlineView } from '/components/trail-step.js';
+import { agentFlowView } from '/components/agent-flow.js';
 
 // The entries of the list, in the order the first agent of each was sent. A builder heads one piece of work, which its
 // validators join; a readiness check joins the entry of the agent the server says it checked, and stands alone when
@@ -69,17 +72,24 @@ function countLine(agents) {
   return parts.join(' · ');
 }
 
-// The agents a session sent, with the call id of the one open, or null; onOpen(tool) opens an agent by its call id.
-export function agentListView(agents, open, { onOpen }) {
+function listView(agents, open, now, onOpen) {
+  return html`<ol class="code-agent-groups">${grouped(agents).map((group) => groupView(group, open, now, onOpen))}</ol>`;
+}
+
+// The agents a session sent, with the call id of the one open, or null; shows is 'flow' or 'list', root names the
+// session's open agent the flow starts at, and onOpen(tool, step) opens an agent by its call id, at a step by its key.
+export function agentListView(agents, open, { shows, root, onOpen }) {
   if (agents.length === 0) return nothing;
   const now = Date.now();
+  let body = agentFlowView(agents, { root, open, now, onOpen });
+  if (shows === 'list') body = listView(agents, open, now, onOpen);
   return html`
-    <aside class="code-agents" aria-label="Agents the session sent">
+    <aside class="code-agents" data-shows=${shows} aria-label="Agents the session sent">
       <header class="code-agents-head">
         <h2 class="code-agents-title">Agents</h2>
         <span class="code-agents-count">${countLine(agents)}</span>
       </header>
-      <ol class="code-agent-groups">${grouped(agents).map((group) => groupView(group, open, now, onOpen))}</ol>
+      ${body}
     </aside>
   `;
 }

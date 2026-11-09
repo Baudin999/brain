@@ -104,6 +104,7 @@ public sealed partial class ReviewServerTests
             await window.Eval("showInbox(':stylebook')").ConfigureAwait(false);
             await window.Until("String(document.querySelectorAll('#main .model-selector .option-list, #main .toggle').length >= 6 && document.querySelectorAll('#main .embedder-picker').length === 2 && document.querySelectorAll('#main .embedder-picker-step progress').length === 2 && document.querySelector('#main .embedder-picker-failed') !== null)", "true").ConfigureAwait(false);
             await window.Until("[...['.agent-row', '.agent-message', '.trail-step', '.navarone-signal', '.verdict'].map((one) => document.querySelectorAll('#main ' + one).length)].join()", "8,2,5,8,2").ConfigureAwait(false);
+            await window.Until("[...['.agent-flow', '.agent-flow-work', '.agent-flow-step', '.agent-flow-check'].map((one) => document.querySelectorAll('#main ' + one).length)].join()", "2,4,10,3").ConfigureAwait(false);
 
             Assert.True(window.Exceptions.Count == 0, string.Join('\n', window.Exceptions));
         }).ConfigureAwait(false);

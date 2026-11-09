@@ -93,6 +93,8 @@
   --measure: 40rem;
   /* The width of brain code's information panel, on the right of a conversation. */
   --panel-width: 30rem;
+  /* The width of brain code's agents panel when it draws the agents as a flow: two lifelines side by side. */
+  --flow-width: 40rem;
   /* How wide markdown shown as text wraps, in brain's window: the diff of a node or of a .md file. Code never wraps. */
   --wrap-measure: 120ch;
   /* The widest a pane head's title and notices run. */

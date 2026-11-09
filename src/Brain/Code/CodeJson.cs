@@ -170,8 +170,9 @@ internal sealed record CodeDecision(bool Allow, [property: JsonIgnore(Condition 
 /// One agent a session sent, as the window lists it: its id, the id of the call that sent it, its type and the kind
 /// of view it opens in, what it was sent to do, whether it runs, finished, was stopped or failed, when it started and
 /// last wrote, the id of the builder whose work it is part of, a readiness check's verdict, and the worktree it builds
-/// in. A readiness check carries the call id of the agent it checked, <c>Attached</c>, and none when no agent was sent
-/// after it yet; a running agent what it does now; a builder the outline of the steps of its work.
+/// in, with when it was opened and whether it was removed. A readiness check carries the call id of the agent it
+/// checked, <c>Attached</c>, and none when no agent was sent after it yet, and whether its verdict asks questions; a
+/// running agent what it does now; a builder the outline of the steps of its work and the Navarone signals it touched.
 /// </summary>
 internal sealed record CodeSent(
     string Agent,
@@ -184,10 +185,12 @@ internal sealed record CodeSent(
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DateTimeOffset? Ended,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Work,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Verdict,
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Worktree,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] CodeWorktree? Worktree = null,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Attached = null,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Now = null,
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<CodeOutline>? Steps = null)
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<CodeOutline>? Steps = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] bool Asks = false,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] CodeSignals? Signals = null)
 {
     public const string Builder = "builder";
     public const string Validator = "validator";
@@ -202,6 +205,16 @@ internal sealed record CodeSent(
 
     public const string Failed = "failed";
 }
+
+/// <summary>
+/// The worktree an agent builds in: its full path, when it was opened, whether it was removed, by a call that removed it
+/// or by its folder being gone, and when that call ran.
+/// </summary>
+internal sealed record CodeWorktree(
+    string Path,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DateTimeOffset? Opened,
+    bool Removed,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DateTimeOffset? RemovedAt);
 
 /// <summary>
 /// A step of a piece of work, short, for the list: its <see cref="Trail"/> kind, the call id of the agent that wrote it,
@@ -301,10 +314,15 @@ internal sealed record CodeHandover(IReadOnlyList<CodeCarried> Sessions, string?
 internal sealed record CodeStart(string? Agent, string? Cwd, string? Resume);
 
 /// <summary>
-/// What the window shows of the second flow, the tool calls and the brain queries a conversation holds: each kind is
-/// drawn or hidden. Both start on.
+/// What the window shows: of the second flow, the tool calls and the brain queries a conversation holds, each kind
+/// drawn or hidden, both on at the start; and how the agents panel draws the agents a session sent, as a flow or as a
+/// list, a flow at the start.
 /// </summary>
-internal sealed record CodeSettingsView(bool Tools = true, bool Brain = true);
+internal sealed record CodeSettingsView(bool Tools = true, bool Brain = true, string Agents = CodeSettingsView.Flow)
+{
+    public const string Flow = "flow";
+    public const string List = "list";
+}
 
 /// <summary>The user's words to a session, and the images he attached to them.</summary>
 internal sealed record CodeSay(string? Session, string? Words, IReadOnlyList<CodeImage>? Images = null);

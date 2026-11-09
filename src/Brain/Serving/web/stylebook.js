@@ -5,7 +5,7 @@
 // sheet in components/, and its head names that sheet. The option list, the model selector and the embedding model
 // picker are drawn here by their own functions, which their modules offer on window, and so are the markdown component,
 // the image viewer, and brain code's image thumbnail, file explorer, permission request, question, stop confirm,
-// process fold, agent row, agent message, trail step, Navarone signal, verdict, tool call, tool run, information panel
+// process fold, agent row, agent flow, agent message, trail step, Navarone signal, verdict, tool call, tool run, information panel
 // and tool detail. A component shown hovered carries data-hover and one shown focused data-focus, which its sheet draws
 // as the pointer's hover and the keys' focus.
 'use strict';
@@ -568,6 +568,44 @@ function demoAgentRow(sent, opened = false) {
   return h('div', { class: 'sb-pane' }, templateNode(row));
 }
 
+// A session's agents as brain code's flow draws them: a piece of work that landed after two rounds, its worktree opened
+// and removed; one whose validator is in round 1; one still building; and an Explore agent of no work.
+const DEMO_FLOW = [
+  { tool: 'f1', agent: 'r1', type: 'brain-ready', kind: 'ready', description: 'Check the lens', state: 'finished', verdict: 'NOT READY', asks: true, attached: 'f3', started: '2026-11-06T19:00:00Z', ended: '2026-11-06T19:00:40Z' },
+  { tool: 'f2', agent: 'r2', type: 'brain-ready', kind: 'ready', description: 'Check the lens', state: 'finished', verdict: 'READY', attached: 'f3', started: '2026-11-06T19:01:00Z', ended: '2026-11-06T19:01:30Z' },
+  {
+    tool: 'f3', agent: 'b1', type: 'builder', kind: 'builder', description: 'Build the lens', state: 'finished', work: 'b1', started: '2026-11-06T19:02:00Z', ended: '2026-11-06T19:31:40Z',
+    worktree: { path: '/home/user/Projects/lens/.claude/worktrees/lens', opened: '2026-11-06T19:03:00Z', removed: true, removedAt: '2026-11-06T19:34:10Z' },
+    signals: { read: true, all: [{ ended: 'fixed' }, { ended: 'fixed' }, { ended: 'kept' }] },
+    steps: [
+      { kind: 'report', tool: 'f3', at: '2026-11-06T19:15:00Z', round: 0, commits: 1 },
+      { kind: 'findings', tool: 'f5', at: '2026-11-06T19:20:00Z', round: 1, commits: 0 },
+      { kind: 'answer', tool: 'f3', at: '2026-11-06T19:25:00Z', round: 1, commits: 1 },
+      { kind: 'findings', tool: 'f5', at: '2026-11-06T19:28:00Z', round: 2, commits: 0 },
+      { kind: 'answer', tool: 'f3', at: '2026-11-06T19:31:00Z', round: 2, commits: 1 },
+      { kind: 'verdict', tool: 'f5', at: '2026-11-06T19:35:00Z', commits: 3, landed: 'cbfdcf1..8124cb8' },
+    ],
+  },
+  { tool: 'f4', agent: 'r3', type: 'brain-ready', kind: 'ready', description: 'Check the lens review', state: 'finished', verdict: 'READY', attached: 'f5', started: '2026-11-06T19:16:00Z', ended: '2026-11-06T19:16:20Z' },
+  { tool: 'f5', agent: 'v1', type: 'validator', kind: 'validator', description: 'Validate the lens', state: 'finished', work: 'b1', started: '2026-11-06T19:17:00Z', ended: '2026-11-06T19:35:00Z' },
+  {
+    tool: 'f6', agent: 'b2', type: 'builder', kind: 'builder', description: 'Build the dial', state: 'running', work: 'b2', started: '2026-11-06T19:06:00Z', now: 'Bash tests/run.sh',
+    worktree: { path: '/home/user/Projects/lens/.claude/worktrees/dial', opened: '2026-11-06T19:06:40Z', removed: false },
+    steps: [
+      { kind: 'report', tool: 'f6', at: '2026-11-06T19:21:00Z', round: 0, commits: 2 },
+      { kind: 'findings', tool: 'f7', at: '2026-11-06T19:33:00Z', round: 1, commits: 0 },
+    ],
+  },
+  { tool: 'f7', agent: 'v2', type: 'validator', kind: 'validator', description: 'Validate the dial', state: 'running', work: 'b2', started: '2026-11-06T19:24:00Z', now: 'SendMessage b2' },
+  { tool: 'f8', agent: 'x1', type: 'Explore', kind: 'other', description: 'Find the old gauge', state: 'finished', started: '2026-11-06T19:08:00Z', ended: '2026-11-06T19:09:00Z' },
+  { tool: 'f9', agent: 'b3', type: 'builder', kind: 'builder', description: 'Build the gauge', state: 'running', work: 'b3', started: '2026-11-06T19:37:00Z', now: 'Edit src/Gauge.cs', steps: [] },
+];
+
+function demoAgentFlow(agents, open = null) {
+  const flow = agentFlowView(agents, { root: 'brain', open, now: Date.parse('2026-11-06T19:45:00Z'), onOpen: () => {} });
+  return h('div', { class: 'sb-pane sb-pane-wide sb-inset' }, templateNode(flow));
+}
+
 function demoTrailOutline(step) {
   const shown = { tool: 'toolu_1', at: '2026-11-06T19:37:06Z', commits: 0, landed: null, ...step };
   return h('div', { class: 'sb-pane' }, templateNode(trailOutlineView(shown, () => {})));
@@ -786,6 +824,12 @@ function componentsView() {
         ['doing now', demoAgentRow({ ...DEMO_SENT.builder, now: 'Bash tests/run.sh' })],
         ['READY', demoAgentRow(DEMO_SENT.ready)],
         ['NOT READY', demoAgentRow({ ...DEMO_SENT.ready, verdict: 'NOT READY' })],
+      ])),
+    h('section', { class: 'doc-section sb-group' },
+      h('h2', {}, 'Agent flow, .agent-flow, shared/components/agent-flow.css'),
+      stateRow('a session’s agents', [
+        ['three pieces of work and an agent of no work', demoAgentFlow(DEMO_FLOW)],
+        ['the validator open', demoAgentFlow(DEMO_FLOW.slice(5, 7), 'f7')],
       ])),
     h('section', { class: 'doc-section sb-group' },
       h('h2', {}, 'Agent message, .agent-message, shared/components/agent-message.js'),

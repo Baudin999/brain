@@ -43,6 +43,8 @@ internal static class WebAssets
         ("/components/process-fold.js", "shared/components/process-fold.js", Script),
         ("/components/process-fold.css", "shared/components/process-fold.css", Sheet),
         ("/components/agent-row.js", "shared/components/agent-row.js", Script),
+        ("/components/agent-flow.js", "shared/components/agent-flow.js", Script),
+        ("/components/agent-flow.css", "shared/components/agent-flow.css", Sheet),
         ("/components/agent-message.js", "shared/components/agent-message.js", Script),
         ("/components/trail-step.js", "shared/components/trail-step.js", Script),
         ("/components/navarone-signal.js", "shared/components/navarone-signal.js", Script),

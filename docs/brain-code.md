@@ -60,8 +60,9 @@ Its line says it is a brain query and what it asked, and the panel lists the nod
 title, in place of the raw output.
 
 The Settings view, under the session list, has one toggle for each kind, tool calls and brain calls. Off hides that
-kind from the conversation entirely, on draws it as above. Both start on, and the server keeps the choice in the data
-repo's `cache`, so it survives a restart of the window. Thinking has no kind yet: Claude Code writes its blocks with
+kind from the conversation entirely, on draws it as above. Both start on. Under them, the agents panel draws as a Flow,
+the default, or as a List. The server keeps every choice in the data repo's `cache`, so it survives a restart of the
+window. Thinking has no kind yet: Claude Code writes its blocks with
 empty text.
 
 ## Live text
@@ -195,10 +196,28 @@ record in `perf/code/`.
 
 ## The agents a session sent
 
-A session lists every agent it sent beside its conversation, in the order sent: its kind, what it was sent to do,
-whether it runs, finished, was stopped by you or failed, and how long it ran. A builder and each validator whose brief
-names the builder's agent id show together as one piece of work. The session's row counts the agents that still run,
-so a new agent marks its session without taking the view, and the stop confirm names those same agents.
+A session shows every agent it sent in a panel beside its conversation: its kind, what it was sent to do, whether it
+runs, finished, was stopped by you or failed, and how long it ran. A builder and each validator whose brief names the
+builder's agent id are one piece of work, and a readiness check belongs to the agent it checked.
+
+The panel draws them as a flow by default. The open agent, the session itself, is the root, and a trunk runs down from
+it with a branch to each piece of work and to each agent of no work, such as an Explore agent. A piece of work is two
+lifelines, the builder's on the left and its validator's on the right, in the order things happened: each readiness
+check a diamond in its verdict's color, which says when it asks questions; each agent a block, which says what it does
+now while it runs; and between the lifelines one line for each step, whose arrow points the way it went: the builder's
+report and each answer to the validator, with their commits, and each round of findings back to the builder. The
+builder's worktree is a mark where it was opened, and another where it was removed. The work ends in its landing, with
+the range it moved the default branch by and its commits, or says where it stands; under it, the work's Navarone
+signals, counted by how they ended. A click on a block or a line opens what the list opens.
+
+The server reads the worktree from the agents' own work: the one Claude Code gave the builder, opened as it started, or
+the one the builder's own Bash call added with git's `worktree add`, opened when that call ran. It was removed when a
+Bash call of the builder or of a validator of its work ran git's `worktree remove` on it, or once its folder is gone. A
+call whose result was an error opened or removed nothing. The work's Navarone signals are read on that worktree.
+
+The List setting draws the agents in a column in the order sent, each piece of work joined at its start. The session's
+row counts the agents that still run, so a new agent marks its session without taking the view, and the stop confirm
+names those same agents.
 
 Each agent opens in a view made for its kind, with its whole conversation one switch away.
 
@@ -216,8 +235,8 @@ Where the work's worktree has Navarone signals in Navarone's event log, the trai
 answered with a reason the validator kept, replaced with the validator's finding, or a clash waiting for a judge in
 brain's window, as Navarone's disputes list it (see [sources.md](sources.md#the-navarone-tab)). The log is read again
 only after the work's agents ran Navarone. What leads is what happened in words; ids, hashes and the worktree sit
-behind one details fold. The agent row, the agent message, the trail step, the Navarone signal and the verdict are
-shared components, each in its states in the Stylebook.
+behind one details fold. The agent row, the agent flow, the agent message, the trail step, the Navarone signal and the
+verdict are shared components, each in its states in the Stylebook.
 
 ## The server, and reloading it
 
