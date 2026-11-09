@@ -932,7 +932,7 @@ function componentsView() {
       ]),
       stateRow('compact', rowStates('row compact queue-item', false)),
       stateRow('menu', [['rest', demoRow('row menu queue-item')], ['focus', demoRow('row menu queue-item', { 'data-focus': true })], ['hover', demoRow('row menu queue-item', { 'data-hover': true })]]),
-      stateRow('vertical', rowStates('row vertical', true)),
+      stateRow('vertical, a tab of the strip', [...rowStates('row vertical', true), ['pressed, a toggle on', demoRow('row vertical', { 'aria-pressed': 'true' })]]),
       stateRow('tree, a workspace’s', inPlace('sb-pane', [
         ['folder', demoTreeRow(0, 'src', true)],
         ['shut', demoTreeRow(0, 'docs', false)],

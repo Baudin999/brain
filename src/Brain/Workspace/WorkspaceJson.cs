@@ -76,6 +76,12 @@ internal sealed record GitMessage(string? Message);
 /// <summary>What a commit or a push did, in a line the window shows.</summary>
 internal sealed record GitDone(string Said);
 
+/// <summary>The origin of the window that frames the workspace, as brain code's server names it.</summary>
+internal sealed record WorkspaceFrame(string? Frame);
+
+/// <summary>The page's URL with a fresh launch code, for a frame to open.</summary>
+internal sealed record WorkspaceLaunch(string Url);
+
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 [JsonSerializable(typeof(TreeListing))]
 [JsonSerializable(typeof(FileView))]
@@ -88,4 +94,6 @@ internal sealed record GitDone(string Said);
 [JsonSerializable(typeof(GitPath))]
 [JsonSerializable(typeof(GitMessage))]
 [JsonSerializable(typeof(GitDone))]
+[JsonSerializable(typeof(WorkspaceFrame))]
+[JsonSerializable(typeof(WorkspaceLaunch))]
 internal sealed partial class WorkspaceJson : JsonSerializerContext;

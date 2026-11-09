@@ -20,7 +20,7 @@ files next to it.
 - [sources.md](sources.md): other tools' questions in the window, the JSON they print, the bench and its keys, and the
   Navarone tab.
 - [conversations.md](conversations.md): conversations talked through over days, sittings, dreams and the deep dream.
-- [workspace.md](workspace.md): `brain workspace`, a live window over one project folder, with git.
+- [workspace.md](workspace.md): a workspace, a brain code session's folder live in brain code's window, with git.
 - [brain-code.md](brain-code.md): `brain code`, Claude Code sessions in a brain window, with `brain ask`.
 
 ## Commands

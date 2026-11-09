@@ -14,24 +14,12 @@
 .app.no-queue { --queue-column: 0px; }
 .app.no-queue .queue { visibility: hidden; padding: 0; border: 0; }
 
-/* The inboxes down the window's left edge, each label turned a quarter left to read upward, as an editor's side strip.
-   A failing source says so in words, not in color alone. */
+/* The inboxes in the strip of components.css down the window's left edge. A failing source says so in words, not in
+   color alone. */
 
-.strip {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: .6rem .2rem;
-  border-right: 1px solid var(--rule);
-  overflow-y: auto;
-}
-
-.strip-label { white-space: nowrap; }
 .strip-count { color: var(--muted); font-size: var(--text-1); font-variant-numeric: tabular-nums; }
 .strip-failing { color: var(--no); font-size: var(--text-1); font-weight: 600; }
 .strip-failing::before { content: "! "; }
-/* The gap pushes Ask again and the views registered at the bottom, such as Evidence, to the strip's far end. */
-.strip-gap { flex: 1 1 auto; }
 .strip-ask { color: var(--muted); font-size: var(--text-1); }
 
 /* The focus: one project for the whole window, picked at the top of the queue. */
@@ -655,7 +643,6 @@
   .beside-entry { padding-left: 0; border-left: 0; }
   body { overflow: auto; }
   .app, .app.no-side { display: block; height: auto; }
-  .strip { flex-direction: row; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--rule); }
   .queue { border-right: 0; border-bottom: 1px solid var(--rule); }
   .main { overflow: visible; }
   .chat { position: fixed; inset: 0 0 0 auto; }

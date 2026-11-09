@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -11,7 +12,9 @@ namespace Brain.Workspace;
 
 /// <summary>
 /// A workspace's own server, one per project folder: a <see cref="WindowServer"/> that serves only its root, through
-/// <see cref="ProjectFiles"/>, and ends once its window is gone. It asks git through <see cref="WorkspaceGit"/> what is
+/// <see cref="ProjectFiles"/>, and ends once its window is gone. It opens no window of its own: brain code's server,
+/// with the key, asks it for a launch through <c>/api/key/launch</c>, naming its own origin, and shows the page in a
+/// frame of its window, which only that origin may frame. It asks git through <see cref="WorkspaceGit"/> what is
 /// uncommitted, and stages, unstages, commits and pushes when the window asks; a POST that writes must come from the
 /// window's origin. Its window hears on its event stream what changed on disk and whether git moved, which
 /// <see cref="RootWatch"/> sees. It sends the window's records and its own to the <see cref="WindowLog"/> of
@@ -42,7 +45,7 @@ internal sealed class WorkspaceServer
     private readonly WindowServer window;
     private readonly TimeProvider time;
 
-    public WorkspaceServer(string home, string userHome, string root, TextWriter err, Func<string, bool> openWindow, Func<string, bool> raise, TimeProvider time, OmarchyTheme theme)
+    public WorkspaceServer(string home, string userHome, string root, TextWriter err, TimeProvider time, OmarchyTheme theme)
     {
         var id = Id(root);
         log = new WindowLog(home, LogDir, Name(root) + "-" + id, time);
@@ -50,8 +53,7 @@ internal sealed class WorkspaceServer
         project = new ProjectFiles(root, records);
         git = new WorkspaceGit(project, records);
         var kind = new WindowKind(App, "brain workspace", Folder(id), project.Root, Name(root), Title(project.Root, userHome), Assets);
-        // brain workspace makes no keyed call but hello and raise.
-        window = new WindowServer(home, kind, err, openWindow, raise, time, theme, records, (_, response, _) => Refuse(response, HttpStatusCode.NotFound, "no such call"), Api);
+        window = new WindowServer(home, kind, err, openWindow: null, time, theme, records, Keyed, Api);
         this.time = time;
     }
 
@@ -69,7 +71,7 @@ internal sealed class WorkspaceServer
     /// <summary>The folder's own name, as the window and the log name the workspace.</summary>
     public static string Name(string root) => Path.GetFileName(Path.TrimEndingDirectorySeparator(Path.GetFullPath(root)));
 
-    /// <summary>The window's title: the folder's name and its path, the home folder as ~, which no other workspace shares.</summary>
+    /// <summary>The page's title: the folder's name and its path, the home folder as ~.</summary>
     public static string Title(string root, string userHome)
     {
         var shown = root;
@@ -81,7 +83,7 @@ internal sealed class WorkspaceServer
         return Name(root) + " · " + shown;
     }
 
-    /// <summary>Opens its window and listens until <paramref name="stop"/>, or until the window is gone; it watches its root while it serves.</summary>
+    /// <summary>Listens until <paramref name="stop"/>, or until the window is gone; it watches its root while it serves.</summary>
     public async Task Serve(CancellationToken stop)
     {
         log.Prune();
@@ -91,6 +93,45 @@ internal sealed class WorkspaceServer
 
     /// <summary>Answers one request.</summary>
     public void Handle(HttpListenerContext context) => window.Handle(context);
+
+    /// <summary>
+    /// The one keyed call, brain code's server's: a launch for a frame of its window, whose origin the body names. From
+    /// then on only that origin may frame the page. A frame that names no origin of 127.0.0.1 is refused.
+    /// </summary>
+    private void Keyed(HttpListenerRequest request, HttpListenerResponse response, string path)
+    {
+        if ((request.HttpMethod, path) != (Post, "/api/key/launch"))
+        {
+            Refuse(response, HttpStatusCode.NotFound, "no such call");
+            return;
+        }
+
+        var frame = Read(request, WorkspaceJson.Default.WorkspaceFrame)?.Frame;
+        if (!IsLocalOrigin(frame))
+        {
+            Refuse(response, HttpStatusCode.BadRequest, "a launch names the origin on 127.0.0.1 that frames the workspace");
+            return;
+        }
+
+        window.FramedBy(frame);
+        Send(response, new WorkspaceLaunch(window.Launch()), WorkspaceJson.Default.WorkspaceLaunch);
+    }
+
+    /// <summary>True when <paramref name="origin"/> is an origin of 127.0.0.1 with a port, and nothing more.</summary>
+    internal static bool IsLocalOrigin([NotNullWhen(true)] string? origin)
+    {
+        if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+        {
+            return false;
+        }
+
+        if (uri.Scheme != Uri.UriSchemeHttp || uri.Host != "127.0.0.1" || uri.IsDefaultPort)
+        {
+            return false;
+        }
+
+        return uri.GetLeftPart(UriPartial.Authority) == origin;
+    }
 
     private void Changed(Changes changes) =>
         window.Publish("event: changed\ndata: " + JsonSerializer.Serialize(changes, WorkspaceJson.Default.Changes) + "\n\n");

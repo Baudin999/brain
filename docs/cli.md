@@ -95,8 +95,8 @@ Your yes, and the window
                                       needed.
 
 Read a project
-  workspace <path>                    Open a workspace window over a project folder, or bring its
-                                      open one forward.
+  workspace --serve <path>            Serve a project folder's workspace, which brain code shows;
+                                      brain code starts it.
 
 Work with agents
   code [agent] [folder]               Start a Claude Code session of an agent, brain unless named,
@@ -792,31 +792,27 @@ brain ui: started brain serve on 127.0.0.1:47474, and it opens the window
 
 ### brain workspace
 
-Opens a workspace window over one project folder: its file tree beside the file open in it, live as files change on
-disk, with what git has uncommitted. A folder that is open already has its window brought forward.
+Serves the workspace of one project folder: its file tree beside the file open in it, live as files change on disk,
+with what git has uncommitted. It opens no window of its own: [brain code](#brain-code) starts it the first time it
+shows a session's folder, and shows it in its window, in a tab or beside the conversation (see
+[brain-code.md](brain-code.md#a-sessions-folder-its-workspace)).
 
 ```
-brain workspace <path> [--serve]
+brain workspace --serve <path>
 ```
 
 | Argument | Default | What it does |
 |---|---|---|
+| `--serve` | required | Run the folder's server in the foreground. brain code starts it in the background. |
 | `<path>` | none | The folder, relative to the working directory. It must exist. |
-| `--serve` | off | Run the folder's server in the foreground. `brain workspace` starts it in the background. |
 
-Each folder has a server and a window of its own, apart from brain's window. The server ends with its window. It
-writes nothing but what the window's git pane asks of git: a stage, an unstage, a commit and a push. Every command the
-window runs and the server's work are recorded in the data repo's `perf/workspace`, outside git. Its log is in the data
-repo's `cache/workspace/<id>/serve.log`.
+Each folder has a server of its own, apart from brain code's, which ends a few seconds after nothing shows it. It
+writes nothing but what the workspace's git pane asks of git: a stage, an unstage, a commit and a push. Every command
+the workspace runs and the server's work are recorded in the data repo's `perf/workspace`, outside git. Its log is in
+the data repo's `cache/workspace/<id>/serve.log`.
 
-It prints `brain workspace: opened a window over <folder>`, or, for a folder already open,
-`brain workspace: <folder> is open; brought its window forward` (on Hyprland) or `...; opened its window again`
-elsewhere. Exit 0; 1 when the path is no folder or no Chromium-family browser is found.
-
-```
-$ cd ~/Projects/lens && brain workspace .
-brain workspace: opened a window over /home/alice/Projects/lens
-```
+It prints `brain workspace: serving <folder> on <origin>` on stderr and runs until nothing shows it. Exit 0; 1 when the
+path is no folder, or `--serve` is missing.
 
 ## Work with agents
 
@@ -837,10 +833,11 @@ brain code [agent] [folder] [--resume <session-id>] [--serve] [--permission <ses
 | `--serve` | off | Run the window's server in the foreground. `brain code` starts it in the background. |
 | `--permission <session-id>` | none | The PermissionRequest hook of a session, which the server gives each session: it reads the request on stdin, waits for your answer in the window and prints the decision. |
 
-There is one brain code window, apart from brain's window and every workspace's. A second `brain code` adds a session
-to it and brings it forward. A tool call that would ask your permission waits in the window, in its session, until you
-allow or deny it. The server ends with its window, and every session with it. Every call the window makes and the
-server's work are recorded in the data repo's `perf/code`, outside git.
+There is one brain code window, apart from brain's window. A second `brain code` adds a session to it and brings it
+forward. Each session's folder shows as its workspace, in a tab or side by side, served by
+[`brain workspace --serve`](#brain-workspace). A tool call that would ask your permission waits in the window, in its
+session, until you allow or deny it. The server ends with its window, and every session with it. Every call the window
+makes and the server's work are recorded in the data repo's `perf/code`, outside git.
 
 It prints `brain code: started <agent> in <folder>, session <id>`, or for `--resume`
 `brain code: moved session <id> into the window, in <folder>; close its terminal yourself`. `--permission` always
@@ -1279,7 +1276,7 @@ $ brain --project ~/Projects/lens subjects project
 | `LOCAL_BIN` | `~/.local/bin` | Where `install` links `brain` when the binary was built from a checkout. |
 | `XDG_CONFIG_HOME` | `~/.config` | `install` links the data repo's `harness/guard` to `brain/guard` under it, when there is one. |
 | `BRAIN_CODE_SESSION` | none | Set by brain code's server in each session it runs, so `brain ask` finds its session. Do not set it yourself. |
-| `HYPRLAND_INSTANCE_SIGNATURE` | none | Set by Hyprland. With it, `workspace` and `code` bring an open window forward through `hyprctl`; without it they open a fresh one. |
+| `HYPRLAND_INSTANCE_SIGNATURE` | none | Set by Hyprland. With it, `code` brings its open window forward through `hyprctl`; without it, `code` opens a fresh one. |
 
 One command is not in the help: `brain keep-agent`, the keeper brain puts between itself and every `claude` it starts,
 so that each one ends when brain does. It is not for people.

@@ -1,13 +1,29 @@
-/* brain code's window: the sessions on the side, the one in view beside them, its conversation scrolling between its
-   head and the composer. Every value is a token, and every control a component of components.css, placed here. */
+/* brain code's window: the strip of the session's views down its left edge, the sessions beside it, the one in view
+   beside them, its conversation scrolling between its head and the composer, or its folder's workspace in its place,
+   or the two side by side. A pane that does not show keeps its place in the grid at no width, so the frames in the
+   workspace's pane are never made anew. Side by side, the pane the keys are in carries a line of the focus color
+   along its top, as a workspace's panes do. Every value is a token, and every control a component of components.css,
+   placed here. */
 
 .code {
+  --main-column: minmax(0, 1fr);
+  --workspace-column: 0px;
+  --panel-column: 0px;
   display: grid;
-  grid-template-columns: var(--side-width) minmax(0, 1fr);
+  grid-template-columns: var(--strip-width) var(--side-width) var(--main-column) var(--workspace-column) var(--panel-column);
   height: 100vh;
 }
 
-.code[data-panel="shown"] { grid-template-columns: var(--side-width) minmax(0, 1fr) var(--panel-width); }
+.code[data-panel="shown"] { --panel-column: var(--panel-width); }
+.code[data-view="code"] { --main-column: 0px; --workspace-column: minmax(0, 1fr); }
+.code[data-view="beside"] { --workspace-column: minmax(0, 1fr); }
+.code[data-view="code"] .code-main, .code[data-view="conversation"] .code-workspace { visibility: hidden; overflow: hidden; }
+
+.code-workspace { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--paper); }
+.code[data-view="beside"] .code-workspace { border-left: 1px solid var(--rule); }
+.code-workspace-frame { flex: 1; width: 100%; min-height: 0; border: 0; }
+.code-workspace-frame[hidden] { display: none; }
+.code-main[data-focus], .code-workspace[data-focus] { box-shadow: inset 0 2px 0 var(--focus); }
 
 .code-side { display: flex; flex-direction: column; min-height: 0; overflow-y: auto; border-right: 1px solid var(--rule); background: var(--canvas); }
 .code-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--paper); }

@@ -218,7 +218,7 @@ internal static class CodeCommand
     {
         var browser = Browser.Find();
         var theme = new OmarchyTheme(env.UserHome, OmarchyTheme.FindCommand());
-        using var server = new CodeServer(env.Home, env.UserHome, "claude", ClaudeFiles.Of(env.UserHome), env.Err, url => WindowClient.OpenWindow(env, browser, url, WindowClass, "brain code"), Compositor.Raise, TimeProvider.System, theme, new CodeBuild(AppContext.BaseDirectory), () => StartServer(env));
+        using var server = new CodeServer(env.Home, env.UserHome, "claude", ClaudeFiles.Of(env.UserHome), env.Err, url => WindowClient.OpenWindow(env, browser, url, WindowClass, "brain code"), Compositor.Raise, TimeProvider.System, theme, new CodeBuild(AppContext.BaseDirectory), () => StartServer(env), root => WorkspaceCommand.StartServer(env, root));
         Foreground.Run(server.Serve);
         return ExitCodes.Ok;
     }

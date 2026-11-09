@@ -25,16 +25,17 @@ internal static class WebCalls
     /// Answers one request through <paramref name="route"/>, with the page's policy and headers. A failure answers 500 with
     /// what failed, which the window shows where the user acted, goes to stderr and to the usage log of
     /// <paramref name="home"/> as an error of <paramref name="server"/>, and never takes the server down. A window that went
-    /// away while it was answered is no failure: nobody is left to tell.
+    /// away while it was answered is no failure: nobody is left to tell. The page's policy is <see cref="WebAssets.Policy"/>
+    /// unless <paramref name="policy"/> says another.
     /// </summary>
     [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "A server's one boundary: every failure is answered, logged and recorded, never dropped with the task.")]
-    public static void Answer(HttpListenerContext context, string home, string server, TextWriter err, Action<HttpListenerRequest, HttpListenerResponse> route)
+    public static void Answer(HttpListenerContext context, string home, string server, TextWriter err, Action<HttpListenerRequest, HttpListenerResponse> route, string policy = WebAssets.Policy)
     {
         var request = context.Request;
         var response = context.Response;
         try
         {
-            response.Headers["Content-Security-Policy"] = WebAssets.Policy;
+            response.Headers["Content-Security-Policy"] = policy;
             response.Headers["X-Content-Type-Options"] = "nosniff";
             response.Headers["Referrer-Policy"] = "no-referrer";
             response.Headers["Cache-Control"] = "no-store";

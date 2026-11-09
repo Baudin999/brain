@@ -184,15 +184,15 @@ internal static class Help
         {
             Flags = [new("--restart", "Restart a running brain serve on this build.")],
         },
-        new("workspace", "<path>", "Open a workspace window over a project folder, or bring its open one forward.")
+        new("workspace", "--serve <path>", "Serve a project folder's workspace, which brain code shows; brain code starts it.")
         {
-            Flags = [new("--serve", "Run the folder's server in the foreground; brain workspace starts it in the background.")],
             Notes =
             [
-                "Each folder has a server and a window of its own, apart from brain's window. The server ends with its window.",
-                "Every command the window runs and the server's work go to the data repo's perf/workspace, outside git.",
+                "A workspace opens no window of its own: brain code shows a session's folder as its workspace, in a tab or side by side.",
+                "Each folder has a server of its own. It ends a few seconds after nothing shows it.",
+                "Every command the workspace runs and the server's work go to the data repo's perf/workspace, outside git.",
             ],
-            Examples = ["brain workspace ."],
+            Examples = ["brain workspace --serve ~/Projects/lens"],
         },
         new("code", "[agent] [folder]", "Start a Claude Code session of an agent, brain unless named, in a folder, here unless named.")
         {

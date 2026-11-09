@@ -31,6 +31,14 @@
 // from the Quote button beside it or with Alt+Q. Under the image viewer, the file explorer or the close confirm there
 // is no Quote button, and Alt+Q quotes nothing.
 //
+// A session's folder has its workspace, the folder's code, which its own server serves and the window shows in a frame.
+// The strip down the window's left edge has a tab for the conversation of the session in view, Alt+C, and one for its
+// folder's code, Alt+W, and the toggle Alt+V shows the two side by side, which the server keeps. Each gives the keys to
+// what it shows: the workspace's keys work while its frame has the focus, and brain code's while the conversation has
+// it; the frame hands brain code these three keys. Side by side, the pane with the focus carries the focus line. The
+// first time a folder's workspace shows, the server starts it; its frame stays while a session runs in the folder.
+// Nothing an agent does switches a tab or opens a file.
+//
 // Images reach the composer of the session in view by one attach path: dropped on the window, pasted, or attached from
 // the file explorer, which Alt+P opens over the window, in the folder last attached from. The explorer reads the disk
 // through the server only, and the server remembers a folder once an image was attached from it. A thumbnail in the
@@ -56,6 +64,8 @@ import { historyButtonView, historyView } from '/components/history.js';
 import { reloadView } from '/components/reload.js';
 import { settingsPage } from '/pages/settings.js';
 import { toolPanelView } from '/components/tool-calls.js';
+import { viewStripView } from '/components/view-strip.js';
+import { workspaceFolderOf, workspaceFrameOf, workspaceFramesPaint, workspacePaneView } from '/components/workspace-pane.js';
 
 const SESSION_KEY = 'code.session';
 const RECORDS_SEND_MS = 10000;
@@ -64,6 +74,9 @@ const READ_BUDGET_MS = 100;
 const FOLD_READ_MS = 1000;
 // How near its end, in pixels, a conversation counts as at its end.
 const AT_END_PX = 48;
+// The keys of the strip, by the key's place, since Alt can change the letter a layout types: the conversation, the
+// code, and side by side.
+const VIEW_KEYS = { KeyC: 'conversation', KeyW: 'code', KeyV: 'beside' };
 
 const state = {
   closed: null,
@@ -86,8 +99,15 @@ const state = {
   conversations: new Map(),
   // The page in view: a session's, the page of every open question, or the settings.
   page: 'session',
-  // Which kinds of the second flow the conversation draws, and how the agents panel draws, as the server keeps them.
-  settings: { tools: true, brain: true, agents: 'flow' },
+  // Which kinds of the second flow the conversation draws, how the agents panel draws, and whether the conversation and
+  // the code show side by side, as the server keeps them.
+  settings: { tools: true, brain: true, agents: 'flow', beside: false },
+  // The tab in view while the two are not side by side: 'conversation' or 'code', the workspace of the session's folder.
+  view: 'conversation',
+  // The workspace of each folder that showed one, by the folder: { url } its frame opens on, or { problem }.
+  workspaces: new Map(),
+  // Where the keys are: 'conversation', brain code's own, or 'workspace', the frame of the workspace in view.
+  focus: 'conversation',
   // The selected text the Quote button offers to put in the composer, { text, top, left }, or null.
   quote: null,
   // The tool call the information panel shows, { key, id }: the key of the conversation it is in and the call's id, or
@@ -199,6 +219,11 @@ async function readSessions() {
   // A fold with nothing left in it, or of a session that went, folds away.
   const folded = state.sessions.find((one) => one.id === state.fold);
   if (!folded || folded.running.length === 0) state.fold = null;
+  // A folder no session runs in any more has no workspace here.
+  const folders = new Set(state.sessions.map((session) => session.cwd));
+  for (const folder of state.workspaces.keys()) {
+    if (!folders.has(folder)) state.workspaces.delete(folder);
+  }
 }
 
 function conversationOf(key) {
@@ -335,7 +360,103 @@ async function pick(id) {
     state.page = 'session';
     await readShown();
     scrollWhenDrawn(id);
+    if (viewsShown()?.code) await openWorkspace();
   });
+}
+
+// ---- The views of the session in view ----
+
+// The session in view on its own page, or null.
+function sessionInView() {
+  if (state.page !== 'session') return null;
+  return state.sessions.find((one) => one.id === state.selected) ?? null;
+}
+
+// What shows of the session in view, { conversation, code }, or null with none in view: both side by side, else the
+// tab's.
+function viewsShown() {
+  if (!sessionInView()) return null;
+  if (state.settings.beside) return { conversation: true, code: true };
+  return { conversation: state.view === 'conversation', code: state.view === 'code' };
+}
+
+// Asks the server for the workspace of the folder of the session in view, which starts it the first time, unless its
+// frame is open. A workspace that could not start says why in its pane, and is asked for again the next time it shows.
+async function openWorkspace() {
+  const folder = sessionInView()?.cwd;
+  if (!folder) return;
+  if (state.workspaces.get(folder)?.url) return;
+  state.workspaces.delete(folder);
+  draw();
+  try {
+    const launched = await ask('/api/workspace', { folder });
+    state.workspaces.set(folder, { url: launched.url });
+  } catch (error) {
+    state.workspaces.set(folder, { problem: error.message });
+  }
+}
+
+// The user's tab: the conversation, or the folder's code, which starts its workspace the first time; the keys go to
+// what it shows.
+async function showView(view) {
+  if (!sessionInView()) return;
+  await act('view.show', view, null, async () => {
+    state.view = view;
+    if (view === 'code') await openWorkspace();
+  });
+  giveKeys(view);
+}
+
+// The user's toggle: the conversation and the code side by side, or the tab's alone, which the server keeps.
+async function toggleBeside() {
+  if (!sessionInView()) return;
+  const beside = !state.settings.beside;
+  await act('view.beside', String(beside), null, async () => {
+    state.settings = await ask('/api/settings', { ...state.settings, beside });
+    if (beside) await openWorkspace();
+  });
+}
+
+// Puts the keys in what view shows: the composer of the conversation, or the frame of the workspace.
+function giveKeys(view) {
+  const host = document.getElementById('app');
+  if (view === 'code') {
+    workspaceFrameOf(host, sessionInView()?.cwd)?.focus();
+    return;
+  }
+  host.querySelector('.code-composer textarea')?.focus();
+}
+
+// Where the keys went: into a workspace's frame, or anywhere of brain code's own. Side by side it draws the focus line.
+function focusMoved() {
+  let focus = 'conversation';
+  if (document.activeElement instanceof HTMLIFrameElement) focus = 'workspace';
+  if (focus === state.focus) return;
+  state.focus = focus;
+  draw();
+}
+
+// A key the strip takes: Alt+C, Alt+W or Alt+V with no other modifier, while a session is in view; true when it took it.
+function viewKeyed(event) {
+  if (!event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return false;
+  const view = VIEW_KEYS[event.code];
+  if (!view || !sessionInView()) return false;
+  if (view === 'beside') toggleBeside();
+  if (view !== 'beside') showView(view);
+  return true;
+}
+
+// A workspace's frame says something: a key of the strip it holds no binding for, or that its workspace ended, which
+// then starts again the next time it shows.
+function heardFrame(event) {
+  const host = document.getElementById('app');
+  const folder = workspaceFolderOf(host, event);
+  if (!folder) return;
+  const said = event.data ?? {};
+  if (said.workspace === 'key') viewKeyed(said);
+  if (said.workspace !== 'ended') return;
+  state.workspaces.set(folder, { problem: 'The workspace’s server stopped. Alt+W starts it again.' });
+  draw();
 }
 
 async function showSettings() {
@@ -949,9 +1070,28 @@ function draw() {
     render(page(), host);
   }
   if (state.viewer) imageViewerPaint(state.viewer, host);
+  workspaceFramesPaint(host, framesWanted());
   focusCloseConfirm();
   quotePlace(host, state.quote);
   readThumbs();
+}
+
+// A frame for each folder whose workspace opened, and that of the session in view shows while its code does.
+function framesWanted() {
+  const shownFolder = viewsShown()?.code ? sessionInView().cwd : null;
+  const frames = [];
+  for (const [folder, workspace] of state.workspaces) {
+    if (!workspace.url) continue;
+    frames.push({ folder, url: workspace.url, shown: folder === shownFolder });
+  }
+  return frames;
+}
+
+// What the window's columns show: 'conversation', 'code' or 'beside'.
+function layoutOf(shown) {
+  if (shown?.conversation && shown.code) return 'beside';
+  if (shown?.code) return 'code';
+  return 'conversation';
 }
 
 // The close confirm takes focus on its safe answer, Keep, so the keys never reach the composer behind it.
@@ -1021,9 +1161,15 @@ function page() {
   let current = null;
   if (state.page === 'session') current = state.selected;
   const questionsInView = state.page === 'questions';
-  const panel = panelView();
+  const shown = viewsShown();
+  const layout = layoutOf(shown);
+  let panel = nothing;
+  if (layout !== 'code') panel = panelView();
+  const beside = layout === 'beside';
+  const folder = shown?.code ? sessionInView().cwd : null;
   return html`
-    <div class="code" data-panel=${panel === nothing ? 'none' : 'shown'}>
+    <div class="code" data-panel=${panel === nothing ? 'none' : 'shown'} data-view=${layout}>
+      ${viewStripView(shown, state.settings.beside, { onShow: showView, onBeside: toggleBeside })}
       <nav class="code-side" aria-label="Sessions">
         <header class="pane-head"><h1 class="pane-title">Sessions</h1>${reloadView(state.reload, state.reloading, { onReload: reload })}${historyButtonView({ onOpen: showHistory })}${settingsCogView(state.page === 'settings', { onOpen: showSettings })}</header>
         ${questionsRowView(state.sessions, questionsInView, { onOpen: showQuestions })}
@@ -1031,7 +1177,8 @@ function page() {
         ${newSessionView(state.agents, folderOfView(), { onStart: start })}
         ${state.problem ? html`<p class="code-problem" role="status">${state.problem}</p>` : nothing}
       </nav>
-      <main class="code-main">${mainView()}</main>
+      <main class="code-main" ?data-focus=${beside && state.focus === 'conversation'}>${mainView()}</main>
+      ${workspacePaneView(folder, state.workspaces.get(folder) ?? null, beside && state.focus === 'workspace')}
       ${panel}
     </div>
     ${explorerView()}
@@ -1133,8 +1280,9 @@ function clicked(event) {
 }
 
 // The image viewer takes its keys first, then the file explorer, whose box is modal and takes every key, then the
-// history, then the close confirm, which hold them too; else Alt+P opens the explorer and Alt+Q quotes the selection,
-// and while the running processes are folded out, Esc folds them away. They take keys before the box the keys are in,
+// history, then the close confirm, which hold them too; else Alt+C, Alt+W and Alt+V pick what the strip shows, Alt+P
+// opens the explorer and Alt+Q quotes the selection, and while the running processes are folded out, Esc folds them
+// away. They take keys before the box the keys are in,
 // so Enter never sends the words under them.
 function overlayKeyed(event) {
   if (state.viewer) {
@@ -1153,6 +1301,11 @@ function overlayKeyed(event) {
   }
   if (state.closing) {
     closeKeyed(event);
+    return;
+  }
+  if (viewKeyed(event)) {
+    event.preventDefault();
+    event.stopPropagation();
     return;
   }
   if (event.altKey && event.code === 'KeyP') {
@@ -1226,6 +1379,10 @@ async function boot() {
   document.addEventListener('dragover', draggedOver);
   document.addEventListener('drop', dropped);
   document.addEventListener('click', clicked);
+  window.addEventListener('message', heardFrame);
+  window.addEventListener('blur', () => setTimeout(focusMoved));
+  window.addEventListener('focus', focusMoved);
+  document.addEventListener('focusin', focusMoved);
   document.addEventListener('open-image', (event) => {
     state.viewer = imageViewer(event.detail.node);
     draw();

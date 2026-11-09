@@ -6,9 +6,9 @@ using Brain.Serving;
 namespace Brain.Windows;
 
 /// <summary>
-/// The side of a small window's command that talks to its server, as <c>brain workspace</c> and <c>brain code</c> do: it
-/// finds the server that runs by the port and key in its <see cref="ServeFiles"/>, raises its window, waits for a new one
-/// to answer, and opens a window in the browser.
+/// The side of a command that talks to a small window's server, as <c>brain code</c> does with its own server and its
+/// server with a workspace's: it finds the server that runs by the port and key in its <see cref="ServeFiles"/>, raises
+/// its window, waits for a new one to answer, and opens a window in the browser.
 /// </summary>
 internal static class WindowClient
 {
@@ -38,7 +38,7 @@ internal static class WindowClient
     /// <summary>Asks the server to bring its window forward: raised, opened, or no-browser.</summary>
     public static string Raise(HttpClient client, ServeFiles files)
     {
-        using var request = Keyed(HttpMethod.Post, "/api/raise", files);
+        using var request = Keyed(HttpMethod.Post, "/api/key/raise", files);
         using var response = client.Send(request);
         var raised = response.IsSuccessStatusCode ? response.Content.ReadFromJsonAsync(WindowJson.Default.WindowRaised).GetAwaiter().GetResult() : null;
         return raised?.Window ?? "no-browser";

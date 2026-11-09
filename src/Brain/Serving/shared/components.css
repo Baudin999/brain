@@ -128,13 +128,29 @@ button.chip:is(:hover, [data-hover]):not(:disabled) { background: var(--select);
 .row:is(:disabled, [aria-disabled="true"]) { opacity: .45; cursor: default; }
 .row.compact { padding: var(--sp-1) var(--sp-2); }
 .row.menu:is(:focus, [data-focus]) { background: var(--select); outline: none; }
-.row.vertical { align-items: center; gap: var(--sp-2); writing-mode: vertical-rl; transform: rotate(180deg); padding: var(--sp-3) 0; color: var(--ink-soft); font-size: var(--text-2); }
-.row.vertical[aria-current="true"] { color: var(--ink); font-weight: 600; }
-.row.vertical[aria-current="true"]::before { inset: var(--sp-1) 0 var(--sp-1) auto; }
+.row.vertical { align-items: center; gap: var(--sp-2); white-space: nowrap; writing-mode: vertical-rl; transform: rotate(180deg); padding: var(--sp-3) 0; color: var(--ink-soft); font-size: var(--text-2); }
+.row.vertical:is([aria-current="true"], [aria-pressed="true"]) { color: var(--ink); font-weight: 600; }
+.row.vertical:is([aria-current="true"], [aria-pressed="true"])::before { content: ""; position: absolute; inset: var(--sp-1) 0 var(--sp-1) auto; width: 3px; border-radius: var(--radius-1); background: var(--accent, var(--focus)); }
+
+/* The strip: the tabs down a window's left edge, as an editor's side strip, each a vertical row; brain's window lists
+   its inboxes in it, and brain code a session's views. Its gap pushes what follows to its far end. A tab's label keeps to
+   one line, and a tab that toggles, rather than picks, is pressed while it is on. */
+
+.strip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: .6rem .2rem;
+  border-right: 1px solid var(--rule);
+  overflow-y: auto;
+}
+
+.strip-gap { flex: 1 1 auto; }
 
 @media (max-width: 760px) {
   .row.vertical { writing-mode: horizontal-tb; transform: none; width: auto; padding: var(--sp-1) var(--sp-2); }
-  .row.vertical[aria-current="true"]::before { inset: auto var(--sp-1) 0; width: auto; height: 3px; }
+  .row.vertical:is([aria-current="true"], [aria-pressed="true"])::before { inset: auto var(--sp-1) 0; width: auto; height: 3px; }
+  .strip { flex-direction: row; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--rule); }
 }
 
 /* The palette: a box over the window, on a shade that dims it. It holds what finds what to run as the keys type:

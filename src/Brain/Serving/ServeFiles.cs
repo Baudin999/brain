@@ -5,8 +5,8 @@ namespace Brain.Serving;
 
 /// <summary>
 /// The files only the user's own account may read, in <c>cache/serve</c>, a directory of mode 0700, or in the folder of
-/// <c>cache</c> that <c>folder</c> names, as a workspace's. <c>key</c>, mode 0600, holds the secret brain ui or brain
-/// workspace sends to reach the server that runs. A launch file, mode 0600, holds one window's launch
+/// <c>cache</c> that <c>folder</c> names, as a workspace's. <c>key</c>, mode 0600, holds the secret brain ui, brain code
+/// or brain code's server sends to reach the server that runs. A launch file, mode 0600, holds one window's launch
 /// code: the browser opens the file, which sends it on to the window's URL, so the code never stands on a command line,
 /// where every account on the machine could read it. The file goes once the window traded the code or a new one opens.
 /// </summary>

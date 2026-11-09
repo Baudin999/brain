@@ -1,5 +1,8 @@
-// A workspace's window: one project folder, its file tree beside the file open in it, live as files change on disk,
-// and all of it reachable from the keys.
+// A workspace: one project folder, its file tree beside the file open in it, live as files change on disk, and all of
+// it reachable from the keys. It opens in a frame of brain code's window, its host, which shows a session's folder so;
+// it has no window of its own. Its keys work while the frame has the focus, and the panes show the focus line only
+// then. A key with Alt that no binding takes is the host's, such as the one that shows the conversation again, and goes
+// to it; so does word that the workspace ended.
 //
 // The core is five things, and everything else is a plugin on them. The workspace holds all state: the root, the file
 // open, the focus, the layout and each plugin's own part. A command has a name, a title, a budget and a run against
@@ -43,6 +46,8 @@ const workspace = {
   history: [],
   problem: null,
   closed: null,
+  // Whether the keys are elsewhere, in the host's window around the frame.
+  away: false,
   // The records the probe shows, written by the core's telemetry only: each command's, and the server's while the
   // probe reads them.
   records: [],
@@ -210,8 +215,8 @@ function page(ws) {
   }
   return html`
     <div class="ws" ?data-tree=${ws.layout.tree}>
-      <nav class="ws-side" aria-label="Files" ?hidden=${!ws.layout.tree} ?data-focus=${ws.focus === 'tree'}>${slot('side', ws)}</nav>
-      <main class="ws-main" ?data-focus=${ws.focus === 'reader'}>${slot('main', ws)}</main>
+      <nav class="ws-side" aria-label="Files" ?hidden=${!ws.layout.tree} ?data-focus=${!ws.away && ws.focus === 'tree'}>${slot('side', ws)}</nav>
+      <main class="ws-main" ?data-focus=${!ws.away && ws.focus === 'reader'}>${slot('main', ws)}</main>
       <footer class="ws-status">${slot('status', ws)}</footer>
     </div>
     ${slot('overlay', ws)}
@@ -259,10 +264,30 @@ function bindingOf(event) {
 function onKey(event) {
   if (!workspace.session || workspace.closed) return;
   const binding = bindingOf(event);
-  if (!binding) return;
+  if (!binding) {
+    if (event.altKey) tellHost({ workspace: 'key', code: event.code, altKey: true, ctrlKey: event.ctrlKey, shiftKey: event.shiftKey, metaKey: event.metaKey });
+    return;
+  }
   event.preventDefault();
   const args = binding.args ? binding.args(workspace) : {};
   execute(binding.command, args, FROM.key, event.timeStamp);
+}
+
+// ---- The host ----
+
+// Says said to the window that frames the workspace, and to no other origin; nothing when it has no host.
+function tellHost(said) {
+  if (window.parent === window) return;
+  const host = location.ancestorOrigins?.[0];
+  if (!host) return;
+  window.parent.postMessage(said, host);
+}
+
+// The keys went into the frame, or out to the host's window: the panes' focus line follows them.
+function keysMoved(away) {
+  if (workspace.away === away) return;
+  workspace.away = away;
+  draw();
 }
 
 // ---- The server ----
@@ -286,24 +311,24 @@ function listen() {
 function heard(event, data) {
   if (event === 'changed') execute('workspace.refresh', JSON.parse(data), FROM.file);
   if (event === 'theme') windowSwapTheme(draw);
-  if (event === 'close') shut('This workspace opened in a newer window.', true);
+  if (event === 'close') shut('This workspace opened in a newer frame.');
 }
 
 function ended(why) {
   if (why === 'session') {
-    shut('This window’s session ended. Run brain workspace again.');
+    shut('This workspace’s session ended.');
     return;
   }
-  shut('The workspace’s server stopped. Run brain workspace again.', true);
+  shut('The workspace’s server stopped.');
 }
 
-// Shuts the window on a message; with close it closes itself too.
-function shut(message, close) {
+// Shuts the workspace on a message, and tells the host, which starts it again the next time it shows it.
+function shut(message) {
   if (workspace.closed) return;
   workspace.closed = message;
   workspace.session = null;
   windowForget(SESSION_KEY);
-  if (close) window.close();
+  tellHost({ workspace: 'ended' });
   draw();
 }
 
@@ -388,7 +413,7 @@ plugin({
 async function start() {
   const session = await windowLaunch(SESSION_KEY);
   if (!session) {
-    shut('This window has no key. Run brain workspace again.');
+    shut('This workspace has no key.');
     return;
   }
   workspace.session = session.token;
@@ -398,6 +423,9 @@ async function start() {
   const missing = unkeyed();
   if (missing.length) console.error(`every command has a key, and these have none: ${missing.join(', ')}`);
   document.addEventListener('keydown', onKey);
+  window.addEventListener('blur', () => keysMoved(true));
+  window.addEventListener('focus', () => keysMoved(false));
+  workspace.away = !document.hasFocus();
   draw();
   listen();
   for (const starter of starters) await starter(workspace);

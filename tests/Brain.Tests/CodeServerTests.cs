@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using Brain.Code;
 using Brain.Serving;
 using Brain.Windows;
+using Brain.Workspace;
 
 namespace Brain.Tests;
 
@@ -34,6 +35,7 @@ public sealed partial class CodeServerTests : IDisposable
     private readonly Task serving;
     private readonly HttpClient client;
     private int successors;
+    private readonly List<(WorkspaceServer Server, Task Serving)> workspaces = [];
 
     /// <summary>What a successor's start does past being counted, such as start a successor server; nothing unless a test sets it.</summary>
     private Action succeeding = () => { };
@@ -58,6 +60,7 @@ public sealed partial class CodeServerTests : IDisposable
     {
         stop.Cancel();
         serving.Wait(Wait);
+        Task.WaitAll([.. workspaces.Select((started) => started.Serving)], Wait);
         stop.Dispose();
         client.Dispose();
         server.Dispose();
@@ -1141,7 +1144,7 @@ public sealed partial class CodeServerTests : IDisposable
 
     /// <summary>A server of this brain on the stand-in, whose build runs from the publish folder; its successor is counted, then <see cref="succeeding"/> runs.</summary>
     private CodeServer Server() =>
-        new(brain.Home, brain.Root, StandIn(), new ClaudeFiles(config), TextWriter.Null, Open, (_) => false, clock, new OmarchyTheme(brain.Root, colorCommand: null), new CodeBuild(publish), Succeed);
+        new(brain.Home, brain.Root, StandIn(), new ClaudeFiles(config), TextWriter.Null, Open, (_) => false, clock, new OmarchyTheme(brain.Root, colorCommand: null), new CodeBuild(publish), Succeed, StartWorkspace);
 
     /// <summary>The system's clock until <see cref="Leaps"/>; from then on each read is ten seconds past the one before.</summary>
     private sealed class LeapingClock : TimeProvider

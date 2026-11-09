@@ -113,8 +113,8 @@ change in place and commits it.
 
 For a topic that takes days, brain's window holds conversations: you talk with the open agent in sittings, and a dream
 distills what you agreed into one document, which you can later carry into the graph, node by node, each with your
-yes. brain also has a window per project folder, `brain workspace .`, and a window that runs Claude Code sessions in
-brain's styling, `brain code`.
+yes. brain also has a window that runs Claude Code sessions in brain's styling, `brain code`, which shows each
+session's folder as its workspace: its tree, its files and git.
 
 ### The window and your yes
 

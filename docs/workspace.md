@@ -1,26 +1,30 @@
 # A workspace
 
-This file covers [`brain workspace`](cli.md#brain-workspace): a window over one project folder, with its file tree, a reader
-that follows the disk live, git's changes drawn in place and a git pane to stage, commit and push. It says how a
-workspace is served, what it reads and writes, its keys, how it is built from commands and plugins, and what it records
-about its own speed. brain's own window is in [window.md](window.md), and brain code's in [brain-code.md](brain-code.md).
+This file covers a workspace: one project folder, with its file tree, a reader that follows the disk live, git's
+changes drawn in place and a git pane to stage, commit and push. A workspace is a brain code session's folder, shown in
+brain code's window. It says how a workspace is served, what it reads and writes, its keys, how it is built from
+commands and plugins, and what it records about its own speed. brain's own window is in [window.md](window.md), and
+brain code's in [brain-code.md](brain-code.md).
 
-## Opening one
+## A session's folder
 
-`brain workspace <path>`, often `brain workspace .`, opens a workspace window over one project folder: its file tree on
-the left and the file open on the right, live as files change on disk. Each folder has its own window, and there can be
-many. A folder that is open already has its window brought forward: on Hyprland `hyprctl` focuses it by its title, the
-folder's name and path; elsewhere a fresh window opens and the old one closes itself. A workspace is apart from brain's
-window: neither is inside the other, and the one window of brain's is not a workspace's.
+Each session of [brain code](brain-code.md#a-sessions-folder-its-workspace) runs in a folder, and that folder has its
+workspace: its file tree on the left and the file open on the right, live as files change on disk. Sessions in the
+same folder share one workspace. brain code shows it in a tab of its own, or beside the conversation; there is no
+window of a workspace's own.
 
 ## Its server
 
-Each workspace runs its own server, `brain workspace --serve <path>`, a process of the same binary, which
-`brain workspace` starts in the background with its output in the data repo's `cache/workspace/<id>/serve.log`. It
-serves only its folder on a free port of 127.0.0.1, and ends a few seconds after its window closes. Like brain serve,
-it takes calls only from its window's session, which the window trades for a launch code once. It writes nothing but
-what the git pane asks of git: a stage, an unstage, a commit and a push. The window is a Chromium-family browser in app
-mode with the window class `brain-workspace`.
+Each workspace runs its own server, [`brain workspace --serve <path>`](cli.md#brain-workspace), a process of the same
+binary, apart from brain code's. brain code starts it in the background the first time it shows the folder, with its
+output in the data repo's `cache/workspace/<id>/serve.log`. It serves only its folder on a free port of 127.0.0.1, and
+ends a few seconds after nothing shows it.
+
+The server opens no window. brain code's server, with the key in the workspace's `cache/workspace/<id>`, asks it for a
+launch, naming brain code's origin, and brain code's window opens the workspace's page in a frame on it. From then on
+only that origin may frame the page. Like brain serve, the server takes calls only from its frame's session, which the
+frame trades for the launch code once; brain code's window itself reads nothing of the folder. It writes nothing but
+what the git pane asks of git: a stage, an unstage, a commit and a push.
 
 ## Reading
 
@@ -32,7 +36,10 @@ events, inotify on Linux, and never polls; the tree and the open file follow wha
 
 ## Keys
 
-Everything is a key. `/` opens the bar, which finds files and commands alike, each command with its key.
+Everything is a key. `/` opens the bar, which finds files and commands alike, each command with its key. The keys work
+while the workspace has the focus; then its panes carry the focus line, and while brain code's conversation has it,
+none does. A key with Alt the workspace does not bind is brain code's: `Alt+C`, `Alt+W` and `Alt+V` work from the
+workspace too (see [brain-code.md](brain-code.md#keys)).
 
 | Where | Key | What it does |
 |---|---|---|
@@ -82,7 +89,7 @@ follow the Omarchy theme.
 
 ## How it is built
 
-The window is built of five things:
+The workspace is built of five things:
 
 - the workspace, which holds all its state;
 - commands, each a name, a title, a budget and a run against the workspace;
@@ -109,12 +116,12 @@ screen, its outcome, and whether it went over its budget.
 | a commit, a push | none: they wait on hooks and the network |
 
 The server records each file read, folder listing, watch event and git call the same way, and once a minute the CPU it
-used, over budget past 1 percent of a minute in which the window made no call. The records go to the data repo's
+used, over budget past 1 percent of a minute in which the workspace made no call. The records go to the data repo's
 `perf/workspace/`, a JSON line each in a file per day and workspace, kept 14 days and out of git; they never leave the
 machine. `F3` shows the last five seconds of them in the probe, the one brain's window shows its frame times in.
 
 ## Related
 
 - [window.md](window.md): brain's window, and the Stylebook a workspace shares.
-- [brain-code.md](brain-code.md): brain code's window.
-- [cli.md](cli.md#brain-workspace): the command and its flags.
+- [brain-code.md](brain-code.md): brain code's window, which shows a session's folder as its workspace.
+- [cli.md](cli.md#brain-workspace): the server's command.

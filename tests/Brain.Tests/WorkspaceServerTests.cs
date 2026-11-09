@@ -10,18 +10,21 @@ using Brain.Workspace;
 namespace Brain.Tests;
 
 /// <summary>
-/// A workspace's server, over real HTTP on 127.0.0.1, on a project folder that is a git checkout: its API answers only
-/// its window's session, which a launch code buys once; it serves its folder and nothing outside it, without what git
+/// A workspace's server, over real HTTP on 127.0.0.1, on a project folder that is a git checkout: it opens no window,
+/// and hands a launch for a frame to the holder of its key; its API answers only its frame's session, which a launch
+/// code buys once; it serves its folder and nothing outside it, without what git
 /// ignores; a change on disk reaches the window's event stream; every read, listing and git call is a record in the
-/// log, with the window's own; a new window closes the one before; and the server ends once its window is gone.
+/// log, with the window's own; a new frame closes the one before; and the server ends once its frame is gone.
 /// </summary>
 [Collection(ReviewServerTests.StartsClaude)]
 public sealed partial class WorkspaceServerTests : IDisposable
 {
     private static readonly TimeSpan Wait = TimeSpan.FromSeconds(10);
 
+    /// <summary>The origin of brain code's window, which frames the workspace.</summary>
+    private const string Frame = "http://127.0.0.1:4711";
+
     private readonly TempBrain brain = new();
-    private readonly List<string> windows = [];
     private readonly CancellationTokenSource stop = new();
     private readonly string project;
     private readonly WorkspaceServer server;
@@ -39,7 +42,7 @@ public sealed partial class WorkspaceServerTests : IDisposable
         File.WriteAllText(Path.Combine(project, "bin", "lens.dll"), "built");
         File.WriteAllBytes(Path.Combine(project, "src", "icon.png"), [137, 80, 78, 71, 0, 1, 2]);
         TempBrain.Git(project, "init", "-q");
-        server = new WorkspaceServer(brain.Home, brain.Root, project, TextWriter.Null, Open, (_) => false, TimeProvider.System, new OmarchyTheme(brain.Root, colorCommand: null));
+        server = new WorkspaceServer(brain.Home, brain.Root, project, TextWriter.Null, TimeProvider.System, new OmarchyTheme(brain.Root, colorCommand: null));
         serving = server.Serve(stop.Token);
         client = new HttpClient { BaseAddress = new Uri(server.Origin) };
     }
@@ -56,7 +59,7 @@ public sealed partial class WorkspaceServerTests : IDisposable
     [Fact]
     public async Task WithoutTheWindowsSessionTheApiAnswersNothing()
     {
-        var code = Code(windows[0]);
+        var code = Code(await Launch());
         var token = await Trade(code);
         var again = await Send(HttpMethod.Post, "/api/launch", Json(new { code }), origin: server.Origin);
 
@@ -71,24 +74,41 @@ public sealed partial class WorkspaceServerTests : IDisposable
         Assert.DoesNotContain("entries", await stranger.Content.ReadAsStringAsync(), StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Hello and a launch need the key; a launch names the origin on 127.0.0.1 that frames the page, which from then on
+    /// only that origin may frame, and the server opens no window of its own.
+    /// </summary>
     [Fact]
-    public async Task HelloAndRaiseNeedTheKey()
+    public async Task HelloAndALaunchNeedTheKeyAndTheLaunchNamesWhoFramesThePage()
     {
-        var key = new ServeFiles(brain.Home, WorkspaceServer.Folder(WorkspaceServer.Id(project))).ReadKey()!;
+        var key = Key();
+        var before = await Send(HttpMethod.Get, "/");
 
         var without = await Send(HttpMethod.Get, "/api/hello");
         var hello = await Send(HttpMethod.Get, "/api/hello", key: key);
+        var stranger = await Send(HttpMethod.Post, "/api/key/launch", Json(new { frame = Frame }));
+        var elsewhere = await Send(HttpMethod.Post, "/api/key/launch", Json(new { frame = "http://evil.example:4000" }), key: key);
+        var injected = await Send(HttpMethod.Post, "/api/key/launch", Json(new { frame = Frame + "; script-src *" }), key: key);
+        var url = await Launch();
+        var after = await Send(HttpMethod.Get, "/");
 
         Assert.Equal(HttpStatusCode.Forbidden, without.StatusCode);
         using var json = JsonDocument.Parse(await hello.Content.ReadAsStringAsync());
         Assert.Equal(WorkspaceServer.App, json.RootElement.GetProperty("app").GetString());
         Assert.Equal(project, json.RootElement.GetProperty("root").GetString());
+        Assert.Equal(HttpStatusCode.Forbidden, stranger.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, elsewhere.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, injected.StatusCode);
+        Assert.StartsWith(server.Origin + "/#launch=", url, StringComparison.Ordinal);
+        Assert.EndsWith("frame-ancestors 'none'", before.Headers.GetValues("Content-Security-Policy").Single(), StringComparison.Ordinal);
+        Assert.EndsWith("frame-ancestors " + Frame, after.Headers.GetValues("Content-Security-Policy").Single(), StringComparison.Ordinal);
+        Assert.Empty(Directory.EnumerateFiles(new ServeFiles(brain.Home, WorkspaceServer.Folder(WorkspaceServer.Id(project))).Dir, "launch-*"));
     }
 
     [Fact]
     public async Task TheTreeListsFoldersFirstWithoutGitOrWhatGitIgnores()
     {
-        var token = await Trade(Code(windows[0]));
+        var token = await Trade(Code(await Launch()));
 
         var root = await Json(await Send(HttpMethod.Get, "/api/tree?path=", token: token));
         var src = await Json(await Send(HttpMethod.Get, "/api/tree?path=src", token: token));
@@ -100,7 +120,7 @@ public sealed partial class WorkspaceServerTests : IDisposable
     [Fact]
     public async Task AFileReadsAsTextOrSaysWhyNot()
     {
-        var token = await Trade(Code(windows[0]));
+        var token = await Trade(Code(await Launch()));
 
         var text = await Json(await Send(HttpMethod.Get, "/api/file?path=src/Fold.cs", token: token));
         var binary = await Json(await Send(HttpMethod.Get, "/api/file?path=src/icon.png", token: token));
@@ -120,7 +140,7 @@ public sealed partial class WorkspaceServerTests : IDisposable
     public async Task APathOutsideTheRootIsRefused(string call)
     {
         await File.WriteAllTextAsync(Path.Combine(brain.Root, "secret.txt"), "not the workspace's");
-        var token = await Trade(Code(windows[0]));
+        var token = await Trade(Code(await Launch()));
 
         var refused = await Send(HttpMethod.Get, call, token: token);
 
@@ -132,7 +152,7 @@ public sealed partial class WorkspaceServerTests : IDisposable
     [Fact]
     public async Task AListingWhoseGitFailsAnswersAFailureNotARefusal()
     {
-        var token = await Trade(Code(windows[0]));
+        var token = await Trade(Code(await Launch()));
         await File.AppendAllTextAsync(Path.Combine(project, ".git", "config"), "[core\n");
 
         var failed = await Send(HttpMethod.Get, "/api/tree?path=src", token: token);
@@ -148,7 +168,7 @@ public sealed partial class WorkspaceServerTests : IDisposable
     [Fact]
     public async Task TheBarFindsEveryFileGitWouldAdd()
     {
-        var token = await Trade(Code(windows[0]));
+        var token = await Trade(Code(await Launch()));
 
         var files = await Json(await Send(HttpMethod.Get, "/api/files", token: token));
 
@@ -159,7 +179,7 @@ public sealed partial class WorkspaceServerTests : IDisposable
     [Fact]
     public async Task AChangeOnDiskReachesTheWindowsEventStream()
     {
-        var token = await Trade(Code(windows[0]));
+        var token = await Trade(Code(await Launch()));
         using var events = await OpenEvents(token);
         using var reader = new StreamReader(await events.Content.ReadAsStreamAsync());
 
@@ -172,7 +192,7 @@ public sealed partial class WorkspaceServerTests : IDisposable
     [Fact]
     public async Task EveryReadListingAndGitCallIsARecordInTheLog()
     {
-        var token = await Trade(Code(windows[0]));
+        var token = await Trade(Code(await Launch()));
         await Send(HttpMethod.Get, "/api/tree?path=", token: token);
         await Send(HttpMethod.Get, "/api/file?path=README.md", token: token);
         var batch = Json(new { records = new[] { new { at = 1, name = "file.open", args = "{\"path\":\"README.md\"}", source = "key", ms = 12.5, outcome = "ok", budget = 100, over = false } } });
@@ -194,19 +214,15 @@ public sealed partial class WorkspaceServerTests : IDisposable
     }
 
     [Fact]
-    public async Task ANewWindowClosesTheOneBefore()
+    public async Task ANewFrameClosesTheOneBefore()
     {
-        var key = new ServeFiles(brain.Home, WorkspaceServer.Folder(WorkspaceServer.Id(project))).ReadKey()!;
-        var old = await Trade(Code(windows[0]));
+        var old = await Trade(Code(await Launch()));
         using var events = await OpenEvents(old);
         using var reader = new StreamReader(await events.Content.ReadAsStreamAsync());
 
-        var raised = await Json(await Send(HttpMethod.Post, "/api/raise", key: key));
-        var fresh = await Trade(Code(windows[^1]));
+        var fresh = await Trade(Code(await Launch()));
         var closed = await NextEvent(reader, "close");
 
-        Assert.Equal("opened", raised.RootElement.GetProperty("window").GetString());
-        Assert.Equal(2, windows.Count);
         Assert.Equal("close", closed);
         Assert.Equal(HttpStatusCode.Unauthorized, (await Send(HttpMethod.Get, "/api/tree?path=", token: old)).StatusCode);
         Assert.Equal(HttpStatusCode.OK, (await Send(HttpMethod.Get, "/api/tree?path=", token: fresh)).StatusCode);
@@ -215,7 +231,7 @@ public sealed partial class WorkspaceServerTests : IDisposable
     [Fact]
     public async Task TheServerEndsOnceItsWindowIsGone()
     {
-        var token = await Trade(Code(windows[0]));
+        var token = await Trade(Code(await Launch()));
         using (var events = await OpenEvents(token))
         {
             await Send(HttpMethod.Post, "/api/bye", token: token, origin: server.Origin);
@@ -250,17 +266,27 @@ public sealed partial class WorkspaceServerTests : IDisposable
     [Fact]
     public void TheWorkspaceRefusesAFolderThatIsNotThere()
     {
-        var (code, _, err) = brain.Run("workspace", Path.Combine(brain.Root, "no-such"));
+        var (code, _, err) = brain.Run("workspace", "--serve", Path.Combine(brain.Root, "no-such"));
 
         Assert.Equal(1, code);
         Assert.Contains("is no folder", err, StringComparison.Ordinal);
+    }
+
+    /// <summary>The workspace has no window of its own to open: brain code shows it.</summary>
+    [Fact]
+    public void TheWorkspaceOpensNoWindowOfItsOwn()
+    {
+        var (code, _, err) = brain.Run("workspace", project);
+
+        Assert.Equal(1, code);
+        Assert.Contains("brain code shows a session's folder as its workspace", err, StringComparison.Ordinal);
     }
 
     /// <summary>The workspace's page, in a real browser: the tree shows, Enter opens a file, and its link opens the next.</summary>
     [WindowFact]
     public async Task TheWindowShowsTheTreeAndFollowsALinkFromTheKeys()
     {
-        var window = await Headless.Open(windows[0], Path.Combine(brain.Root, "chromium")).ConfigureAwait(false);
+        var window = await Headless.Open(await Launch().ConfigureAwait(false), Path.Combine(brain.Root, "chromium")).ConfigureAwait(false);
         try
         {
             await window.Until("document.querySelectorAll('.row.tree').length", "3").ConfigureAwait(false);
@@ -291,7 +317,7 @@ public sealed partial class WorkspaceServerTests : IDisposable
     public async Task TheWindowOpensADiagramInTheViewerThatTakesTheKeys()
     {
         await File.WriteAllTextAsync(Path.Combine(project, "diagram.md"), "# Flow\n\n```mermaid\nflowchart LR\n  a --> b\n```\n").ConfigureAwait(false);
-        var window = await Headless.Open(windows[0], Path.Combine(brain.Root, "chromium")).ConfigureAwait(false);
+        var window = await Headless.Open(await Launch().ConfigureAwait(false), Path.Combine(brain.Root, "chromium")).ConfigureAwait(false);
         try
         {
             await window.Until("document.querySelectorAll('.row.tree').length > 0", "true").ConfigureAwait(false);
@@ -338,7 +364,7 @@ public sealed partial class WorkspaceServerTests : IDisposable
     [Fact]
     public async Task AMoveOfGitsIndexReachesTheWindowsEventStream()
     {
-        var token = await Trade(Code(windows[0]));
+        var token = await Trade(Code(await Launch()));
         using var events = await OpenEvents(token);
         using var reader = new StreamReader(await events.Content.ReadAsStreamAsync());
 
@@ -353,7 +379,7 @@ public sealed partial class WorkspaceServerTests : IDisposable
     [Fact]
     public async Task TheStatusListsWhatIsUncommittedAndARefusedCommitSaysWhy()
     {
-        var token = await Trade(Code(windows[0]));
+        var token = await Trade(Code(await Launch()));
 
         var status = await Json(await Send(HttpMethod.Get, "/api/git/status", token: token));
         var refused = await Send(HttpMethod.Post, "/api/git/commit", Json(new { message = "Nothing staged" }), token: token, origin: server.Origin);
@@ -381,7 +407,7 @@ public sealed partial class WorkspaceServerTests : IDisposable
         await File.WriteAllTextAsync(Path.Combine(project, "src", "Fold.cs"), "class Fold\n{\n    int depth;\n}\n").ConfigureAwait(false);
         TempBrain.Git(project, "commit", "-q", "-am", "four lines");
         await File.WriteAllTextAsync(Path.Combine(project, "src", "Fold.cs"), "class Lens\n{\n}\n").ConfigureAwait(false);
-        var window = await Headless.Open(windows[0], Path.Combine(brain.Root, "chromium")).ConfigureAwait(false);
+        var window = await Headless.Open(await Launch().ConfigureAwait(false), Path.Combine(brain.Root, "chromium")).ConfigureAwait(false);
         try
         {
             await window.Until("document.querySelector('.row.tree[data-change]')?.textContent.trim()", "▸src").ConfigureAwait(false);
@@ -449,7 +475,7 @@ public sealed partial class WorkspaceServerTests : IDisposable
         await File.WriteAllTextAsync(Path.Combine(project, "README.md"), "# Lens\n\n" + string.Join(' ', Enumerable.Repeat("a long line that wraps", 40)) + "\n").ConfigureAwait(false);
         await File.WriteAllTextAsync(Path.Combine(project, "src", "git.js"), "// a file named like the view\n").ConfigureAwait(false);
         await File.WriteAllTextAsync(Path.Combine(project, "tests.md"), "# Tests\n").ConfigureAwait(false);
-        var window = await Headless.Open(windows[0], Path.Combine(brain.Root, "chromium")).ConfigureAwait(false);
+        var window = await Headless.Open(await Launch().ConfigureAwait(false), Path.Combine(brain.Root, "chromium")).ConfigureAwait(false);
         try
         {
             await window.Until("[...document.querySelectorAll('.row.tree[data-change] .tree-name')].some((name) => name.textContent === 'README.md')", "true").ConfigureAwait(false);
@@ -495,18 +521,19 @@ public sealed partial class WorkspaceServerTests : IDisposable
         }
     }
 
-    private bool Open(string url)
+    /// <summary>A launch for a frame of <see cref="Frame"/>, as brain code's server asks the workspace for one.</summary>
+    private async Task<string> Launch()
     {
-        lock (windows)
-        {
-            windows.Add(url);
-        }
-
-        return true;
+        var reply = await Send(HttpMethod.Post, "/api/key/launch", Json(new { frame = Frame }), key: Key()).ConfigureAwait(false);
+        Assert.Equal(HttpStatusCode.OK, reply.StatusCode);
+        using var json = JsonDocument.Parse(await reply.Content.ReadAsStringAsync().ConfigureAwait(false));
+        return json.RootElement.GetProperty("url").GetString()!;
     }
 
-    /// <summary>The launch code in the launch file a window was opened on.</summary>
-    private static string Code(string url) => LaunchCode().Match(File.ReadAllText(new Uri(url).LocalPath)).Groups[1].Value;
+    private string Key() => new ServeFiles(brain.Home, WorkspaceServer.Folder(WorkspaceServer.Id(project))).ReadKey()!;
+
+    /// <summary>The launch code in a launch's URL.</summary>
+    private static string Code(string url) => LaunchCode().Match(url).Groups[1].Value;
 
     private async Task<string> Trade(string code)
     {

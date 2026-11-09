@@ -9,22 +9,24 @@ namespace Brain.Windows;
 
 /// <summary>
 /// What one kind of small window is: its app's name, the command that opens it, the folder it shows, its name and title,
-/// and its page's files.
+/// its page's files and the policy its page starts with.
 /// </summary>
 /// <param name="Folder">The folder of the data repo's cache that holds its key, its port and its launch files.</param>
 /// <param name="Assets">Its own page's files, by the path each is served at, the shared ones of <see cref="WebAssets"/> with them.</param>
-internal sealed record WindowKind(string App, string Command, string Folder, string Root, string Name, string Title, Dictionary<string, (string Resource, string Type)> Assets);
+internal sealed record WindowKind(string App, string Command, string Folder, string Root, string Name, string Title, Dictionary<string, (string Resource, string Type)> Assets, string Policy = WebAssets.Policy);
 
 /// <summary>
 /// The server of one small window, such as a workspace's or brain code's, on a free port of 127.0.0.1. It is not brain
 /// serve. It serves its window's page with the shared stylebook and scripts, and answers the plumbing every such window
 /// shares; the rest of <c>/api</c> it hands to the window's own <c>api</c>. Every request must name its host exactly,
-/// and a POST from a browser must come from its origin. Hello, raise and the window's own keyed calls need the key in its
-/// <see cref="ServeFiles"/>, which only the user's account can read; launch needs a launch code; everything else under
-/// <c>/api</c> needs the session of its window from <see cref="WindowSessions"/>. Its window hears on its event stream
-/// what the server publishes and each Omarchy theme switch, and moves onto the server's successor once it hands on. It
-/// sends the window's records and its own to its <see cref="Records"/>, and once a minute records the CPU it used, which
-/// an idle window keeps near none. It ends once its window is gone.
+/// and a POST from a browser must come from its origin. A server opens its own window, as brain code's does, or opens
+/// none and hands out a launch for a frame of another window, as a workspace's does for brain code's. Hello and the
+/// window's own keyed calls need the key in its <see cref="ServeFiles"/>, which only the user's account can read;
+/// launch needs a launch code; everything else under <c>/api</c> needs the session of its window from
+/// <see cref="WindowSessions"/>. Its window hears on its event stream what the server publishes and each Omarchy theme
+/// switch, and moves onto the server's successor once it hands on. It sends the window's records and its own to its
+/// <see cref="Records"/>, and once a minute records the CPU it used, which an idle window keeps near none. It ends once
+/// its window is gone.
 /// </summary>
 internal sealed class WindowServer
 {
@@ -61,8 +63,7 @@ internal sealed class WindowServer
     private readonly string home;
     private readonly WindowKind kind;
     private readonly TextWriter err;
-    private readonly Func<string, bool> openWindow;
-    private readonly Func<string, bool> raise;
+    private readonly Func<string, bool>? openWindow;
     private readonly TimeProvider time;
     private readonly OmarchyTheme theme;
     private readonly ServeFiles files;
@@ -73,18 +74,19 @@ internal sealed class WindowServer
     private CancellationTokenSource? serving;
     private ITimer? idle;
     private string key = string.Empty;
+    private volatile string policy;
     private TimeSpan cpuSeen;
     private int calls;
 
+    /// <param name="openWindow">Opens a window on a launch URL; null for a server whose window is a frame of another's, which <see cref="Launch"/> starts.</param>
     /// <param name="keyed">Answers a call under <c>/api/key/</c>, by its path, once its key was checked: one the window's command makes.</param>
     /// <param name="api">Answers a call of the window's session, by its path, which no plumbing took.</param>
-    public WindowServer(string home, WindowKind kind, TextWriter err, Func<string, bool> openWindow, Func<string, bool> raise, TimeProvider time, OmarchyTheme theme, Records records, Action<HttpListenerRequest, HttpListenerResponse, string> keyed, Action<HttpListenerRequest, HttpListenerResponse, string> api)
+    public WindowServer(string home, WindowKind kind, TextWriter err, Func<string, bool>? openWindow, TimeProvider time, OmarchyTheme theme, Records records, Action<HttpListenerRequest, HttpListenerResponse, string> keyed, Action<HttpListenerRequest, HttpListenerResponse, string> api)
     {
         this.home = home;
         this.kind = kind;
         this.err = err;
         this.openWindow = openWindow;
-        this.raise = raise;
         this.time = time;
         this.theme = theme;
         this.records = records;
@@ -92,15 +94,16 @@ internal sealed class WindowServer
         this.api = api;
         files = new ServeFiles(home, kind.Folder);
         windows = new WindowSessions(time);
+        policy = kind.Policy;
     }
 
     public string Origin { get; private set; } = string.Empty;
 
     /// <summary>
-    /// Opens its window and listens until <paramref name="stop"/>, or until the window is gone. A launch code its
-    /// predecessor handed it takes the place of a new window: the window already open moves onto this server. The code is
-    /// admitted before the port file names this server, so a predecessor that waits on that file tells its window only
-    /// once the code trades.
+    /// Opens its window, when it opens one of its own, and listens until <paramref name="stop"/>, or until the window is
+    /// gone. A launch code its predecessor handed it takes the place of a new window: the window already open moves onto
+    /// this server. The code is admitted before the port file names this server, so a predecessor that waits on that file
+    /// tells its window only once the code trades.
     /// </summary>
     // navarone: 0000174
     public async Task Serve(CancellationToken stop)
@@ -196,19 +199,17 @@ internal sealed class WindowServer
         return true;
     }
 
-    /// <summary>Brings the window forward: the compositor raises it, or a fresh window takes its place.</summary>
-    public string Raise()
-    {
-        if (raise(kind.Title))
-        {
-            return "raised";
-        }
+    /// <summary>
+    /// A fresh launch for a window that is a frame of another's: the page's URL with a launch code, which the frame trades
+    /// once, as a window the server opened does.
+    /// </summary>
+    public string Launch() => Origin + "/#launch=" + windows.Issue();
 
-        return OpenWindow() ? "opened" : "no-browser";
-    }
+    /// <summary>From now on only a page of <paramref name="ancestor"/>, an origin, may frame the window's page.</summary>
+    public void FramedBy(string ancestor) => policy = WebAssets.FramedBy(ancestor);
 
     /// <summary>Answers one request in the boundary <see cref="WebCalls.Answer"/> gives every server.</summary>
-    public void Handle(HttpListenerContext context) => Answer(context, home, kind.Command, err, Route);
+    public void Handle(HttpListenerContext context) => Answer(context, home, kind.Command, err, Route, policy);
 
     /// <summary>Stops serving, as once the window is gone.</summary>
     private void Stop()
@@ -253,8 +254,19 @@ internal sealed class WindowServer
         return ((IPEndPoint)probe.LocalEndpoint).Port;
     }
 
-    /// <summary>Opens a window with a fresh launch code, through a launch file, so no command line shows the code.</summary>
-    private bool OpenWindow() => openWindow(new Uri(files.WriteLaunch(Origin + "/#launch=" + windows.Issue())).AbsoluteUri);
+    /// <summary>
+    /// Opens a window with a fresh launch code, through a launch file, so no command line shows the code; false when it
+    /// would not open, or the server opens no window of its own.
+    /// </summary>
+    public bool OpenWindow()
+    {
+        if (openWindow is null)
+        {
+            return false;
+        }
+
+        return openWindow(new Uri(files.WriteLaunch(Launch())).AbsoluteUri);
+    }
 
     /// <summary>Tells the window of every Omarchy theme switch, until the server stops.</summary>
     private void FollowTheme(CancellationToken stop)
@@ -300,7 +312,7 @@ internal sealed class WindowServer
             return;
         }
 
-        if (path is "/api/hello" or "/api/raise" || path.StartsWith("/api/key/", StringComparison.Ordinal))
+        if (path == "/api/hello" || path.StartsWith("/api/key/", StringComparison.Ordinal))
         {
             Keyed(request, response, path);
             return;
@@ -334,7 +346,7 @@ internal sealed class WindowServer
         Session(request, response, token, path);
     }
 
-    /// <summary>A call of the window's command, which needs the key: hello, raise, or one of the window's own under <c>/api/key/</c>.</summary>
+    /// <summary>A call of the window's command, which needs the key: hello, or one of the window's own under <c>/api/key/</c>.</summary>
     private void Keyed(HttpListenerRequest request, HttpListenerResponse response, string path)
     {
         if (!HasKey(request, key))
@@ -343,18 +355,13 @@ internal sealed class WindowServer
             return;
         }
 
-        switch (request.HttpMethod, path)
+        if ((request.HttpMethod, path) == (Get, "/api/hello"))
         {
-            case (Get, "/api/hello"):
-                Send(response, new WindowHello(kind.App, kind.Root), WindowJson.Default.WindowHello);
-                return;
-            case (Post, "/api/raise"):
-                Send(response, new WindowRaised(Raise()), WindowJson.Default.WindowRaised);
-                return;
-            default:
-                keyed(request, response, path);
-                return;
+            Send(response, new WindowHello(kind.App, kind.Root), WindowJson.Default.WindowHello);
+            return;
         }
+
+        keyed(request, response, path);
     }
 
     /// <summary>Sends the page's file at <paramref name="path"/>, its theme sheet among them; false when it is none.</summary>

@@ -3,9 +3,10 @@ using System.Text.Json;
 namespace Brain.Code;
 
 /// <summary>
-/// What brain code's window remembers across restarts: which kinds of the second flow it draws. It is kept in the data
-/// repo's cache, on this machine only, since the window's port changes with each start and the browser keeps nothing
-/// for it. A missing or unreadable file is every kind on.
+/// What brain code's window remembers across restarts: which kinds of the second flow it draws, and whether it shows a
+/// session's conversation and its workspace side by side. It is kept in the data repo's cache, on this machine only,
+/// since the window's port changes with each start and the browser keeps nothing for it. A missing or unreadable file
+/// is every kind on and the two not side by side.
 /// </summary>
 internal sealed class CodeSettings(string home)
 {

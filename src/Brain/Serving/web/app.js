@@ -232,7 +232,7 @@ function renderStrip() {
       ? h(
           'button',
           { class: 'row vertical', disabled: state.asking, title: 'Run every source in sources.tsv again, F5', onclick: askAgain },
-          h('span', { class: 'strip-label strip-ask' }, state.asking ? 'Asking' : 'Ask again'),
+          h('span', { class: 'strip-ask' }, state.asking ? 'Asking' : 'Ask again'),
         )
       : null,
     registered.filter((inbox) => inbox.bottom).map(stripItem),
@@ -251,7 +251,7 @@ function stripItem(inbox) {
       title: error || inbox.label,
       onclick: () => showInbox(inbox.name),
     },
-    h('span', { class: 'strip-label' }, inbox.label),
+    h('span', {}, inbox.label),
     error ? h('span', { class: 'strip-failing' }, 'failing') : count ? h('span', { class: 'strip-count' }, String(count)) : null,
     agentMark(inbox.name),
   );

@@ -330,14 +330,18 @@ internal sealed record CodeStart(string? Agent, string? Cwd, string? Resume);
 
 /// <summary>
 /// What the window shows: of the second flow, the tool calls and the brain queries a conversation holds, each kind
-/// drawn or hidden, both on at the start; and how the agents panel draws the agents a session sent, as a flow or as a
-/// list, a flow at the start.
+/// drawn or hidden, both on at the start; how the agents panel draws the agents a session sent, as a flow or as a list,
+/// a flow at the start; and whether a session's conversation and its folder's workspace show side by side, off at the
+/// start.
 /// </summary>
-internal sealed record CodeSettingsView(bool Tools = true, bool Brain = true, string Agents = CodeSettingsView.Flow)
+internal sealed record CodeSettingsView(bool Tools = true, bool Brain = true, string Agents = CodeSettingsView.Flow, bool Beside = false)
 {
     public const string Flow = "flow";
     public const string List = "list";
 }
+
+/// <summary>The folder whose workspace the window shows.</summary>
+internal sealed record CodeWorkspaceRef(string? Folder);
 
 /// <summary>The user's words to a session, and the images he attached to them.</summary>
 internal sealed record CodeSay(string? Session, string? Words, IReadOnlyList<CodeImage>? Images = null);
@@ -380,6 +384,7 @@ internal sealed record CodeAgents(IReadOnlyList<string> Agents);
 [JsonSerializable(typeof(CodeStart))]
 [JsonSerializable(typeof(CodeSay))]
 [JsonSerializable(typeof(CodeSettingsView))]
+[JsonSerializable(typeof(CodeWorkspaceRef))]
 [JsonSerializable(typeof(CodeImage))]
 [JsonSerializable(typeof(CodeFolder))]
 [JsonSerializable(typeof(CodePlaces))]

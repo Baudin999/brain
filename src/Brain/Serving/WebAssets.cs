@@ -4,7 +4,7 @@ using System.Reflection;
 namespace Brain.Serving;
 
 /// <summary>
-/// What brain's window and a workspace window serve alike: the page's policy and the shared files under
+/// What brain's window, brain code's and a workspace serve alike: the page's policy and the shared files under
 /// <c>Serving/shared</c>. The stylebook, its tokens and its components, is one for both, and so are lit-html, mermaid,
 /// markdown and its viewer, the diagrams and the probe. Each server adds the files of its own page to these.
 /// </summary>
@@ -15,9 +15,15 @@ internal static class WebAssets
     public const string Page = "text/html; charset=utf-8";
 
     /// <summary>The page's policy: everything from this origin only, no inline script or style, and no frame around it.</summary>
-    public const string Policy =
+    public const string Policy = Own + "frame-ancestors 'none'";
+
+    /// <summary>brain code's policy: the page's, and it may frame the page of a workspace's server on 127.0.0.1.</summary>
+    public const string Framing = Policy + "; frame-src http://127.0.0.1:*";
+
+    /// <summary>What every page allows, but who may frame it.</summary>
+    private const string Own =
         "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; font-src 'self'; "
-        + "base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
+        + "base-uri 'none'; form-action 'none'; ";
 
     private static readonly (string Path, string Resource, string Type)[] Shared =
     [
@@ -70,6 +76,9 @@ internal static class WebAssets
         ("/lit-html.js", "shared/vendor/lit-html.js", Script),
         ("/mermaid.js", "shared/vendor/mermaid.min.js", Script),
     ];
+
+    /// <summary>A workspace's policy once brain code shows it: the page's, framed by <paramref name="ancestor"/>, an origin, only.</summary>
+    public static string FramedBy(string ancestor) => Own + "frame-ancestors " + ancestor;
 
     /// <summary>The shared files and <paramref name="own"/>, by the path each is served at.</summary>
     public static Dictionary<string, (string Resource, string Type)> With(params (string Path, string Resource, string Type)[] own)

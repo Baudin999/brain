@@ -429,7 +429,7 @@ function gitListView(ws, side, title, none) {
     cut = html`<p class="ws-git-none" role="status">The list stops at its first ${ws.git.files.length} files; the tree colours only these.</p>`;
   }
   return html`
-    <section class="ws-git-list" data-side=${side} aria-label=${title} ?data-focus=${ws.git.side === side && ws.focus === 'git'}>
+    <section class="ws-git-list" data-side=${side} aria-label=${title} ?data-focus=${!ws.away && ws.git.side === side && ws.focus === 'git'}>
       <header class="pane-head compact"><h2 class="pane-title">${title}</h2><span class="ws-git-meta">${files.length}</span></header>
       <ol class="ws-git-files" role="listbox" aria-label=${`${title} files`}>${files.map((file) => gitRow(ws, side, file))}</ol>
       ${files.length === 0 ? html`<p class="ws-git-none">${none}</p>` : nothing}

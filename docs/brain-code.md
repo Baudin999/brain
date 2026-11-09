@@ -2,9 +2,10 @@
 
 This file covers [`brain code`](cli.md#brain-code): a window that runs Claude Code sessions of brain's agents, in brain's
 styling, in place of a terminal. It says how a session starts and moves in, how the window draws a conversation and its
-tool calls, how live text streams, how a turn is stopped, how images are attached, the jobs and permission requests a
-session raises, how an agent asks you questions with [`brain ask`](cli.md#brain-ask), how the agents a session sent are
-shown, and how the window's server reloads onto a new build. The agents themselves are described in
+tool calls, how a session's folder shows as its workspace, how live text streams, how a turn is stopped, how images are
+attached, the jobs and permission requests a session raises, how an agent asks you questions with
+[`brain ask`](cli.md#brain-ask), how the agents a session sent are shown, the window's keys, and how the window's server
+reloads onto a new build. The agents themselves are described in
 [gates.md](gates.md#how-work-lands) and in `harness/agents`.
 
 ## Starting a session
@@ -18,7 +19,7 @@ two agents are refused. The session list and each session's head show its full f
 A session whose claude exits without a transcript, or with an error, is marked ended and says the exit status and
 claude's stderr in its conversation; `brain code` prints the same when the server reports it within a second.
 
-There is one brain code window, apart from brain's window and every workspace's. A `brain code` while it is open adds a
+There is one brain code window, apart from brain's window. A `brain code` while it is open adds a
 session to it, shows that session and brings the window forward. The window lists its sessions on the side, several
 alive at once, and its own new session takes an agent and a folder, and refuses one that does not exist.
 
@@ -64,6 +65,27 @@ kind from the conversation entirely, on draws it as above. Both start on. Under 
 the default, or as a List. The server keeps every choice in the data repo's `cache`, so it survives a restart of the
 window. Thinking has no kind yet: Claude Code writes its blocks with
 empty text.
+
+## A session's folder, its workspace
+
+Each session's folder has its [workspace](workspace.md): the folder's tree, the reader, git's changes and the git pane,
+as the workspace's own server serves them. Sessions in the same folder share one workspace. brain code's window only
+shows it, in a frame, and reimplements none of it: its server starts the folder's workspace server the first time it
+shows the folder, and that server ends as it does, a few seconds after nothing shows it. Its frame stays while a
+session runs in the folder, so the file open and the tree stay as you left them.
+
+A strip down the window's left edge, the strip of brain's window's inboxes (see
+[window.md](window.md#the-inbox-strip)), holds the views of the session in view, each label turned to read upward: the
+Conversation tab, `Alt+C`, shows its conversation, and the Code tab, `Alt+W`, its folder's workspace in the
+conversation's place. Side by side, at the strip's far end, `Alt+V`, shows the two at once, the conversation on the
+left, and turns off again. The server keeps the toggle's state in the data repo's `cache`, as it keeps the settings, so
+it survives a reload and a restart.
+
+Each tab and the toggle give the keys to what they show, side by side as well: `Alt+C` to the conversation's composer,
+`Alt+W` to the workspace. The workspace's keys work while it has the focus, and brain code's while the conversation
+has it. Side by side, the pane with the focus carries a line of the focus color along its top, and the workspace's own
+panes carry theirs only while it has the focus. The workspace hands brain code the Alt keys it does not bind, so
+`Alt+C`, `Alt+W` and `Alt+V` work from it too. Nothing an agent does switches a tab or opens a file.
 
 ## Live text
 
@@ -265,9 +287,26 @@ Only when no window listened does the successor open a new one.
 Every call and the server's work are records in the data repo's `perf/code/`, kept 14 days and out of git; they never
 leave the machine.
 
+## Keys
+
+Everything is a key. brain code's keys work while its own part of the window has the focus, and none of them collides
+with a [workspace's](workspace.md#keys).
+
+| Where | Key | What it does |
+|---|---|---|
+| a session | `Alt+C` | show its conversation, and give it the keys |
+| a session | `Alt+W` | show its folder's workspace, and give it the keys |
+| a session | `Alt+V` | show the conversation and the workspace side by side, and back |
+| a session | `Ctrl+C` | stop the agent's turn, or copy the text selected |
+| anywhere | `Esc` | close what is in front: the information panel, a confirm, the explorer, the viewer, the fold |
+| anywhere | `Alt+P` | open the file explorer to attach images |
+| anywhere | `Alt+Q` | quote the selected text into the composer |
+
+The file explorer's own keys are in [The file explorer](#the-file-explorer).
+
 ## Related
 
 - [gates.md](gates.md): how a builder and a validator land work.
 - [window.md](window.md): brain's own window, its chat and its stop confirm.
-- [workspace.md](workspace.md): the workspace window.
+- [workspace.md](workspace.md): the workspace a session's folder shows.
 - [cli.md](cli.md#brain-code): `brain code` and `brain ask`, with their flags.

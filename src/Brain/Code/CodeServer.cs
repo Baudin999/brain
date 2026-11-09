@@ -3,6 +3,7 @@ using System.Net;
 using System.Text.Json.Serialization.Metadata;
 using Brain.Serving;
 using Brain.Windows;
+using Brain.Workspace;
 using static Brain.Serving.WebCalls;
 using static Brain.Windows.WindowServer;
 
@@ -18,7 +19,8 @@ namespace Brain.Code;
 /// conversation, answers a permission request and a session's questions, and closes a session. The user's words carry
 /// the images he attached. Its file explorer lists a folder's folders and images through <see cref="ImageFolders"/>,
 /// reads an image file, and says which folder images were attached from; the server reads nothing else of the disk for
-/// it. A session's permission hook, <c>brain code --permission</c>, hands each request in through the keyed
+/// it. Each session's folder has its workspace, which <see cref="CodeWorkspaces"/> starts and the window shows in a
+/// frame; brain code reads nothing of it. A session's permission hook, <c>brain code --permission</c>, hands each request in through the keyed
 /// <c>/api/key/permission</c>, which answers once the user did, or deny once the session ended or a week went by. A
 /// session's <c>brain ask</c> hands its questions in through the keyed <c>/api/key/ask</c>, which answers at once for
 /// an agent that goes on, and once the user answered, or the session ended, for one that waits. The window hears on its
@@ -39,6 +41,7 @@ internal sealed class CodeServer : IDisposable
     public const string App = "brain-code";
     public const string Command = "brain code";
     public const string Folder = "code";
+    private const string Title = "brain code";
 
     /// <summary>A conversation read past this many milliseconds is over its budget.</summary>
     private const double ReadBudgetMs = 100;
@@ -83,7 +86,9 @@ internal sealed class CodeServer : IDisposable
         ("/components/settings-cog.js", "code/components/settings-cog.js", WebAssets.Script),
         ("/components/history.js", "code/components/history.js", WebAssets.Script),
         ("/components/reload.js", "code/components/reload.js", WebAssets.Script),
-        ("/components/tool-calls.js", "code/components/tool-calls.js", WebAssets.Script));
+        ("/components/tool-calls.js", "code/components/tool-calls.js", WebAssets.Script),
+        ("/components/view-strip.js", "code/components/view-strip.js", WebAssets.Script),
+        ("/components/workspace-pane.js", "code/components/workspace-pane.js", WebAssets.Script));
 
     private readonly Lock gate = new();
     private readonly HashSet<string> pending = new(StringComparer.Ordinal);
@@ -102,6 +107,8 @@ internal sealed class CodeServer : IDisposable
     private readonly CodeBuild build;
     private readonly Action successor;
     private readonly ServeFiles files;
+    private readonly CodeWorkspaces workspaces;
+    private readonly Func<string, bool> raise;
     private readonly CancellationTokenSource reloaded = new();
     private string? opened;
     private bool reloading;
@@ -109,9 +116,12 @@ internal sealed class CodeServer : IDisposable
 
     /// <param name="program">The claude each session runs: <c>claude</c>, or a test's stand-in.</param>
     /// <param name="build">The build the server runs, which says when a newer one is published.</param>
+    /// <param name="raise">Brings the window titled as it says forward through the compositor; false when it could not.</param>
     /// <param name="successor">Starts the server's successor on the build now published, once a reload stopped it.</param>
-    public CodeServer(string home, string userHome, string program, ClaudeFiles claude, TextWriter err, Func<string, bool> openWindow, Func<string, bool> raise, TimeProvider time, OmarchyTheme theme, CodeBuild build, Action successor)
+    /// <param name="startWorkspace">Starts the server of a folder's workspace, and gives the log it writes.</param>
+    public CodeServer(string home, string userHome, string program, ClaudeFiles claude, TextWriter err, Func<string, bool> openWindow, Func<string, bool> raise, TimeProvider time, OmarchyTheme theme, CodeBuild build, Action successor, Func<string, string> startWorkspace)
     {
+        this.raise = raise;
         this.userHome = userHome;
         this.claude = claude;
         past = new PastSessions(claude);
@@ -125,9 +135,10 @@ internal sealed class CodeServer : IDisposable
         signals = new WorkSignals(home, records);
         settings = new CodeSettings(home);
         explorer = new ImageFolders(userHome, files);
+        workspaces = new CodeWorkspaces(home, startWorkspace);
         gathering = time.CreateTimer(_ => Tell(), null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
-        var kind = new WindowKind(App, Command, Folder, userHome, "brain code", "brain code", Assets);
-        window = new WindowServer(home, kind, err, openWindow, raise, time, theme, records, Keyed, Api);
+        var kind = new WindowKind(App, Command, Folder, userHome, Title, Title, Assets, WebAssets.Framing);
+        window = new WindowServer(home, kind, err, openWindow, time, theme, records, Keyed, Api);
     }
 
     public string Origin => window.Origin;
@@ -207,8 +218,8 @@ internal sealed class CodeServer : IDisposable
     }
 
     /// <summary>
-    /// The calls <c>brain code</c> makes with the key: read a session, start one, which the window then shows, and hand
-    /// in a permission request, which waits for the user's answer; and the call <c>brain ask</c> makes, which hands in a
+    /// The calls <c>brain code</c> makes with the key: read a session, start one, which the window then shows, bring the
+    /// window forward, and hand in a permission request, which waits for the user's answer; and the call <c>brain ask</c> makes, which hands in a
     /// session's questions.
     /// </summary>
     // navarone: 0000181
@@ -222,6 +233,9 @@ internal sealed class CodeServer : IDisposable
             case (Post, "/api/key/start"):
                 Announced(request, response);
                 break;
+            case (Post, "/api/key/raise"):
+                Send(response, new WindowRaised(Raise()), WindowJson.Default.WindowRaised);
+                break;
             case (Post, "/api/key/permission"):
                 Send(response, Decided(Read(request, CodeJson.Default.CodePermission, AskBody)), CodeJson.Default.CodeDecision);
                 break;
@@ -232,6 +246,22 @@ internal sealed class CodeServer : IDisposable
                 Refuse(response, HttpStatusCode.NotFound, "no such call");
                 break;
         }
+    }
+
+    /// <summary>Brings the window forward: the compositor raises it, or a fresh window takes its place.</summary>
+    private string Raise()
+    {
+        if (raise(Title))
+        {
+            return "raised";
+        }
+
+        if (window.OpenWindow())
+        {
+            return "opened";
+        }
+
+        return "no-browser";
     }
 
     /// <summary>Starts the session <c>brain code</c> asked for, and tells the window, which then shows it.</summary>
@@ -348,10 +378,29 @@ internal sealed class CodeServer : IDisposable
             case "/api/reload":
                 Reload(request, response);
                 break;
+            case "/api/workspace":
+                Answering(response, () => Workspace(request), WorkspaceJson.Default.WorkspaceLaunch);
+                break;
             default:
                 Refuse(response, HttpStatusCode.NotFound, "no such call");
                 break;
         }
+    }
+
+    /// <summary>
+    /// A launch of the workspace of a session's folder, for a frame of the window, its server started when none runs;
+    /// refused for a folder no session runs in.
+    /// </summary>
+    private WorkspaceLaunch Workspace(HttpListenerRequest request)
+    {
+        var folder = Read(request, CodeJson.Default.CodeWorkspaceRef)?.Folder ?? string.Empty;
+        if (!sessions.All().Any(session => session.Cwd == folder))
+        {
+            throw new BrainException($"no session runs in {folder}, so it has no workspace here");
+        }
+
+        var url = records.Time("workspace", folder, null, () => workspaces.Launch(folder, window.Origin));
+        return new WorkspaceLaunch(url);
     }
 
     private CodeSessionList List()
