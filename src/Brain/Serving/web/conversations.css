@@ -112,7 +112,7 @@
 .phase-who { font-weight: 600; color: var(--ink-soft); }
 
 .phase .prose { font-size: var(--text-4); line-height: 1.66; }
-.phase.user .prose { padding: .7rem 1rem; border-left: 3px solid var(--focus); border-radius: 0 6px 6px 0; background: var(--select); color: var(--ink); }
+.phase.user .prose { padding: .7rem 1rem; border-left: 3px solid var(--focus); border-radius: 0 var(--radius-2) var(--radius-2) 0; background: var(--select); color: var(--ink); }
 .phase.user .phase-who { color: var(--focus); }
 
 /* While the agent answers: one quiet line that says what it does now. */
