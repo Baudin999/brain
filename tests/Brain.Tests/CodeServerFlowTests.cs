@@ -6,7 +6,7 @@ namespace Brain.Tests;
 /// <summary>
 /// The agents panel as a flow: a session whose open agent sent three builders and an Explore agent. The first builder's
 /// work landed after two rounds, with a NOT READY then a READY check before it, and its worktree, which its own Bash
-/// call opened, was removed by its validator; the second's validator is in round 1, and its worktree is still there; the
+/// call opened, was removed by its validator after it removed a stale one; the second's validator is in round 1, and its worktree is still there; the
 /// third, in the worktree Claude Code gave it, still builds. The server says where each worktree was opened and whether
 /// it was removed; the window draws three chains apart and the Explore agent on its own, and draws the list instead
 /// once the settings say so.
@@ -65,9 +65,18 @@ public sealed partial class CodeServerTests
     [InlineData("echo git worktree add", "add", "/s", null)]
     [InlineData("git worktree add -b x", "add", "/s", null)]
     [InlineData("git -C \"/p\" worktree add --lock \"w\"", "add", "/s", "/p/w")]
+    [InlineData("git -C ~/p worktree add w", "add", "/s", "~/p/w")]
+    [InlineData("git -C /p worktree add ~/w", "add", "/s", "~/w")]
+    [InlineData("git -C $P worktree add w", "add", "/s", null)]
+    [InlineData("git -C \"$P\" worktree add /p/w", "add", "/s", "/p/w")]
+    [InlineData("git worktree add \"$WT\"", "add", "/s", null)]
+    [InlineData("cd $P && git worktree add w", "add", "/s", null)]
     public void AWorktreeCommandNamesTheFullPathOfItsWorktree(string command, string verb, string cwd, string? path)
     {
-        Assert.Equal(path, Brain.Code.Worktrees.Named(command, verb, cwd));
+        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        var expected = path?.Replace("~", home, StringComparison.Ordinal);
+
+        Assert.Equal(expected, Brain.Code.Worktrees.Named(command, verb, cwd));
     }
 
     [Fact]
@@ -102,7 +111,7 @@ public sealed partial class CodeServerTests
             await window.Until("[...document.querySelectorAll('.agent-flow-work')].map((work) => work.dataset.end).join()", "landed,review,building").ConfigureAwait(false);
             const string Lens = "document.querySelectorAll('.agent-flow-work')[0]";
             await window.Until($"[...{Lens}.querySelectorAll('.agent-flow-check')].map((check) => check.dataset.verdict).join()", "NOT READY,READY,READY").ConfigureAwait(false);
-            await window.Until($"[...{Lens}.querySelectorAll('.agent-flow-step')].map((step) => step.dataset.way).join()", "forth,back,forth,back,forth,own").ConfigureAwait(false);
+            await window.Until($"[...{Lens}.querySelectorAll('.agent-flow-step')].map((step) => step.dataset.way).join()", "forth,back,forth,back,forth").ConfigureAwait(false);
             await window.Until($"[...{Lens}.querySelectorAll('.agent-flow-tree')].map((tree) => tree.dataset.opened).join()", "true,false").ConfigureAwait(false);
             await window.Until($"{Lens}.querySelector('.agent-flow-end-range').textContent", "cbfdcf1..8124cb8").ConfigureAwait(false);
             const string Dial = "document.querySelectorAll('.agent-flow-work')[1]";
@@ -174,6 +183,7 @@ public sealed partial class CodeServerTests
             folder, "v1", "validator", "toolu_v1", "Validate the lens", true,
             Brief(1050, LensReview), Message(1200, "b1", "1. No test."), Message(1700, "b1", "2. Name it."),
             Bash(2000, "l1", $"git -C {project} merge --ff-only lens"), BashResult(2005, "l1", Landing),
+            Bash(2030, "stale", $"git -C {project} worktree remove {project}/.claude/worktrees/stale"), BashResult(2035, "stale", ""),
             Bash(2050, "rm", $"git -C {project} worktree remove {lens}"), BashResult(2055, "rm", ""),
             Handback(2100, "Landed.")).ConfigureAwait(false);
         await Sent(folder, "r5", "brain-ready", "toolu_r5", "Check the dial review", true, Brief(1400, DialReview), Said(1420, "READY")).ConfigureAwait(false);

@@ -7,7 +7,7 @@ namespace Brain.Code;
 /// the one its own Bash call added with <c>git worktree add</c>, opened when that call ran; and removed when a Bash call
 /// of the agent or of a validator of its work ran <c>git worktree remove</c> on it, or once its folder is gone. A call
 /// whose result was an error opened or removed nothing. A relative path is in the folder of <c>git -C</c>, else of the
-/// command line's last <c>cd</c>, else of the session's folder.
+/// command line's last <c>cd</c>, else of the session's folder; a path the shell would expand from a variable is none.
 /// </summary>
 internal static partial class Worktrees
 {
@@ -33,33 +33,42 @@ internal static partial class Worktrees
         var opened = started;
         if (path is null)
         {
-            (path, opened) = Ran(agent, Add, cwd);
-        }
-
-        if (path is null)
-        {
-            return null;
-        }
-
-        DateTimeOffset? removedAt = null;
-        foreach (var events in others.Prepend(agent))
-        {
-            var (removed, at) = Ran(events, Remove, cwd);
-            if (removed == path)
+            var adds = Ran(agent, Add, cwd);
+            if (adds.Count == 0)
             {
-                removedAt = at;
-                break;
+                return null;
+            }
+
+            (path, opened) = adds[0];
+        }
+
+        var removedAt = RemovedAt(path, others.Prepend(agent), cwd);
+        var removed = removedAt is not null || !Directory.Exists(path);
+        return new CodeWorktree(path, opened, removed, removedAt);
+    }
+
+    /// <summary>When the first Bash call of <paramref name="agents"/> that removed the worktree at <paramref name="path"/> ran; null when none did.</summary>
+    private static DateTimeOffset? RemovedAt(string path, IEnumerable<IReadOnlyList<CodeEvent>> agents, string? cwd)
+    {
+        foreach (var events in agents)
+        {
+            foreach (var (removed, at) in Ran(events, Remove, cwd))
+            {
+                if (removed == path)
+                {
+                    return at;
+                }
             }
         }
 
-        var gone = removedAt is not null || !Directory.Exists(path);
-        return new CodeWorktree(path, opened, gone, removedAt);
+        return null;
     }
 
-    /// <summary>The worktree the first Bash call of <paramref name="events"/> that ran <c>git worktree</c> <paramref name="verb"/> named, and when it ran.</summary>
-    private static (string? Path, DateTimeOffset? At) Ran(IReadOnlyList<CodeEvent> events, string verb, string? cwd)
+    /// <summary>Each worktree a Bash call of <paramref name="events"/> ran <c>git worktree</c> <paramref name="verb"/> on, with when it ran, the earliest first; a call whose result was an error is left out.</summary>
+    private static List<(string Path, DateTimeOffset? At)> Ran(IReadOnlyList<CodeEvent> events, string verb, string? cwd)
     {
-        var failed = SentAgents.FailedCalls(events);
+        var failed = CodeEvent.FailedCalls(events);
+        var ran = new List<(string, DateTimeOffset?)>();
         foreach (var call in events)
         {
             if (call.Kind != CodeEvent.Tool || call.Name != Bash || failed.Contains(call.Id ?? string.Empty))
@@ -70,11 +79,11 @@ internal static partial class Worktrees
             var command = call.Input?.GetValueOrDefault("command") ?? string.Empty;
             if (Named(command, verb, cwd) is { } path)
             {
-                return (path, call.At);
+                ran.Add((path, call.At));
             }
         }
 
-        return (null, null);
+        return ran;
     }
 
     /// <summary>
@@ -137,16 +146,35 @@ internal static partial class Worktrees
         return null;
     }
 
-    /// <summary><paramref name="path"/> as a full path, a relative one taken in <paramref name="folder"/>, with no slash at its end.</summary>
-    private static string Resolved(string path, string? folder)
+    /// <summary>
+    /// <paramref name="path"/> as a full path with no slash at its end: a leading <c>~</c> is the home folder, and a
+    /// relative path is taken in <paramref name="folder"/>. Null for a path the shell would expand from a variable, and
+    /// for a relative one with no folder known.
+    /// </summary>
+    private static string? Resolved(string path, string? folder)
     {
         var full = path.Trim('"', '\'');
-        if (!Path.IsPathRooted(full) && folder is not null)
+        if (full.Contains('$', StringComparison.Ordinal))
         {
-            full = Path.GetFullPath(Path.Combine(folder, full));
+            return null;
         }
 
-        return Path.TrimEndingDirectorySeparator(full);
+        if (full == "~" || full.StartsWith("~/", StringComparison.Ordinal))
+        {
+            full = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + full[1..];
+        }
+
+        if (Path.IsPathRooted(full))
+        {
+            return Path.TrimEndingDirectorySeparator(full);
+        }
+
+        if (folder is null)
+        {
+            return null;
+        }
+
+        return Path.TrimEndingDirectorySeparator(Path.GetFullPath(Path.Combine(folder, full)));
     }
 
     /// <summary>A command that changes the folder: <c>cd folder</c>.</summary>

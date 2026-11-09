@@ -1,36 +1,15 @@
-// The agents panel beside the conversation: every agent a session sent, drawn as the settings choose, as the shared
-// agent flow, a diagram of blocks and lines from the open agent on, or as the list.
-//
-// The agent list: every agent a session sent, in the order it sent them, each as the shared agent row. A piece of work reads as one trail joined by a line: the checks, the builder, each validator with its
-// checks, and between them the steps that passed between the agents, as the server outlines them. A click opens the
-// agent's own view, a step's the view of the agent that wrote it, at that step. The list is drawn from what the server
-// says and holds no state of its own.
+// The agents panel beside the conversation: every agent a session sent, grouped into its pieces of work by the shared
+// agent work, and drawn as the settings choose. As a flow, it is the shared agent flow, a diagram of blocks and lines
+// from the open agent on. As a list, each agent is the shared agent row in the order it was sent, and a piece of work
+// reads as one trail joined by a line: the checks, the builder, each validator with its checks, and between them the
+// steps that passed between the agents, as the server outlines them. A click opens the agent's own view, a step's the
+// view of the agent that wrote it, at that step. The panel is drawn from what the server says and holds no state of
+// its own.
 import { html, nothing } from '/lit-html.js';
 import { agentRowView } from '/components/agent-row.js';
 import { trailOutlineView } from '/components/trail-step.js';
 import { agentFlowView } from '/components/agent-flow.js';
-
-// The entries of the list, in the order the first agent of each was sent. A builder heads one piece of work, which its
-// validators join; a readiness check joins the entry of the agent the server says it checked, and stands alone when
-// none was sent after it. Any other agent is an entry of its own.
-// The key of the entry an agent is in: the piece of work of its builder, the entry of the agent a check checked, or its own.
-function keyOf(sent, builders, byTool) {
-  if (sent.kind === 'ready' && byTool.has(sent.attached)) return keyOf(byTool.get(sent.attached), builders, byTool);
-  if (sent.work && builders.has(sent.work)) return `work|${sent.work}`;
-  return sent.tool;
-}
-
-function grouped(agents) {
-  const builders = new Set(agents.filter((sent) => sent.kind === 'builder').map((sent) => sent.agent));
-  const byTool = new Map(agents.map((sent) => [sent.tool, sent]));
-  const groups = new Map();
-  for (const sent of agents) {
-    const key = keyOf(sent, builders, byTool);
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push(sent);
-  }
-  return [...groups.values()];
-}
+import { piecesOf } from '/components/agent-work.js';
 
 // The time an item of an entry happened at; an item with none is last.
 function atOf(item) {
@@ -73,7 +52,7 @@ function countLine(agents) {
 }
 
 function listView(agents, open, now, onOpen) {
-  return html`<ol class="code-agent-groups">${grouped(agents).map((group) => groupView(group, open, now, onOpen))}</ol>`;
+  return html`<ol class="code-agent-groups">${piecesOf(agents).map((group) => groupView(group, open, now, onOpen))}</ol>`;
 }
 
 // The agents a session sent, with the call id of the one open, or null; shows is 'flow' or 'list', root names the
@@ -81,8 +60,12 @@ function listView(agents, open, now, onOpen) {
 export function agentListView(agents, open, { shows, root, onOpen }) {
   if (agents.length === 0) return nothing;
   const now = Date.now();
-  let body = agentFlowView(agents, { root, open, now, onOpen });
-  if (shows === 'list') body = listView(agents, open, now, onOpen);
+  let body;
+  if (shows === 'list') {
+    body = listView(agents, open, now, onOpen);
+  } else {
+    body = agentFlowView(agents, { root, open, now, onOpen });
+  }
   return html`
     <aside class="code-agents" data-shows=${shows} aria-label="Agents the session sent">
       <header class="code-agents-head">

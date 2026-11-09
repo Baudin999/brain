@@ -35,7 +35,7 @@ function foldView(session, { folded, onFold, onEndProcess, ending }) {
 export function sessionPage(session, conversation, agents, actions) {
   const {
     onAgent, onCall, selected, kinds, onSend, onInterrupt, stopping, confirm, onConfirm, onKeep, onClose, onAnswer, answering,
-    onShowQuestion, away, onToEnd, onExplore, onChange,
+    onShowQuestion, away, onToEnd, onExplore, onChange, shows,
   } = actions;
   const questionView = (asked) => sessionQuestionView(session, asked, actions);
   return html`
@@ -63,7 +63,7 @@ export function sessionPage(session, conversation, agents, actions) {
         ${openQuestionsView(session, { onShow: onShowQuestion })}
         ${composerView(session, { onSend, onInterrupt, stopping, confirm, onConfirm, onKeep, onExplore, onChange })}
       </div>
-      ${agentListView(agents, null, { shows: kinds.agents, root: session.agent, onOpen: onAgent })}
+      ${agentListView(agents, null, { shows, root: session.agent, onOpen: onAgent })}
     </div>
   `;
 }

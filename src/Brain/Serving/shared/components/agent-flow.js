@@ -8,7 +8,8 @@
 // is a line whose arrow points the way the information went: the builder's report and each answer to the validator,
 // each round of findings back to the builder. Where the builder's worktree was opened, and where it was removed, is a
 // mark on its lifeline. The work ends in the landing, with the range it moved the default branch by and its commits,
-// or says where it stands; under it, the Navarone signals the work touched, counted by how they ended.
+// or says where it stands, which only it says; under it, the Navarone signals the work touched, counted by how they
+// ended. A verdict that landed the work is that landing. Which agents are one piece of work is the shared agent work's.
 //
 // A click opens what the list opens: a block the agent's own view, a line the view of the agent that wrote it at that
 // step, a worktree mark or the signals the builder's view, the landing the validator's at its report. Nothing here
@@ -19,6 +20,7 @@
 import { html, nothing } from '/lit-html.js';
 import { kindLabel, ranFor } from '/components/agent-row.js';
 import { stepKey } from '/components/trail-step.js';
+import { piecesOf } from '/components/agent-work.js';
 
 // The ends of a Navarone signal, in the order the count says them: what still needs someone first.
 const SIGNAL_ENDS = [
@@ -44,35 +46,18 @@ function timeOf(at) {
   return time;
 }
 
-// The branches of the trunk, in the order the first agent of each was sent: each builder's work, with its checks, its
-// validators and theirs; and each agent of no work, with its checks.
-function flowBranches(agents) {
-  const byTool = new Map(agents.map((sent) => [sent.tool, sent]));
-  const checks = new Map();
-  for (const sent of agents) {
-    if (sent.kind !== 'ready' || !byTool.has(sent.attached)) continue;
-    if (!checks.has(sent.attached)) checks.set(sent.attached, []);
-    checks.get(sent.attached).push(sent);
+// A piece of work as the trunk branches to it: a builder's work, with its checks, its validators and theirs; or an
+// agent of no work, with its checks, a check that checked none being its own block.
+function branchOf(piece) {
+  const checksOf = (sent) => piece.filter((one) => one.kind === 'ready' && one.attached === sent.tool);
+  const builder = piece.find((sent) => sent.kind === 'builder');
+  if (builder) {
+    const validators = piece.filter((sent) => sent.kind === 'validator').map((sent) => ({ sent, checks: checksOf(sent) }));
+    return { kind: 'work', builder, checks: checksOf(builder), validators };
   }
-  const builders = new Map();
-  for (const sent of agents) {
-    if (sent.kind === 'builder') builders.set(sent.agent, { kind: 'work', builder: sent, checks: checks.get(sent.tool) || [], validators: [] });
-  }
-  const branches = [];
-  for (const sent of agents) {
-    const of = checks.get(sent.tool) || [];
-    if (sent.kind === 'builder') {
-      branches.push(builders.get(sent.agent));
-      continue;
-    }
-    if (sent.kind === 'validator' && builders.has(sent.work)) {
-      builders.get(sent.work).validators.push({ sent, checks: of });
-      continue;
-    }
-    if (sent.kind === 'ready' && byTool.has(sent.attached)) continue;
-    branches.push({ kind: 'lone', sent, checks: of });
-  }
-  return branches;
+  let sent = piece.find((one) => one.kind !== 'ready');
+  if (!sent) sent = piece[piece.length - 1];
+  return { kind: 'lone', sent, checks: piece.filter((one) => one !== sent) };
 }
 
 // The rows of a piece of work, in the order they happened: the blocks of each lifeline, the steps between them, and
@@ -89,6 +74,8 @@ function workRows(work) {
     rows.push({ at: timeOf(validator.sent.started), side: 'validator', draws: { agent: validator.sent } });
   }
   for (const step of builder.steps || []) {
+    // A verdict that landed the work is the landing the work ends in.
+    if (step.landed) continue;
     let side = 'both';
     if (step.kind === 'verdict') side = 'validator';
     rows.push({ at: timeOf(step.at), side, draws: { step } });
@@ -132,7 +119,7 @@ function plural(count, word) {
 function workEnd(work) {
   const steps = work.builder.steps || [];
   const landing = steps.find((step) => step.landed);
-  if (landing) return { end: 'landed', words: 'Landed', landing };
+  if (landing) return { end: 'landed', words: 'Landed on the default branch', landing };
   const rounds = roundsOf(work);
   const validators = work.validators.map((one) => one.sent);
   const checks = [...work.checks, ...work.validators.flatMap((one) => one.checks)];
@@ -232,7 +219,6 @@ function stepWords(step) {
   if (step.kind === 'report') return `Report${commits}`;
   if (step.kind === 'findings') return `Round ${step.round} · findings`;
   if (step.kind === 'answer') return `Answer to round ${step.round}${commits}`;
-  if (step.landed) return 'Landed the work';
   return 'Verdict';
 }
 
@@ -243,7 +229,7 @@ function stepView(step, onOpen) {
   if (step.kind === 'findings') way = 'back';
   if (step.kind === 'verdict') way = 'own';
   return html`
-    <button class="agent-flow-step" data-kind=${step.kind} data-way=${way} data-landed=${step.landed ? 'true' : nothing}
+    <button class="agent-flow-step" data-kind=${step.kind} data-way=${way}
       @click=${() => onOpen(step.tool, stepKey(step))}>
       <span class="agent-flow-step-words">${stepWords(step)}</span>
       <span class="agent-flow-step-when">${clockOf(step.at)}</span>
@@ -288,8 +274,7 @@ function signalsView(work, onOpen) {
 
 // Where the work ends: the landing, with its range and commits, which opens the validator's report; or where it
 // stands, in words.
-function endView(work, onOpen) {
-  const end = workEnd(work);
+function endView(end, onOpen) {
   if (end.end !== 'landed') {
     return html`<p class="agent-flow-end" data-end=${end.end}><span class="agent-flow-end-words">${end.words}</span></p>`;
   }
@@ -298,7 +283,7 @@ function endView(work, onOpen) {
   if (landing.commits > 0) commits = html`<span class="agent-flow-end-commits">${plural(landing.commits, 'commit')}</span>`;
   return html`
     <button class="agent-flow-end" data-end="landed" @click=${() => onOpen(landing.tool, stepKey(landing))}>
-      <span class="agent-flow-end-words">Landed on the default branch</span>
+      <span class="agent-flow-end-words">${end.words}</span>
       <span class="agent-flow-end-range">${landing.landed}</span>
       ${commits}
     </button>
@@ -315,12 +300,9 @@ function workView(work, shown) {
   const end = workEnd(work);
   return html`
     <section class="agent-flow-work" data-end=${end.end} aria-label=${`Work: ${work.builder.description}`}>
-      <header class="agent-flow-work-head">
-        <h3 class="agent-flow-work-title">${work.builder.description}</h3>
-        <span class="agent-flow-work-state">${end.words}</span>
-      </header>
+      <h3 class="agent-flow-work-title">${work.builder.description}</h3>
       <ol class="agent-flow-rows">${rows.map((row, at) => rowView(row, builderLine[at], validatorLine[at], work, shown))}</ol>
-      ${endView(work, shown.onOpen)}
+      ${endView(end, shown.onOpen)}
       ${signalsView(work, shown.onOpen)}
     </section>
   `;
@@ -350,7 +332,7 @@ export function agentFlowView(agents, { root, open = null, now = Date.now(), onO
   return html`
     <div class="agent-flow">
       <p class="agent-flow-root"><span class="agent-flow-root-kind">Open agent</span><span class="agent-flow-root-name">${root}</span></p>
-      <ol class="agent-flow-branches">${flowBranches(agents).map((branch) => branchView(branch, shown))}</ol>
+      <ol class="agent-flow-branches">${piecesOf(agents).map((piece) => branchView(branchOf(piece), shown))}</ol>
     </div>
   `;
 }

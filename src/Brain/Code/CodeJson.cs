@@ -54,6 +54,21 @@ internal sealed record CodeEvent(
 
     /// <summary>A message another agent sent this one, as a validator's findings to its builder: Id is the sender's agent id, Name its name.</summary>
     public const string Message = "message";
+
+    /// <summary>The ids of the calls of <paramref name="calls"/> whose result was an error.</summary>
+    public static HashSet<string> FailedCalls(IReadOnlyList<CodeEvent> calls)
+    {
+        var failed = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var one in calls)
+        {
+            if (one is { Kind: CodeEvent.Result, Failed: true, Id: { } call })
+            {
+                failed.Add(call);
+            }
+        }
+
+        return failed;
+    }
 }
 
 /// <summary>

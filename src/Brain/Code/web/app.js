@@ -963,7 +963,7 @@ function focusCloseConfirm() {
 
 function mainView() {
   const actions = {
-    onAgent: openAgent, onCall: openCall, selected: state.panel?.id ?? null, kinds: state.settings, onSend: say, onClose: askClose, onBack: back, onShow: show, onPick: pick, onShowQuestion: showQuestion,
+    onAgent: openAgent, onCall: openCall, selected: state.panel?.id ?? null, kinds: state.settings, shows: state.settings.agents, onSend: say, onClose: askClose, onBack: back, onShow: show, onPick: pick, onShowQuestion: showQuestion,
     onAnswer: answer, onReply: reply, onDismiss: dismiss, answering: isAnswering, onChange: draw, away: state.away, onToEnd: toEnd, onExplore: openExplorer,
     onInterrupt: askInterrupt, stopping: isStopping, confirm: confirmOf, onConfirm: confirmInterrupt, onKeep: keepRunning,
     folded, onFold: fold, onEndProcess: endProcess, ending: isEnding,

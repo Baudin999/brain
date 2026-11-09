@@ -70,7 +70,7 @@ internal sealed class SentAgents
     private List<Agent> Read(Transcript session)
     {
         var calls = session.All();
-        var failed = FailedCalls(calls);
+        var failed = CodeEvent.FailedCalls(calls);
         var metas = WithUnwritten(calls, session.Sent());
         var builders = metas.Where(meta => meta.Type == Agent.BuilderType && meta.Agent.Length > 0).Select(meta => meta.Agent).ToList();
         var agents = new List<Agent>();
@@ -81,21 +81,6 @@ internal sealed class SentAgents
         }
 
         return [.. agents.OrderBy(agent => agent.Sent.Started ?? DateTimeOffset.MaxValue)];
-    }
-
-    /// <summary>The ids of the calls of <paramref name="calls"/> whose result was an error.</summary>
-    internal static HashSet<string> FailedCalls(IReadOnlyList<CodeEvent> calls)
-    {
-        var failed = new HashSet<string>(StringComparer.Ordinal);
-        foreach (var one in calls)
-        {
-            if (one is { Kind: CodeEvent.Result, Failed: true, Id: { } call })
-            {
-                failed.Add(call);
-            }
-        }
-
-        return failed;
     }
 
     /// <summary>

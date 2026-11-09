@@ -1597,11 +1597,11 @@
       "id": "0000191",
       "check": "split-complexity",
       "symbol": "brain::Brain.Code.SentAgents.Read(Transcript)",
-      "fingerprint": "1f93ce4aa7d38d807975b1ca79df69c32c46f7978e6b05d39536ef6ff63971b7",
+      "fingerprint": "032acdf50938e810d093b483cc80cfcc5e1ce67df5fd90476f956c2c8d99d5d8",
       "value": 34,
       "resolution": {
-        "reason": "Read stays a short walk: calls, metas, agents, order. The .ctor reads one agent\u0027s state, start, end and now; KindOf maps a type to a kind; NowOf reads the last tool call or words; StateOf picks one of four states; Verdict reads the two words a check opens with; WorkOf finds the builder a brief names; WithUnwritten adds the agents whose meta Claude Code has not written yet. Each answers one question about one agent. FailedCalls left the sum: Worktrees uses it too.",
-        "fingerprint": "1f93ce4aa7d38d807975b1ca79df69c32c46f7978e6b05d39536ef6ff63971b7",
+        "reason": "Read stays a short walk: calls, metas, agents, order. The .ctor reads one agent\u0027s state, start, end and now; KindOf maps a type to a kind; NowOf reads the last tool call or words; StateOf picks one of four states; Verdict reads the two words a check opens with; WorkOf finds the builder a brief names; WithUnwritten adds the agents whose meta Claude Code has not written yet. Each answers one question about one agent. Which calls failed is now CodeEvent.FailedCalls, a question about events that Worktrees asks too.",
+        "fingerprint": "032acdf50938e810d093b483cc80cfcc5e1ce67df5fd90476f956c2c8d99d5d8",
         "value": 34
       }
     },
@@ -1769,12 +1769,12 @@
       "id": "0000218",
       "check": "split-complexity",
       "symbol": "brain::Brain.Code.Worktrees.Of(string, DateTimeOffset?, IReadOnlyList\u003CCodeEvent\u003E, IReadOnlyList\u003CIReadOnlyList\u003CCodeEvent\u003E\u003E, string)",
-      "fingerprint": "2481bf83ef4bb582b51652cb472fa58c5a73588ea8b249660a3707245ed158c3",
-      "value": 25,
+      "fingerprint": "948122a179e5f0ccdef1b8fe0fa7892d896b694f2bf1f41265eed89cbe0bb76f",
+      "value": 29,
       "resolution": {
-        "reason": "Of decides given or opened, then removed, then gone. Ran finds the first Bash call of a verb whose result was no error, and when it ran; Named reads one Bash line, its cd, its git -C and its verb; PathAfterOptions skips the option words and their values; Resolved makes a path full in a folder. Ran is about the agent\u0027s events and the other three about one shell line; inlined they would be one method that mixes the two.",
-        "fingerprint": "2481bf83ef4bb582b51652cb472fa58c5a73588ea8b249660a3707245ed158c3",
-        "value": 25
+        "reason": "Of decides given or opened, then removed, then gone. Ran lists every Bash call of a verb whose result was no error, with the worktree it named and when; RemovedAt finds among them the removal that names this worktree, so a removal of another worktree first no longer hides it; Named reads one Bash line, its cd, its git -C and its verb; PathAfterOptions skips the option words and their values; Resolved makes a path full, expanding ~ and refusing a variable. Ran and RemovedAt are about the agents\u0027 events and the other three about one shell line; inlined they would be one method that mixes the two.",
+        "fingerprint": "948122a179e5f0ccdef1b8fe0fa7892d896b694f2bf1f41265eed89cbe0bb76f",
+        "value": 29
       }
     },
     {
