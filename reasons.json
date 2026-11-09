@@ -1565,11 +1565,11 @@
       "id": "0000190",
       "check": "split-complexity",
       "symbol": "brain::Brain.Code.SentAgents.View(Transcript, string, WorkSignals, Landings)",
-      "fingerprint": "340d859659c61f6ebbb6be4562d1c421c9f91187b19e7f02aff968fa9407e058",
+      "fingerprint": "9af23bed48c5eb9b1a487c476f45b75e8ff540c18542897a6f8ae593bf7d33a0",
       "value": 18,
       "resolution": {
-        "reason": "View finds one agent and hands its facts to the view. NavaroneRuns.get counts the Bash results that ran Navarone, RunsNavarone(CodeEvent) is the one test of a call for it, Questions.get cuts a readiness check\u0027s report after its verdict, and TrailOf(Agent, List\u003CAgent\u003E, WorkSignals, Landings) builds the trail of the agent\u0027s work. Each answers one question and none is a branch of View cut in pieces.",
-        "fingerprint": "340d859659c61f6ebbb6be4562d1c421c9f91187b19e7f02aff968fa9407e058",
+        "reason": "View finds one agent and hands its facts to the view. NavaroneRuns.get counts the Bash results that ran Navarone, RunsNavarone(CodeEvent) is the one test of a call for it, Questions.get cuts a readiness check\u0027s report after its verdict, and TrailOf(Agent, List\u003CAgent\u003E, WorkSignals, Landings) builds the trail of the agent\u0027s work. Listing(Agent, List\u003CAgent\u003E) makes the agent\u0027s own listing. Each answers one question and none is a branch of View cut in pieces.",
+        "fingerprint": "9af23bed48c5eb9b1a487c476f45b75e8ff540c18542897a6f8ae593bf7d33a0",
         "value": 18
       }
     },

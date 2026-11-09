@@ -45,7 +45,7 @@ internal sealed class SentAgents
         }
 
         var trail = TrailOf(agent, agents, signals, landings);
-        var sent = Listed(agents)[agents.IndexOf(agent)];
+        var sent = Listing(agent, agents);
         return new CodeAgentView(sent, agent.Brief, agent.Report, trail, agent.Questions);
     }
 
@@ -79,10 +79,18 @@ internal sealed class SentAgents
         var listed = new List<CodeSent>();
         foreach (var agent in agents)
         {
-            listed.Add(agent.Sent with { Attached = CheckedBy(agent, agents), Steps = OutlineOf(agent, agents) });
+            listed.Add(Listing(agent, agents));
         }
 
         return listed;
+    }
+
+    /// <summary>One agent as the list shows it: with the agent it checked, for a check, and the outline of its work, for a builder.</summary>
+    private static CodeSent Listing(Agent agent, List<Agent> agents)
+    {
+        var attached = CheckedBy(agent, agents);
+        var steps = OutlineOf(agent, agents);
+        return agent.Sent with { Attached = attached, Steps = steps };
     }
 
     /// <summary>The call id of the agent the check <paramref name="check"/> checked; null for any other agent, and for a check with no agent sent after it.</summary>
