@@ -25,6 +25,9 @@ internal static class HandedLaunch
         return code;
     }
 
+    /// <summary>Removes a handed code no window will trade, so the next server that starts opens its own window.</summary>
+    public static void Withdraw(ServeFiles files) => File.Delete(Path.Combine(files.Dir, FileName));
+
     /// <summary>The code a predecessor handed, which is gone from then on; null when none waits, or it is past its life.</summary>
     public static string? Take(ServeFiles files, TimeProvider time)
     {
@@ -34,7 +37,7 @@ internal static class HandedLaunch
             return null;
         }
 
-        File.Delete(Path.Combine(files.Dir, FileName));
+        Withdraw(files);
         var parts = text.Split(' ');
         if (parts.Length != 2 || !long.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out var at))
         {

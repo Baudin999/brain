@@ -114,6 +114,41 @@ public sealed partial class CodeServerTests
     }
 
     /// <summary>
+    /// A successor that never serves leaves no handed code behind: the server withdraws it once it gave up waiting, so a
+    /// server that starts there later opens its own window.
+    /// </summary>
+    [Fact]
+    public async Task ASuccessorThatNeverServesLeavesNoHandedCodeAndTheNextServerOpensAWindow()
+    {
+        var token = await Trade(Code(windows[0]));
+        using var events = await OpenEvents(token);
+        await File.WriteAllTextAsync(Path.Combine(publish, CodeBuild.StampFile), "second\n");
+        using var ready = await ListedWhen(token, CodeReload.Ready);
+        var handed = Path.Combine(brain.Home, "cache", CodeServer.Folder, HandedLaunch.FileName);
+        var whileWaiting = false;
+        succeeding = () =>
+        {
+            whileWaiting = File.Exists(handed);
+            clock.Leaps = true;
+        };
+
+        var reloaded = await Reload(token, string.Empty);
+        await serving.WaitAsync(Wait);
+        clock.Leaps = false;
+        using var later = Server();
+        using var stopping = new CancellationTokenSource();
+        var served = later.Serve(stopping.Token);
+
+        Assert.Equal(HttpStatusCode.NoContent, reloaded.StatusCode);
+        Assert.Equal(1, successors);
+        Assert.True(whileWaiting);
+        Assert.False(File.Exists(handed));
+        Assert.Equal(2, windows.Count);
+        await stopping.CancelAsync();
+        await served.WaitAsync(Wait);
+    }
+
+    /// <summary>
     /// The window in a real browser: no reload button shows until a newer build is published; then it shows, disabled
     /// while a session runs a job, and it lights up once the job ended, with no event from the server; its click reloads:
     /// the server starts its successor, and the same window moves onto it with no second window and no question asked.

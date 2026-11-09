@@ -22,9 +22,9 @@ internal sealed record WindowKind(string App, string Command, string Folder, str
 /// and a POST from a browser must come from its origin. Hello, raise and the window's own keyed calls need the key in its
 /// <see cref="ServeFiles"/>, which only the user's account can read; launch needs a launch code; everything else under
 /// <c>/api</c> needs the session of its window from <see cref="WindowSessions"/>. Its window hears on its event stream
-/// what the server publishes and each Omarchy theme switch, and moves onto the server's successor once it hands on. It sends the window's records and its own to its
-/// <see cref="Records"/>, and once a minute records the CPU it used, which an idle window keeps near none. It ends once
-/// its window is gone.
+/// what the server publishes and each Omarchy theme switch, and moves onto the server's successor once it hands on. It
+/// sends the window's records and its own to its <see cref="Records"/>, and once a minute records the CPU it used, which
+/// an idle window keeps near none. It ends once its window is gone.
 /// </summary>
 internal sealed class WindowServer
 {
@@ -162,7 +162,8 @@ internal sealed class WindowServer
     /// starts it, waits until the successor's port file names it, and tells the window the successor's launch URL on the
     /// window's own event stream, waiting a moment for the stream to carry it, so the window goes on there and no second
     /// window opens. False, with nothing started, when no window listens: the successor then opens its own. A successor
-    /// that does not serve within <see cref="SuccessorWait"/> leaves the window to find this server gone.
+    /// that does not serve within <see cref="SuccessorWait"/> has its code withdrawn and leaves the window to find this
+    /// server gone.
     /// </summary>
     public bool MoveTo(Action successor)
     {
@@ -174,12 +175,14 @@ internal sealed class WindowServer
         var code = HandedLaunch.Hand(files, time);
         var mine = files.Read(PortFile);
         successor();
-        var deadline = DateTime.UtcNow + SuccessorWait;
+        var deadline = time.GetUtcNow() + SuccessorWait;
         var theirs = files.Read(PortFile);
         while (theirs is null || theirs == mine)
         {
-            if (DateTime.UtcNow > deadline)
+            if (time.GetUtcNow() > deadline)
             {
+                // No window will trade the code: a server that starts here later opens its own window.
+                HandedLaunch.Withdraw(files);
                 return true;
             }
 
@@ -413,9 +416,8 @@ internal sealed class WindowServer
 
     /// <summary>
     /// The window's event stream: what the server publishes, a theme switch, close once a newer window took over, and
-    /// moved once the window goes on in the server's successor. It
-    /// ends with the window's goodbye or its connection. Once the last stream ended and none came back within a few
-    /// seconds, the server stops.
+    /// moved once the window goes on in the server's successor. It ends with the window's goodbye or its connection.
+    /// Once the last stream ended and none came back within a few seconds, the server stops.
     /// </summary>
     // navarone: 0000157
     private void Events(HttpListenerResponse response, string token)

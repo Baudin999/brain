@@ -23,6 +23,9 @@ public sealed partial class CodeServerTests : IDisposable
 
     private readonly TempBrain brain = new();
     private readonly List<string> windows = [];
+
+    /// <summary>The clock every server of a test runs on: the system's, until a test has it leap.</summary>
+    private readonly LeapingClock clock = new();
     private readonly CancellationTokenSource stop = new();
     private readonly string config;
     private readonly string project;
@@ -1133,7 +1136,26 @@ public sealed partial class CodeServerTests : IDisposable
 
     /// <summary>A server of this brain on the stand-in, whose build runs from the publish folder; its successor is counted, then <see cref="succeeding"/> runs.</summary>
     private CodeServer Server() =>
-        new(brain.Home, brain.Root, StandIn(), new ClaudeFiles(config), TextWriter.Null, Open, (_) => false, TimeProvider.System, new OmarchyTheme(brain.Root, colorCommand: null), new CodeBuild(publish), Succeed);
+        new(brain.Home, brain.Root, StandIn(), new ClaudeFiles(config), TextWriter.Null, Open, (_) => false, clock, new OmarchyTheme(brain.Root, colorCommand: null), new CodeBuild(publish), Succeed);
+
+    /// <summary>The system's clock until <see cref="Leaps"/>; from then on each read is ten seconds past the one before.</summary>
+    private sealed class LeapingClock : TimeProvider
+    {
+        private static readonly TimeSpan Leap = TimeSpan.FromSeconds(10);
+        private TimeSpan ahead;
+
+        public bool Leaps { get; set; }
+
+        public override DateTimeOffset GetUtcNow()
+        {
+            if (Leaps)
+            {
+                ahead += Leap;
+            }
+
+            return DateTimeOffset.UtcNow + ahead;
+        }
+    }
 
     private void Succeed()
     {

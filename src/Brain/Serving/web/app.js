@@ -494,7 +494,7 @@ async function followEvents() {
           const lines = buffer.slice(0, end).split('\n');
           if (lines.includes('event: theme')) swapTheme();
           if (lines.includes('event: close')) shut('A newer brain window took over, or brain serve stopped.', true);
-          if (lines.includes('event: moved')) move(lines.find((line) => line.startsWith('data: ')).slice('data: '.length));
+          if (lines.includes('event: moved')) moved(lines);
           buffer = buffer.slice(end + 2);
         }
       }
@@ -503,6 +503,14 @@ async function followEvents() {
     }
     await new Promise((resolve) => setTimeout(resolve, EVENTS_RETRY_MS));
   }
+}
+
+// The moved event names the successor's launch URL on its data line; one without it moves nowhere.
+function moved(lines) {
+  const data = lines.find((line) => line.startsWith('data: '));
+  if (!data) return;
+  const url = data.slice('data: '.length);
+  move(url);
 }
 
 // brain serve restarts onto a new build and hands this window on: once its successor serves the page, the window goes
