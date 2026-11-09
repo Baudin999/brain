@@ -14,19 +14,18 @@ namespace Brain.Code;
 /// workspace's, that runs the window's sessions in its <see cref="CodeSessions"/> and ends, with every session and what
 /// runs under each, once its window is gone. <c>brain code</c> starts a session through the keyed
 /// <c>/api/key/start</c>; the window starts one through <c>/api/start</c>, says the user's words, interrupts a turn,
-/// ends a process a session started,
-/// reads a session's conversation, the agents it sent and one agent's view with the trail of its work and its
-/// conversation, answers a permission request and a session's questions, and closes a session. The user's words carry
-/// the images he attached. Its file explorer lists a folder's folders and images through <see cref="ImageFolders"/>,
-/// reads an image file, and says which folder images were attached from; the server reads nothing else of the disk for
-/// it. Each session's folder has its workspace, which <see cref="CodeWorkspaces"/> starts and the window shows in a
-/// frame; brain code reads nothing of it. A session's permission hook, <c>brain code --permission</c>, hands each request in through the keyed
-/// <c>/api/key/permission</c>, which answers once the user did, or deny once the session ended or a week went by. A
-/// session's <c>brain ask</c> hands its questions in through the keyed <c>/api/key/ask</c>, which answers at once for
-/// an agent that goes on, and once the user answered, or the session ended, for one that waits. The window hears on its
-/// event stream which session changed, at most once each 50 ms, and which one a <c>brain code</c> started. Every call,
-/// each request with its answer, and each question with its answer, is a record in the <see cref="WindowLog"/> of
-/// <c>perf/code</c>.
+/// ends a process a session started, reads a session's conversation, the agents it sent and one agent's view with the
+/// trail of its work and its conversation, answers a permission request and a session's questions, and closes a
+/// session. The user's words carry the images he attached. Its file explorer lists a folder's folders and images
+/// through <see cref="ImageFolders"/>, reads an image file, and says which folder images were attached from; the server
+/// reads nothing else of the disk for it. Each session's folder has its workspace, which <see cref="CodeWorkspaces"/>
+/// starts and the window shows in a frame; brain code reads nothing of it. A session's permission hook,
+/// <c>brain code --permission</c>, hands each request in through the keyed <c>/api/key/permission</c>, which answers
+/// once the user did, or deny once the session ended or a week went by. A session's <c>brain ask</c> hands its
+/// questions in through the keyed <c>/api/key/ask</c>, which answers at once for an agent that goes on, and once the
+/// user answered, or the session ended, for one that waits. The window hears on its event stream which session changed,
+/// at most once each 50 ms, and which one a <c>brain code</c> started. Every call, each request with its answer, and
+/// each question with its answer, is a record in the <see cref="WindowLog"/> of <c>perf/code</c>.
 /// <para>
 /// Once a newer build is published beside it, its window hears so and its session list says whether a reload waits for
 /// a session that runs. The user's reload, refused while one runs, hands every session on in <see cref="Handover"/>, and
@@ -218,9 +217,9 @@ internal sealed class CodeServer : IDisposable
     }
 
     /// <summary>
-    /// The calls <c>brain code</c> makes with the key: read a session, start one, which the window then shows, bring the
-    /// window forward, and hand in a permission request, which waits for the user's answer; and the call <c>brain ask</c> makes, which hands in a
-    /// session's questions.
+    /// The calls <c>brain code</c> makes with the key: read a session, start one, which the window then shows, bring
+    /// the window forward, and hand in a permission request, which waits for the user's answer; and the call
+    /// <c>brain ask</c> makes, which hands in a session's questions.
     /// </summary>
     // navarone: 0000181
     private void Keyed(HttpListenerRequest request, HttpListenerResponse response, string path)

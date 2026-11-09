@@ -1,12 +1,12 @@
 # brain code
 
-This file covers [`brain code`](cli.md#brain-code): a window that runs Claude Code sessions of brain's agents, in brain's
-styling, in place of a terminal. It says how a session starts and moves in, how the window draws a conversation and its
-tool calls, how a session's folder shows as its workspace, how live text streams, how a turn is stopped, how images are
-attached, the jobs and permission requests a session raises, how an agent asks you questions with
+This file covers [`brain code`](cli.md#brain-code): a window that runs Claude Code sessions of brain's agents, in
+brain's styling, in place of a terminal. It says how a session starts and moves in, how the window draws a conversation
+and its tool calls, how a session's folder shows as its workspace, how live text streams, how a turn is stopped, how
+images are attached, the jobs and permission requests a session raises, how an agent asks you questions with
 [`brain ask`](cli.md#brain-ask), how the agents a session sent are shown, the window's keys, and how the window's server
-reloads onto a new build. The agents themselves are described in
-[gates.md](gates.md#how-work-lands) and in `harness/agents`.
+reloads onto a new build. The agents themselves are described in [gates.md](gates.md#how-work-lands) and in
+`harness/agents`.
 
 ## Starting a session
 
@@ -19,9 +19,9 @@ two agents are refused. The session list and each session's head show its full f
 A session whose claude exits without a transcript, or with an error, is marked ended and says the exit status and
 claude's stderr in its conversation; `brain code` prints the same when the server reports it within a second.
 
-There is one brain code window, apart from brain's window. A `brain code` while it is open adds a
-session to it, shows that session and brings the window forward. The window lists its sessions on the side, several
-alive at once, and its own new session takes an agent and a folder, and refuses one that does not exist.
+There is one brain code window, apart from brain's window. A `brain code` while it is open adds a session to it, shows
+that session and brings the window forward. The window lists its sessions on the side, several alive at once, and its
+own new session takes an agent and a folder, and refuses one that does not exist.
 
 `brain code [agent] --resume <session-id>` moves a session that runs elsewhere, as in a terminal, into the window: it
 continues by its id, in the folder it ran in, with its history drawn. A folder argument that differs from it is
@@ -81,11 +81,11 @@ conversation's place. Side by side, at the strip's far end, `Alt+V`, shows the t
 left, and turns off again. The server keeps the toggle's state in the data repo's `cache`, as it keeps the settings, so
 it survives a reload and a restart.
 
-Each tab and the toggle give the keys to what they show, side by side as well: `Alt+C` to the conversation's composer,
-`Alt+W` to the workspace. The workspace's keys work while it has the focus, and brain code's while the conversation
-has it. Side by side, the pane with the focus carries a line of the focus color along its top, and the workspace's own
-panes carry theirs only while it has the focus. The workspace hands brain code the Alt keys it does not bind, so
-`Alt+C`, `Alt+W` and `Alt+V` work from it too. Nothing an agent does switches a tab or opens a file.
+Each tab gives the keys to what it shows, side by side as well: `Alt+C` to the conversation's composer, `Alt+W` to the
+workspace. The workspace's keys work while it has the focus, and brain code's while the conversation has it. Side by
+side, the pane with the focus carries a line of the focus color along its top, and the workspace's own panes carry
+theirs only while it has the focus. The workspace hands brain code the Alt keys it does not bind, so `Alt+C`, `Alt+W`
+and `Alt+V` work from it too. Nothing an agent does switches a tab or opens a file.
 
 ## Live text
 

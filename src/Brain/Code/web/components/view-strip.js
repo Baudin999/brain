@@ -1,7 +1,7 @@
 // The strip down the window's left edge, the strip of brain's window and its inboxes: for the session in view, one tab
-// shows its conversation and one its folder's code, its workspace, and at the far end the toggle that shows the two side
-// by side. A tab is current while what it shows is in view, both of them side by side, and the toggle pressed while it
-// is on. With no session in view the strip is empty. A click does what the tab's key does.
+// shows its conversation and one its folder's code, its workspace, and at the far end the toggle that shows the two
+// side by side. A tab is current while what it shows is in view, both of them side by side, and the toggle pressed
+// while it is on. With no session in view the strip is empty. A click does what the tab's key does.
 import { html } from '/lit-html.js';
 
 const TABS = [

@@ -70,8 +70,7 @@ node a forget or a merge touches. A node's change wraps at 120 characters.
 The window filters on two axes, each picked in one place. The inbox is the first. A thin strip down the window's left
 edge lists Home, node review, conversations, dreams, Answered, one inbox per source in `sources.tsv`, and Evidence at
 its far end, each label turned to read upward, each with how much waits in it. brain code's window draws its strip with
-the same component. `Ctrl+P` shows node review, and `H` and
-`L` step through the inboxes.
+the same component. `Ctrl+P` shows node review, and `H` and `L` step through the inboxes.
 
 The window opens on the last inbox you opened, kept across a reload and a restart like the focus, and on Home when none
 is remembered; a write or a question arriving never changes it. Evidence, Settings and the Stylebook sit at the strip's
@@ -361,8 +360,8 @@ The Stylebook shows every token of `tokens.css`, the colors, text sizes, radii a
 its states: the button, the chip, the segmented switch, the row, a tab of the strip, current or pressed, a workspace's
 tree row and git file row among its variants, the pane head, the icon button, the link, the fold, the field, the code
 mark, a workspace's git change in the tree, in code and in markdown, and the palette, which is brain's command palette
-and a workspace's bar alike, of `components.css`; and the select, the toggle, the field row, the option list and the model selector, each drawn by its
-own sheet in brain's `web/components`.
+and a workspace's bar alike, of `components.css`; and the select, the toggle, the field row, the option list and the
+model selector, each drawn by its own sheet in brain's `web/components`.
 
 Both shared sheets live in `src/Brain/Serving/shared`, which brain's window, brain code's and every workspace serve
 alike, with lit-html, mermaid, the markdown, the diagrams, the probe and the quiet page. Settings is a page in

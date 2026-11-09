@@ -436,13 +436,16 @@ function focusMoved() {
   draw();
 }
 
-// A key the strip takes: Alt+C, Alt+W or Alt+V with no other modifier, while a session is in view; true when it took it.
+// A key the strip takes: Alt+C, Alt+W or Alt+V with no other modifier, with a session in view; true when it took it.
 function viewKeyed(event) {
   if (!event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return false;
   const view = VIEW_KEYS[event.code];
   if (!view || !sessionInView()) return false;
-  if (view === 'beside') toggleBeside();
-  if (view !== 'beside') showView(view);
+  if (view === 'beside') {
+    toggleBeside();
+    return true;
+  }
+  showView(view);
   return true;
 }
 
@@ -453,7 +456,10 @@ function heardFrame(event) {
   const folder = workspaceFolderOf(host, event);
   if (!folder) return;
   const said = event.data ?? {};
-  if (said.workspace === 'key') viewKeyed(said);
+  if (said.workspace === 'key') {
+    viewKeyed(said);
+    return;
+  }
   if (said.workspace !== 'ended') return;
   state.workspaces.set(folder, { problem: 'The workspace’s server stopped. Alt+W starts it again.' });
   draw();

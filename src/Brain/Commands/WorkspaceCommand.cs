@@ -4,9 +4,10 @@ using Brain.Workspace;
 namespace Brain.Commands;
 
 /// <summary>
-/// <c>brain workspace --serve &lt;path&gt;</c>: runs the server of one project folder's workspace in the foreground, its
-/// file tree, its reader and git. It opens no window of its own: brain code starts it, in the background, the first time
-/// it shows a session's folder, and shows its page in a frame of brain code's window. It is apart from brain serve.
+/// <c>brain workspace --serve &lt;path&gt;</c>: runs the server of one project folder's workspace in the foreground,
+/// its file tree, its reader and git. It opens no window of its own: brain code starts it, in the background, the first
+/// time it shows a session's folder, and shows its page in a frame of brain code's window. It is apart from brain
+/// serve.
 /// </summary>
 internal static class WorkspaceCommand
 {
