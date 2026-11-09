@@ -28,6 +28,7 @@ internal static class WebCalls
     /// away while it was answered is no failure: nobody is left to tell. The page's policy is <see cref="WebAssets.Policy"/>
     /// unless <paramref name="policy"/> says another.
     /// </summary>
+    // navarone: 0000219
     [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "A server's one boundary: every failure is answered, logged and recorded, never dropped with the task.")]
     public static void Answer(HttpListenerContext context, string home, string server, TextWriter err, Action<HttpListenerRequest, HttpListenerResponse> route, string policy = WebAssets.Policy)
     {

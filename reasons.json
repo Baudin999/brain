@@ -1,5 +1,5 @@
 {
-  "granted": 218,
+  "granted": 219,
   "problems": [
     {
       "id": "0000001",
@@ -898,14 +898,6 @@
       "resolution": null
     },
     {
-      "id": "0000111",
-      "check": "split-complexity",
-      "symbol": "brain::Brain.Serving.WebCalls.Answer(HttpListenerContext, string, string, TextWriter, Action\u003CHttpListenerRequest, HttpListenerResponse\u003E)",
-      "fingerprint": "20fb397ee8899b4615ac38478280dfbbc07dbd44a8cc27f937be8b0de76a0165",
-      "value": 11,
-      "resolution": null
-    },
-    {
       "id": "0000112",
       "check": "split-complexity",
       "symbol": "brain::Brain.Staging.PendingStore.Undo(string, string, Graph)",
@@ -1257,12 +1249,12 @@
       "id": "0000156",
       "check": "cyclomatic",
       "symbol": "brain::Brain.Windows.WindowServer.Route(HttpListenerRequest, HttpListenerResponse)",
-      "fingerprint": "d8f922356d263e6e0946816a0b0477d203f8d622d2fcc270c1629a06f4bca9ff",
-      "value": 13,
+      "fingerprint": "c7596df37e9d882925ff43e58c12622c08430fcfadb94f39754ba2b416bdfdcb",
+      "value": 12,
       "resolution": {
-        "reason": "Route is the server\u0027s door: the stranger check, then one guard per kind of caller that hands it on and returns: the command with the key to Keyed, the browser to Page, the window\u0027s launch to Launch, the window\u0027s session to Session. Its paths are those guards; each caller\u0027s calls live in its own method.",
-        "fingerprint": "d8f922356d263e6e0946816a0b0477d203f8d622d2fcc270c1629a06f4bca9ff",
-        "value": 13
+        "reason": "Route is the server\u0027s door: the stranger check, then one guard per kind of caller that hands it on and returns: the command with the key to Keyed, the browser to Page, the window\u0027s launch to Launch, the window\u0027s session to Session. Its paths are those guards; each caller\u0027s calls live in its own method. This change takes raise out of the plumbing, into brain code\u0027s own keyed calls, and adds no path.",
+        "fingerprint": "c7596df37e9d882925ff43e58c12622c08430fcfadb94f39754ba2b416bdfdcb",
+        "value": 12
       }
     },
     {
@@ -1337,11 +1329,11 @@
       "id": "0000164",
       "check": "lcom4",
       "symbol": "brain::Brain.Workspace.WorkspaceServer",
-      "fingerprint": "b5f5df2f75be425b5f8d6f054a35ba91fcd0aed82ec03be71f8467c0f0724945",
+      "fingerprint": "6a58f4f0f6fb671ed601b53b848f06f4e8ad19542d1be9350a8ff40937b91181",
       "value": 2,
       "resolution": {
-        "reason": "Name and Title are pure functions of the root, by which the constructor names the window, its log and its WindowKind. They use no field because the fields are built from them; they belong with the workspace that names itself.",
-        "fingerprint": "b5f5df2f75be425b5f8d6f054a35ba91fcd0aed82ec03be71f8467c0f0724945",
+        "reason": "Name and Title are pure functions of the root, by which the constructor names the workspace, its log and its WindowKind. They use no field because the fields are built from them; they belong with the workspace that names itself. The new Keyed and IsLocalOrigin join the first piece: the launch for brain code\u0027s frame is the workspace\u0027s own keyed call.",
+        "fingerprint": "6a58f4f0f6fb671ed601b53b848f06f4e8ad19542d1be9350a8ff40937b91181",
         "value": 2
       }
     },
@@ -1373,11 +1365,11 @@
       "id": "0000167",
       "check": "split-complexity",
       "symbol": "brain::Brain.Commands.CodeCommand.Run(BrainEnv, IReadOnlyList\u003Cstring\u003E)",
-      "fingerprint": "0d8f5f84f0c2a91ae3241101fc857d10371a02d572a9eadffcfa54ee610652d6",
+      "fingerprint": "3c28b1993a579e49faf42205d39b66dc007d4ead6d646f005abef98153fbbcfa",
       "value": 29,
       "resolution": {
-        "reason": "Run parses the command line and picks one of its three runs, each a step with its own meaning: Serve runs the window\u0027s server; Permission is the hook\u0027s run, which reads the request and writes the decision, and Asked hands it to the server and waits, deny when the server is gone; Positionals tells the folder from the agent, Open finds or starts the server and raises its window, Started posts the start, Ended watches a session that fails at once, and Checked turns the server\u0027s refusal into the command\u0027s message. This change moves the server\u0027s start into StartServer, which Open and a reloading server\u0027s successor share, and adds no decision.",
-        "fingerprint": "0d8f5f84f0c2a91ae3241101fc857d10371a02d572a9eadffcfa54ee610652d6",
+        "reason": "Run parses the command line and picks one of its three runs, each a step with its own meaning: Serve runs the window\u0027s server; Permission is the hook\u0027s run and Asked hands it to the server; Positionals tells the folder from the agent, Open finds or starts the server and raises its window, Started posts the start, Ended watches a session that fails at once, and Checked turns the server\u0027s refusal into the command\u0027s message. This change hands Serve\u0027s server the workspace\u0027s start, WorkspaceCommand.StartServer, and adds no decision.",
+        "fingerprint": "3c28b1993a579e49faf42205d39b66dc007d4ead6d646f005abef98153fbbcfa",
         "value": 29
       }
     },
@@ -1433,11 +1425,11 @@
       "id": "0000176",
       "check": "control-coupling",
       "symbol": "brain::Brain.Code.CodeServer.Acts(HttpListenerRequest, HttpListenerResponse, string)",
-      "fingerprint": "98217b04ae6128abbf9d5d26d9a1dba50740d5662857053980e59de9cfb72644",
+      "fingerprint": "6f0e37a8742cd3f2a4d32723b7131a599bb0280ef45f3d1e4b40550113c010cf",
       "value": 1,
       "resolution": {
-        "reason": "Acts picks the window\u0027s action by the request\u0027s path, a route table with one call per case and no logic of its own; the path is the request\u0027s own, not a flag the caller chose. The reload joins the table as one more case.",
-        "fingerprint": "98217b04ae6128abbf9d5d26d9a1dba50740d5662857053980e59de9cfb72644",
+        "reason": "Acts picks the window\u0027s action by the request\u0027s path, a route table with one call per case and no logic of its own; the path is the request\u0027s own, not a flag the caller chose. The workspace\u0027s launch joins the table as one more case.",
+        "fingerprint": "6f0e37a8742cd3f2a4d32723b7131a599bb0280ef45f3d1e4b40550113c010cf",
         "value": 1
       }
     },
@@ -1489,23 +1481,23 @@
       "id": "0000181",
       "check": "cyclomatic",
       "symbol": "brain::Brain.Code.CodeServer.Keyed(HttpListenerRequest, HttpListenerResponse, string)",
-      "fingerprint": "5b2f828672273436daf80aaf26c7755c093ef08e380252e8e6fa8a09e380a2f2",
-      "value": 13,
+      "fingerprint": "644ddc5c8d6f7d8831d86b37e03555cc357d7b6202a40640004b50cb3bbe1a94",
+      "value": 16,
       "resolution": {
-        "reason": "Keyed is the route table of the keyed calls: one arm per call, read a session, start one, hand in a permission request, hand in a session\u0027s questions, and the refusal of any other. Its paths are the switch\u0027s arms and the tuple patterns they match on method and path; each arm is one call to the step that does the work.",
-        "fingerprint": "5b2f828672273436daf80aaf26c7755c093ef08e380252e8e6fa8a09e380a2f2",
-        "value": 13
+        "reason": "Keyed is the route table of the keyed calls: one arm per call, read a session, start one, raise the window, hand in a permission request, hand in a session\u0027s questions, and the refusal of any other. Its paths are the switch\u0027s arms and the tuple patterns they match on method and path; each arm is one call to the step that does the work. Raise moved here from the shared plumbing, since only brain code\u0027s window raises.",
+        "fingerprint": "644ddc5c8d6f7d8831d86b37e03555cc357d7b6202a40640004b50cb3bbe1a94",
+        "value": 16
       }
     },
     {
       "id": "0000182",
       "check": "lcom4",
       "symbol": "brain::Brain.Serving.WebCalls",
-      "fingerprint": "e265d27aef1b0c42de3bdeb4765dc1ca49706a7d5aafe678e80a54ead41a9f8c",
+      "fingerprint": "e0d0fc0d4945708434b40395dddd9c82ca3c81492028be2061679e1d6ccb979d",
       "value": 2,
       "resolution": {
-        "reason": "WebCalls is the one HTTP vocabulary every server of brain speaks, all static and stateless: the boundary that answers a request and the helpers that send and refuse on one side, and reading the request\u0027s body on the other. Read and Body are one step, the body read whole by its length or to its end when chunked; they share no field with the senders because no method here holds one. Splitting the body read into its own class would move one method every server imports beside the others it imports from here.",
-        "fingerprint": "e265d27aef1b0c42de3bdeb4765dc1ca49706a7d5aafe678e80a54ead41a9f8c",
+        "reason": "WebCalls is the HTTP every server of brain speaks, as one boundary: answering a request with its headers and refusals, and reading its body. Read and Body share no field with the senders because the class has none; splitting the reading from the answering would give each server two imports for one wire. This change only lets a server name its page\u0027s policy.",
+        "fingerprint": "e0d0fc0d4945708434b40395dddd9c82ca3c81492028be2061679e1d6ccb979d",
         "value": 2
       }
     },
@@ -1729,8 +1721,8 @@
       "id": "0000211",
       "check": "cyclomatic",
       "symbol": "brain::Brain.Code.CodeServer.Acts(HttpListenerRequest, HttpListenerResponse, string)",
-      "fingerprint": "98217b04ae6128abbf9d5d26d9a1dba50740d5662857053980e59de9cfb72644",
-      "value": 12,
+      "fingerprint": "6f0e37a8742cd3f2a4d32723b7131a599bb0280ef45f3d1e4b40550113c010cf",
+      "value": 13,
       "resolution": {
         "reason": "Acts is the window\u0027s route table: one case per endpoint, each a call to the handler of that path, with no logic of its own. A case that closes an ask joins it, as every endpoint did before it; its count is the endpoints, and a table of them is read straight down.",
         "fingerprint": "441bf87acaa076fa2d26a240f9dde0a8844979fcd3d12ef43e418b445c24d640",
@@ -1787,6 +1779,18 @@
         "reason": "Of decides given or opened, then removed, then gone. Ran lists every Bash call of a verb whose result was no error, with the worktree it named and when; RemovedAt finds among them the removal that names this worktree, so a removal of another worktree first no longer hides it; Named reads one Bash line, its cd, its git -C and its verb; PathAfterOptions skips the option words and their values; Resolved makes a path full, expanding ~ and refusing a variable. Ran and RemovedAt are about the agents\u0027 events and the other three about one shell line; inlined they would be one method that mixes the two.",
         "fingerprint": "948122a179e5f0ccdef1b8fe0fa7892d896b694f2bf1f41265eed89cbe0bb76f",
         "value": 29
+      }
+    },
+    {
+      "id": "0000219",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Serving.WebCalls.Answer(HttpListenerContext, string, string, TextWriter, Action\u003CHttpListenerRequest, HttpListenerResponse\u003E, string)",
+      "fingerprint": "2298cab4e7d7ef2cd2632efc70ad1263b0b95d5bf846da7ab0754fea2c9bf409",
+      "value": 11,
+      "resolution": {
+        "reason": "Answer is the one boundary every request is answered in: the policy and headers, the route, and a failure answered, logged and recorded. TrySend\u0027s decisions are what sending an answer to a window that may have gone needs, which only this boundary does. This change adds the policy as a parameter and no decision.",
+        "fingerprint": "2298cab4e7d7ef2cd2632efc70ad1263b0b95d5bf846da7ab0754fea2c9bf409",
+        "value": 11
       }
     }
   ]
