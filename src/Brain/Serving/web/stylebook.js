@@ -568,6 +568,11 @@ function demoAgentRow(sent, opened = false) {
   return h('div', { class: 'sb-pane' }, templateNode(row));
 }
 
+function demoTrailOutline(step) {
+  const shown = { tool: 'toolu_1', at: '2026-11-06T19:37:06Z', commits: 0, landed: null, ...step };
+  return h('div', { class: 'sb-pane' }, templateNode(trailOutlineView(shown, () => {})));
+}
+
 function demoAgentMessage(from) {
   const message = agentMessageView(from, markdownView('1. **BLOCKER** `code.css` is empty.\n2. One state gets one word.'));
   return h('div', { class: 'sb-pane sb-pane-wide' }, templateNode(message));
@@ -778,6 +783,7 @@ function componentsView() {
         ['stopped', demoAgentRow({ ...DEMO_SENT.builder, state: 'stopped', ended: '2026-11-06T19:20:00Z' })],
         ['failed', demoAgentRow({ ...DEMO_SENT.builder, state: 'failed', ended: '2026-11-06T19:05:00Z' })],
         ['open', demoAgentRow(DEMO_SENT.validator, true)],
+        ['doing now', demoAgentRow({ ...DEMO_SENT.builder, now: 'Bash tests/run.sh' })],
         ['READY', demoAgentRow(DEMO_SENT.ready)],
         ['NOT READY', demoAgentRow({ ...DEMO_SENT.ready, verdict: 'NOT READY' })],
       ])),
@@ -792,6 +798,14 @@ function componentsView() {
         ['answer', demoTrailStep({ kind: 'answer', round: 1, commits: DEMO_COMMITS })],
         ['report', demoTrailStep({ kind: 'verdict', commits: [] })],
         ['landed', demoTrailStep({ kind: 'verdict', landed: 'cbfdcf1..8124cb8', commits: DEMO_COMMITS })],
+      ])),
+    h('section', { class: 'doc-section sb-group' },
+      h('h2', {}, 'Trail outline, .trail-outline, shared/components/trail-step.js'),
+      stateRow('a step in the agent list', [
+        ['report', demoTrailOutline({ kind: 'report', round: 0, commits: 2 })],
+        ['findings', demoTrailOutline({ kind: 'findings', round: 1 })],
+        ['answer', demoTrailOutline({ kind: 'answer', round: 1, commits: 1 })],
+        ['landed', demoTrailOutline({ kind: 'verdict', landed: 'cbfdcf1..8124cb8' })],
       ])),
     h('section', { class: 'doc-section sb-group' },
       h('h2', {}, 'Navarone signal, .navarone-signal, shared/components/navarone-signal.js'),

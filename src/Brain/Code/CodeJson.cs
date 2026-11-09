@@ -170,7 +170,8 @@ internal sealed record CodeDecision(bool Allow, [property: JsonIgnore(Condition 
 /// One agent a session sent, as the window lists it: its id, the id of the call that sent it, its type and the kind
 /// of view it opens in, what it was sent to do, whether it runs, finished, was stopped or failed, when it started and
 /// last wrote, the id of the builder whose work it is part of, a readiness check's verdict, and the worktree it builds
-/// in.
+/// in. A readiness check carries the call id of the agent it checked, <c>Attached</c>, and none when no agent was sent
+/// after it yet; a running agent what it does now; a builder the outline of the steps of its work.
 /// </summary>
 internal sealed record CodeSent(
     string Agent,
@@ -183,7 +184,10 @@ internal sealed record CodeSent(
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DateTimeOffset? Ended,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Work,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Verdict,
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Worktree)
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Worktree,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Attached = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Now = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<CodeOutline>? Steps = null)
 {
     public const string Builder = "builder";
     public const string Validator = "validator";
@@ -198,6 +202,18 @@ internal sealed record CodeSent(
 
     public const string Failed = "failed";
 }
+
+/// <summary>
+/// A step of a piece of work, short, for the list: its <see cref="Trail"/> kind, the call id of the agent that wrote it,
+/// when, its round, how many commits it made, and for a landing its range.
+/// </summary>
+internal sealed record CodeOutline(
+    string Kind,
+    string Tool,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DateTimeOffset? At,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? Round,
+    int Commits,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Landed);
 
 /// <summary>Every agent a session sent, in the order it sent them.</summary>
 internal sealed record CodeSentList(IReadOnlyList<CodeSent> Agents);

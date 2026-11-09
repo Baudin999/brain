@@ -14,7 +14,7 @@ import { fileExplorer, fileExplorerShow, fileExplorerThumb, fileExplorerView } f
 import { processFoldView } from '/components/process-fold.js';
 import { agentRowView } from '/components/agent-row.js';
 import { agentMessageView } from '/components/agent-message.js';
-import { trailStepView } from '/components/trail-step.js';
+import { trailOutlineView, trailStepView } from '/components/trail-step.js';
 import { navaroneSignalView } from '/components/navarone-signal.js';
 import { verdictView } from '/components/verdict.js';
 import { toolCallKind, toolCallView } from '/components/tool-call.js';
@@ -44,6 +44,7 @@ Object.assign(window, {
   processFoldView,
   agentRowView,
   agentMessageView,
+  trailOutlineView,
   trailStepView,
   navaroneSignalView,
   verdictView,

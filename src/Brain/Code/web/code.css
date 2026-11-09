@@ -85,8 +85,7 @@
 .code-agents-title { margin: 0; color: var(--ink); font: 600 var(--text-2)/1.4 var(--sans); }
 .code-agents-count { color: var(--muted); font-size: var(--text-1); }
 .code-agent-groups { display: flex; flex-direction: column; gap: var(--sp-1); list-style: none; margin: 0; padding: 0; }
-.code-work { border-left: 2px solid var(--rule-strong); }
-.code-work .agent-row + .agent-row { margin-left: var(--sp-4); width: calc(100% - var(--sp-4)); }
+.code-work { display: flex; flex-direction: column; gap: var(--sp-1); padding-left: var(--sp-2); border-left: 2px solid var(--rule-strong); }
 
 /* The agent page: what happened leads, in words; the brief and the details wait behind their folds. */
 

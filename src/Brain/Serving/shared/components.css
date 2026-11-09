@@ -436,6 +436,7 @@ textarea.field { field-sizing: content; resize: none; min-height: calc(var(--lin
 .row.agent-row { flex-wrap: wrap; }
 .agent-row-kind { color: var(--ink); font: 600 var(--text-2)/1.4 var(--sans); }
 .agent-row-what { flex-basis: 100%; min-width: 0; color: var(--ink-soft); font-size: var(--text-2); overflow-wrap: anywhere; }
+.agent-row-now { flex-basis: 100%; color: var(--muted); font-size: var(--text-1); overflow-wrap: anywhere; }
 .agent-row-state { color: var(--muted); font-size: var(--text-1); }
 .agent-row[data-state="running"] .agent-row-state { color: var(--focus); }
 .agent-row[data-state="failed"] .agent-row-state { color: var(--no); }
@@ -452,7 +453,8 @@ textarea.field { field-sizing: content; resize: none; min-height: calc(var(--lin
 
 /* The trail step: one step of a piece of work's story, on canvas, ruled at its start in the color of who wrote it: a
    report in the strong rule, findings in the stale color, an answer in the focus color, and a landing in the yes
-   color. Drawn by shared/components/trail-step.js. */
+   color. Drawn by shared/components/trail-step.js. The outline of a step, .trail-outline, is one such step in a line in the
+   agent list. */
 
 .trail-step { padding: var(--sp-3) var(--sp-4); border-left: 3px solid var(--rule-strong); border-radius: var(--radius-2); background: var(--canvas); }
 .trail-step[data-kind="findings"] { border-left-color: var(--stale); }
@@ -461,6 +463,11 @@ textarea.field { field-sizing: content; resize: none; min-height: calc(var(--lin
 .trail-step-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-2); }
 .trail-step-title { margin: 0; color: var(--ink); font: 600 var(--text-3)/1.4 var(--sans); }
 .trail-step-when { color: var(--muted); font-size: var(--text-1); }
+.trail-outline { display: flex; justify-content: space-between; gap: var(--sp-2); padding: var(--sp-1) var(--sp-2); border: 0; border-radius: var(--radius-2); background: none; color: var(--ink-soft); font-size: var(--text-1); text-align: left; cursor: pointer; }
+.trail-outline:hover { background: var(--canvas); }
+.trail-outline[data-kind="findings"] { color: var(--stale); }
+.trail-outline[data-landed="true"] { color: var(--yes); }
+.trail-outline-when { color: var(--muted); }
 .trail-step-label { margin: var(--sp-3) 0 0; color: var(--muted); font-size: var(--text-1); }
 .trail-step-commits { margin: var(--sp-1) 0 0; padding-left: var(--sp-4); color: var(--ink-soft); font-size: var(--text-2); }
 

@@ -1565,8 +1565,8 @@
       "id": "0000190",
       "check": "split-complexity",
       "symbol": "brain::Brain.Code.SentAgents.View(Transcript, string, WorkSignals, Landings)",
-      "fingerprint": "1809cee85752bf561f99b7edcac69d29b1aa5c3ffa0790294a50759edcd06ba8",
-      "value": 23,
+      "fingerprint": "47863b722f3a7f976b659e6162f2d765d90371b09a560395c24d192e53a32b8e",
+      "value": 19,
       "resolution": {
         "reason": "View reads one sent agent\u0027s transcript into its view, and its helpers are the facts the view states, one each: NavaroneRuns.get adds 5, Now.get adds 4, Questions.get adds 3, RunsNavarone adds 5 and TrailOf adds 4. RunsNavarone only changed where it reads a Bash command, from the event\u0027s text to its input field, so the counts are the view\u0027s own.",
         "fingerprint": "1809cee85752bf561f99b7edcac69d29b1aa5c3ffa0790294a50759edcd06ba8",
@@ -1577,12 +1577,12 @@
       "id": "0000191",
       "check": "split-complexity",
       "symbol": "brain::Brain.Code.SentAgents.Read(Transcript)",
-      "fingerprint": "29c99e70540a45f594cd80fc1c24c77f3290ed7f95127e335bc302008c072398",
-      "value": 35,
+      "fingerprint": "c6f2c6acf67bab840956b439a8af8aa3ec1cece1f485718eea80101b1afc450c",
+      "value": 46,
       "resolution": {
-        "reason": "Read lists the session\u0027s agents in plain steps: the failed calls, the metas with the calls whose meta is not written yet, the builders, an Agent per meta, then the order. FailedCalls(IReadOnlyList\u003CCodeEvent\u003E) picks the calls that gave back an error and WithUnwritten(IReadOnlyList\u003CCodeEvent\u003E, IReadOnlyList\u003CSentMeta\u003E) adds an agent its call sent before Claude Code wrote its meta. The rest are the facts one agent\u0027s files say, which Agent holds as one record so the list and an agent\u0027s view read them alike: its .ctor(SentMeta, IReadOnlyList\u003CCodeEvent\u003E, IReadOnlySet\u003Cstring\u003E, IReadOnlyList\u003Cstring\u003E) gathers them, KindOf(string) maps the type to a view, StateOf(SentMeta, IReadOnlySet\u003Cstring\u003E) running, finished, stopped or failed, WorkOf(IReadOnlyList\u003Cstring\u003E) the builder a validator\u0027s brief names, and Verdict() a readiness check\u0027s word.",
-        "fingerprint": "29c99e70540a45f594cd80fc1c24c77f3290ed7f95127e335bc302008c072398",
-        "value": 35
+        "reason": "Read stays a short walk: calls, metas, agents, order, attach. The ctor reads one agent\u0027s state, start and end; KindOf maps a type to a kind; StateOf picks one of four states; Verdict reads the two words a check opens with; WorkOf finds the builder a brief names; FailedCalls collects error results; WithUnwritten adds a meta for a call with none yet; Attach hands each agent its attached check, now and outline; CheckedBy matches a check\u0027s brief and falls to the next agent sent; IsWork names the one test both share; OutlineOf shortens Trail.Of\u0027s steps. Each answers one question about one agent and is called once per agent, none is a branch of Read cut in pieces.",
+        "fingerprint": "c6f2c6acf67bab840956b439a8af8aa3ec1cece1f485718eea80101b1afc450c",
+        "value": 46
       }
     },
     {

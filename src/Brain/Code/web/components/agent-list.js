@@ -1,34 +1,57 @@
 // The agent list: every agent a session sent, in the order it sent them, beside the conversation, each as the shared
-// agent row. A builder and the validators sent for its work sit together as one piece of work, the validators under it.
-// A click opens the agent's own view. The list is drawn from what the server says and holds no state of its own.
+// agent row. A piece of work reads as one trail joined by a line: the checks, the builder, each validator with its
+// checks, and between them the steps that passed between the agents, as the server outlines them. A click opens the
+// agent's own view, a step's the view of the agent that wrote it, at that step. The list is drawn from what the server
+// says and holds no state of its own.
 import { html, nothing } from '/lit-html.js';
 import { agentRowView } from '/components/agent-row.js';
+import { trailOutlineView } from '/components/trail-step.js';
 
-// The pieces of work and the lone agents, in the order the first agent of each was sent: a builder heads its work,
-// and a validator joins the work of the builder its brief names, or stands alone when the list holds no such builder.
-function grouped(agents) {
+// The entries of the list, in the order the first agent of each was sent. A builder heads one piece of work, which its
+// validators join; a readiness check joins the entry of the agent the server says it checked, and stands alone when
+// none was sent after it. Any other agent is an entry of its own.
+function entryKeys(agents) {
   const builders = new Set(agents.filter((sent) => sent.kind === 'builder').map((sent) => sent.agent));
-  const groups = [];
-  const works = new Map();
+  const byTool = new Map(agents.map((sent) => [sent.tool, sent]));
+  const keyOf = (sent) => {
+    if (sent.kind === 'ready' && byTool.has(sent.attached)) return keyOf(byTool.get(sent.attached));
+    if (sent.work && builders.has(sent.work)) return `work|${sent.work}`;
+    return sent.tool;
+  };
+  return keyOf;
+}
+
+function grouped(agents) {
+  const keyOf = entryKeys(agents);
+  const groups = new Map();
   for (const sent of agents) {
-    if (!sent.work || !builders.has(sent.work)) {
-      groups.push([sent]);
-      continue;
-    }
-    if (!works.has(sent.work)) {
-      const work = [];
-      works.set(sent.work, work);
-      groups.push(work);
-    }
-    works.get(sent.work).push(sent);
+    const key = keyOf(sent);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(sent);
   }
-  return groups;
+  return [...groups.values()];
+}
+
+// The time an item of an entry happened at; an item with none is last.
+function atOf(item) {
+  const at = Date.parse(item.sent ? item.sent.started : item.step.at);
+  return Number.isNaN(at) ? Infinity : at;
+}
+
+// An entry as one trail: its agents and, for a builder's work, the steps of its outline, in the order they happened.
+function trailOf(group) {
+  const items = group.map((sent) => ({ sent }));
+  for (const sent of group) {
+    for (const step of sent.steps || []) items.push({ step });
+  }
+  return items.map((item, place) => ({ item, place })).sort((a, b) => atOf(a.item) - atOf(b.item) || a.place - b.place).map(({ item }) => item);
 }
 
 function groupView(group, open, now, onOpen) {
-  const rows = group.map((sent) => agentRowView(sent, { opened: sent.tool === open, now, onOpen }));
-  if (group.length === 1) return html`<li class="code-sent-one">${rows}</li>`;
-  return html`<li class="code-work" aria-label="One piece of work">${rows}</li>`;
+  const items = trailOf(group);
+  if (items.length === 1) return html`<li class="code-sent-one">${agentRowView(group[0], { opened: group[0].tool === open, now, onOpen })}</li>`;
+  const drawn = items.map((item) => item.sent ? agentRowView(item.sent, { opened: item.sent.tool === open, now, onOpen }) : trailOutlineView(item.step, onOpen));
+  return html`<li class="code-work" aria-label="One piece of work">${drawn}</li>`;
 }
 
 // How many agents are in each state, in words: running and finished always, stopped and failed when there are any.

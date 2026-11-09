@@ -63,7 +63,73 @@ internal sealed class SentAgents
             agents.Add(new Agent(meta, events, failed, builders));
         }
 
-        return [.. agents.OrderBy(agent => agent.Sent.Started ?? DateTimeOffset.MaxValue)];
+        var ordered = agents.OrderBy(agent => agent.Sent.Started ?? DateTimeOffset.MaxValue).ToList();
+        Attach(ordered);
+        return ordered;
+    }
+
+    /// <summary>
+    /// Gives each readiness check the agent it checked, what each running agent does now, and each builder the outline
+    /// of its work. A check belongs to the builder or validator sent with exactly its brief; one whose brief matches
+    /// none belongs to the next builder or validator sent after it; one with none after it belongs to none.
+    /// </summary>
+    private static void Attach(List<Agent> agents)
+    {
+        foreach (var agent in agents)
+        {
+            var attached = CheckedBy(agent, agents);
+            var steps = OutlineOf(agent, agents);
+            agent.Sent = agent.Sent with { Attached = attached, Now = agent.Now, Steps = steps };
+        }
+    }
+
+    /// <summary>The call id of the agent the check <paramref name="check"/> checked; null for any other agent, and for a check with no agent sent after it.</summary>
+    private static string? CheckedBy(Agent check, List<Agent> agents)
+    {
+        if (check.Sent.Kind != CodeSent.Ready)
+        {
+            return null;
+        }
+
+        var works = agents.Where(IsWork).ToList();
+        var sentAfter = agents.Skip(agents.IndexOf(check) + 1).Where(IsWork).ToList();
+        if (check.Brief is { } brief)
+        {
+            var same = sentAfter.Find(one => one.Brief == brief) ?? works.Find(one => one.Brief == brief);
+            if (same is not null)
+            {
+                return same.Meta.ToolUseId;
+            }
+        }
+
+        return sentAfter.FirstOrDefault()?.Meta.ToolUseId;
+    }
+
+    /// <summary>True for a builder and a validator: the agents a readiness check checks.</summary>
+    private static bool IsWork(Agent agent) => agent.Sent.Kind == CodeSent.Builder || agent.Sent.Kind == CodeSent.Validator;
+
+    /// <summary>The short steps of the work a builder heads, the earliest first; null for any other agent.</summary>
+    private static List<CodeOutline>? OutlineOf(Agent builder, List<Agent> agents)
+    {
+        if (builder.Sent.Kind != CodeSent.Builder)
+        {
+            return null;
+        }
+
+        var validators = agents.Where(one => one.Sent.Kind == CodeSent.Validator && one.Sent.Work == builder.Meta.Agent).ToList();
+        var tools = new Dictionary<string, string>(StringComparer.Ordinal) { [builder.Meta.Agent] = builder.Meta.ToolUseId };
+        foreach (var validator in validators)
+        {
+            tools[validator.Meta.Agent] = validator.Meta.ToolUseId;
+        }
+
+        var outline = new List<CodeOutline>();
+        foreach (var step in Trail.Of(builder.Worker, [.. validators.Select(one => one.Worker)]))
+        {
+            outline.Add(new CodeOutline(step.Kind, tools[step.Agent], step.At, step.Round, step.Commits.Count, step.Landed));
+        }
+
+        return outline;
     }
 
     /// <summary>The ids of the session's calls whose result was an error.</summary>
@@ -192,7 +258,7 @@ internal sealed class SentAgents
 
         public IReadOnlyList<CodeEvent> Events { get; }
 
-        public CodeSent Sent { get; }
+        public CodeSent Sent { get; set; }
 
         /// <summary>The kind of view the agent opens in, from its type.</summary>
         public string Kind => KindOf(Meta.Type);

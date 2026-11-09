@@ -461,11 +461,21 @@ function dismiss(session, asked) {
 }
 
 // Opens the agent the selected session's call tool sent, in the view of its kind.
-async function openAgent(tool) {
+// A step the click names is scrolled to in the view, once it is drawn.
+async function openAgent(tool, step) {
   await act('agent.open', tool, READ_BUDGET_MS, async () => {
     const sent = (state.sent.get(state.selected) || []).find((one) => one.tool === tool);
     state.agent = { id: tool, name: sent?.type, shows: 'happened' };
     await readShown();
+    if (step) scrollToStep(step);
+  });
+}
+
+// Scrolls the open agent's view to its trail step by key, once it is drawn.
+function scrollToStep(step) {
+  requestAnimationFrame(() => {
+    const found = [...document.querySelectorAll('.trail-step')].find((one) => one.dataset.step === step);
+    if (found) found.scrollIntoView({ block: 'start' });
   });
 }
 

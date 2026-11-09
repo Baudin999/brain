@@ -3,7 +3,9 @@
 // kind, what it was sent to do, and its state with how long it ran: running, finished or failed, as the server says, a
 // readiness check that finished saying its verdict, READY or NOT READY. A click opens the agent's own view.
 //
-// The agent is the server's shape: { agent, tool, type, kind, description, state, started, ended, verdict }.
+// A running agent shows under its row what it does now, in one line, as the server says it: { now }.
+//
+// The agent is the server's shape: { agent, tool, type, kind, description, state, started, ended, verdict, now }.
 import { html, nothing } from '/lit-html.js';
 
 const MINUTE_MS = 60000;
@@ -50,6 +52,7 @@ export function agentRowView(sent, { opened = false, now = Date.now(), onOpen })
       <span class="agent-row-kind">${kindLabel(sent)}</span>
       <span class="agent-row-what">${sent.description}</span>
       <span class="agent-row-state">${stateWords(sent, now)}</span>
+      ${sent.state === 'running' && sent.now ? html`<span class="agent-row-now">${sent.now}</span>` : nothing}
     </button>
   `;
 }
