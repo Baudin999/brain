@@ -1758,6 +1758,18 @@
       "resolution": null
     },
     {
+      "id": "0000216",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Serving.ReviewServer.Serve(bool, CancellationToken)",
+      "fingerprint": "8428e22c51ab20edfc25f8f4bf4ff678b7dde3fe92bb69a55bad223b3dec3516",
+      "value": 11,
+      "resolution": {
+        "reason": "Serve is the server\u0027s life read top to bottom: take a handed code, start the listener or say the port is taken, open the window unless one moves here, accept until stopped, then land an answer in flight, stop every agent and start the successor. The eleventh path is the handed code, which stands beside the window it replaces; a helper for it would hide one if and add a name.",
+        "fingerprint": "8428e22c51ab20edfc25f8f4bf4ff678b7dde3fe92bb69a55bad223b3dec3516",
+        "value": 11
+      }
+    },
+    {
       "id": "0000217",
       "check": "split-complexity",
       "symbol": "brain::Brain.Code.SentAgents.Agent.NavaroneRuns.get",
@@ -1775,18 +1787,6 @@
         "reason": "Of decides given or opened, then removed, then gone. Ran lists every Bash call of a verb whose result was no error, with the worktree it named and when; RemovedAt finds among them the removal that names this worktree, so a removal of another worktree first no longer hides it; Named reads one Bash line, its cd, its git -C and its verb; PathAfterOptions skips the option words and their values; Resolved makes a path full, expanding ~ and refusing a variable. Ran and RemovedAt are about the agents\u0027 events and the other three about one shell line; inlined they would be one method that mixes the two.",
         "fingerprint": "948122a179e5f0ccdef1b8fe0fa7892d896b694f2bf1f41265eed89cbe0bb76f",
         "value": 29
-      }
-    },
-    {
-      "id": "0000216",
-      "check": "cyclomatic",
-      "symbol": "brain::Brain.Serving.ReviewServer.Serve(bool, CancellationToken)",
-      "fingerprint": "8428e22c51ab20edfc25f8f4bf4ff678b7dde3fe92bb69a55bad223b3dec3516",
-      "value": 11,
-      "resolution": {
-        "reason": "Serve is the server\u0027s life read top to bottom: take a handed code, start the listener or say the port is taken, open the window unless one moves here, accept until stopped, then land an answer in flight, stop every agent and start the successor. The eleventh path is the handed code, which stands beside the window it replaces; a helper for it would hide one if and add a name.",
-        "fingerprint": "8428e22c51ab20edfc25f8f4bf4ff678b7dde3fe92bb69a55bad223b3dec3516",
-        "value": 11
       }
     }
   ]
