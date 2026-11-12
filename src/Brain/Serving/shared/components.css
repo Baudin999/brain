@@ -440,6 +440,11 @@ textarea.field { field-sizing: content; resize: none; min-height: calc(var(--lin
   letter-spacing: -.01em;
 }
 
+/* Each character the user types is drawn as typed: a font's ligatures would join "->" or "::" into one glyph. The font
+   shorthand of .field, .writing and .heading resets the ligatures, so this rule comes after them and names each. */
+
+.field, .field.writing, .field.heading { font-variant-ligatures: none; }
+
 .field.query { border-radius: var(--radius-3); padding: var(--sp-1) var(--sp-2) var(--sp-1) var(--sp-3); }
 .field.query .field.bare { line-height: 1.7; }
 .field:not(.bare):is(:focus, :focus-within, [data-focus]) { border-color: var(--focus); }
