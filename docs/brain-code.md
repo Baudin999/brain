@@ -244,6 +244,14 @@ the one the builder's own Bash call added with git's `worktree add`, opened when
 Bash call of the builder or of a validator of its work ran git's `worktree remove` on it, or once its folder is gone. A
 call whose result was an error opened or removed nothing. The work's Navarone signals are read on that worktree.
 
+Whether the work landed is asked of git, never of what an agent printed. The worktree's branch is the one Claude Code
+gave the builder, or the one its `worktree add` names: the branch of `-b`, else the one it checks out, else the
+worktree folder's name. The work landed when the reflog of the default branch, the branch the primary checkout is on,
+holds a fast-forward of that branch after the builder started, as the validator's `git merge --ff-only <branch>` writes
+it. The reflog keeps it after the worktree is removed and the branch deleted, and its range holds the commits as they
+landed, so a branch the validator rebased first shows the rebased commits. The last validator's report carries the
+landing.
+
 The List setting draws the agents in a column in the order sent, each piece of work joined at its start. The session's
 row counts the agents that still run, so a new agent marks its session without taking the view, and the stop confirm
 names those same agents.
@@ -253,8 +261,8 @@ Each agent opens in a view made for its kind, with its whole conversation one sw
 - A readiness check, `brain-ready`, shows its verdict, READY or NOT READY, and its questions.
 - A builder and a validator show the trail of their work, top to bottom: the builder's report; each round's findings,
   the message the validator sent the builder with SendMessage, and the builder's answer, what it sent or handed back
-  next, with the commits git printed meanwhile; then each validator's report, and a landing with the commits its
-  fast-forward put on the default branch.
+  next, with the commits git printed meanwhile; then each validator's report, and a landing with the commits git says
+  it put on the default branch.
 
 The server numbers each round: findings by their place among the validators' messages, an answer by how many the
 builder had been sent before it, so messages that cross keep their rounds. A validator's findings reach the builder's

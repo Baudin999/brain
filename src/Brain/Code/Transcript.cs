@@ -302,9 +302,15 @@ internal sealed partial class Transcript(string path)
                 worktree = null;
             }
 
+            string? branch = Text(root, "worktreeBranch");
+            if (branch.Length == 0)
+            {
+                branch = null;
+            }
+
             var finished = IsTrue(root, "finished");
             var stopped = IsTrue(root, "stoppedByUser");
-            return new SentMeta(agent, toolUseId, type, Text(root, "description"), worktree, finished, stopped, transcript);
+            return new SentMeta(agent, toolUseId, type, Text(root, "description"), worktree, branch, finished, stopped, transcript);
         }
     }
 
@@ -719,10 +725,10 @@ internal sealed partial class Transcript(string path)
 
 /// <summary>
 /// An agent a session sent, as its <c>.meta.json</c> says: its id, the id of the Agent call that sent it, its type and
-/// description, the worktree it builds in or null, whether it finished or the user stopped it, and its transcript. It
-/// has ended once it did either.
+/// description, the worktree Claude Code gave it and that worktree's branch, or null, whether it finished or the user
+/// stopped it, and its transcript. It has ended once it did either.
 /// </summary>
-internal sealed record SentMeta(string Agent, string ToolUseId, string Type, string Description, string? Worktree, bool Finished, bool Stopped, string Transcript)
+internal sealed record SentMeta(string Agent, string ToolUseId, string Type, string Description, string? Worktree, string? WorktreeBranch, bool Finished, bool Stopped, string Transcript)
 {
     public bool Ended => Finished || Stopped;
 }

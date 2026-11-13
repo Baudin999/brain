@@ -4,7 +4,9 @@ namespace Brain.Code;
 
 /// <summary>
 /// The worktree an agent builds in, read from what its work did: the worktree Claude Code gave it, as its meta names, or
-/// the one its own Bash call added with <c>git worktree add</c>, opened when that call ran; and removed when a Bash call
+/// the one its own Bash call added with <c>git worktree add</c>, opened when that call ran; its branch, as the meta names
+/// it or as git names it for that call: the branch of <c>-b</c>, else the one it checks out, else the folder's name; and
+/// removed when a Bash call
 /// of the agent or of a validator of its work ran <c>git worktree remove</c> on it, or once its folder is gone. A call
 /// whose result was an error opened or removed nothing. A relative path is in the folder of <c>git -C</c>, else of the
 /// command line's last <c>cd</c>, else of the session's folder; a path the shell would expand from a variable is none.
@@ -21,15 +23,19 @@ internal static partial class Worktrees
     /// <summary>The options of <c>git worktree add</c> that take the next word as their value.</summary>
     private static readonly HashSet<string> Valued = new(StringComparer.Ordinal) { "-b", "-B", "--reason" };
 
+    /// <summary>The options of <c>git worktree add</c> whose value is the branch the worktree is on.</summary>
+    private static readonly HashSet<string> Branching = new(StringComparer.Ordinal) { "-b", "-B" };
+
     /// <summary>
-    /// The worktree of an agent that started at <paramref name="started"/>, given by <paramref name="given"/> or opened by
-    /// its own Bash calls in <paramref name="agent"/>, and whether it or one of <paramref name="others"/> removed it; null
-    /// for an agent that has none. <paramref name="cwd"/> is the folder the session ran in.
+    /// The worktree of an agent that started at <paramref name="started"/>, given by its meta <paramref name="meta"/> or
+    /// opened by its own Bash calls in <paramref name="agent"/>, and whether it or one of <paramref name="others"/>
+    /// removed it; null for an agent that has none. <paramref name="cwd"/> is the folder the session ran in.
     /// </summary>
     // navarone: 0000218
-    public static CodeWorktree? Of(string? given, DateTimeOffset? started, IReadOnlyList<CodeEvent> agent, IReadOnlyList<IReadOnlyList<CodeEvent>> others, string? cwd)
+    public static CodeWorktree? Of(SentMeta meta, DateTimeOffset? started, IReadOnlyList<CodeEvent> agent, IReadOnlyList<IReadOnlyList<CodeEvent>> others, string? cwd)
     {
-        var path = given;
+        var path = meta.Worktree;
+        var branch = meta.WorktreeBranch;
         var opened = started;
         if (path is null)
         {
@@ -39,12 +45,12 @@ internal static partial class Worktrees
                 return null;
             }
 
-            (path, opened) = adds[0];
+            (path, branch, opened) = adds[0];
         }
 
         var removedAt = RemovedAt(path, others.Prepend(agent), cwd);
         var removed = removedAt is not null || !Directory.Exists(path);
-        return new CodeWorktree(path, opened, removed, removedAt);
+        return new CodeWorktree(path, opened, removed, removedAt, branch);
     }
 
     /// <summary>When the first Bash call of <paramref name="agents"/> that removed the worktree at <paramref name="path"/> ran; null when none did.</summary>
@@ -52,7 +58,7 @@ internal static partial class Worktrees
     {
         foreach (var events in agents)
         {
-            foreach (var (removed, at) in Ran(events, Remove, cwd))
+            foreach (var (removed, _, at) in Ran(events, Remove, cwd))
             {
                 if (removed == path)
                 {
@@ -64,11 +70,11 @@ internal static partial class Worktrees
         return null;
     }
 
-    /// <summary>Each worktree a Bash call of <paramref name="events"/> ran <c>git worktree</c> <paramref name="verb"/> on, with when it ran, the earliest first; a call whose result was an error is left out.</summary>
-    private static List<(string Path, DateTimeOffset? At)> Ran(IReadOnlyList<CodeEvent> events, string verb, string? cwd)
+    /// <summary>Each worktree a Bash call of <paramref name="events"/> ran <c>git worktree</c> <paramref name="verb"/> on, with its branch and when it ran, the earliest first; a call whose result was an error is left out.</summary>
+    private static List<(string Path, string Branch, DateTimeOffset? At)> Ran(IReadOnlyList<CodeEvent> events, string verb, string? cwd)
     {
         var failed = CodeEvent.FailedCalls(events);
-        var ran = new List<(string, DateTimeOffset?)>();
+        var ran = new List<(string, string, DateTimeOffset?)>();
         foreach (var call in events)
         {
             if (call.Kind != CodeEvent.Tool || call.Name != Bash || failed.Contains(call.Id ?? string.Empty))
@@ -77,9 +83,9 @@ internal static partial class Worktrees
             }
 
             var command = call.Input?.GetValueOrDefault("command") ?? string.Empty;
-            if (Named(command, verb, cwd) is { } path)
+            if (Named(command, verb, cwd) is { } named)
             {
-                ran.Add((path, call.At));
+                ran.Add((named.Path, named.Branch, call.At));
             }
         }
 
@@ -88,9 +94,9 @@ internal static partial class Worktrees
 
     /// <summary>
     /// The full path of the worktree a <c>git worktree</c> command of <paramref name="verb"/> in the Bash line
-    /// <paramref name="command"/> names, or null when the line runs none.
+    /// <paramref name="command"/> names, with the branch git gives it, or null when the line runs none.
     /// </summary>
-    internal static string? Named(string command, string verb, string? cwd)
+    internal static NamedWorktree? Named(string command, string verb, string? cwd)
     {
         var folder = cwd;
         foreach (var part in command.Split(Separators, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
@@ -108,7 +114,8 @@ internal static partial class Worktrees
                 continue;
             }
 
-            if (PathAfterOptions(git.Groups["rest"].Value) is not { } path)
+            var (path, branch) = Words(git.Groups["rest"].Value);
+            if (path is null)
             {
                 continue;
             }
@@ -119,31 +126,57 @@ internal static partial class Worktrees
                 under = Resolved(git.Groups["git"].Value, folder);
             }
 
-            return Resolved(path, under);
+            if (Resolved(path, under) is not { } full)
+            {
+                return null;
+            }
+
+            return new NamedWorktree(full, branch ?? Path.GetFileName(full));
         }
 
         return null;
     }
 
-    /// <summary>The first word of <paramref name="words"/> that is no option and no option's value; null when there is none.</summary>
-    private static string? PathAfterOptions(string words)
+    /// <summary>
+    /// The path a <c>git worktree</c> command's <paramref name="words"/> name, the first that is no option and no
+    /// option's value, and the branch they name: the value of <c>-b</c> or <c>-B</c>, else the word after the path; null
+    /// for none.
+    /// </summary>
+    private static (string? Path, string? Branch) Words(string words)
     {
         var all = words.Split([' ', '\t'], StringSplitOptions.RemoveEmptyEntries);
+        var plain = new List<string>();
+        string? branch = null;
         for (var at = 0; at < all.Length; at++)
         {
             if (Valued.Contains(all[at]))
             {
+                if (Branching.Contains(all[at]) && at + 1 < all.Length)
+                {
+                    branch = all[at + 1];
+                }
+
                 at++;
                 continue;
             }
 
             if (!all[at].StartsWith('-'))
             {
-                return all[at];
+                plain.Add(all[at]);
             }
         }
 
-        return null;
+        if (plain.Count == 0)
+        {
+            return (null, null);
+        }
+
+        if (branch is null && plain.Count > 1)
+        {
+            branch = plain[1];
+        }
+
+        return (plain[0], branch);
     }
 
     /// <summary>
@@ -185,3 +218,6 @@ internal static partial class Worktrees
     [GeneratedRegex(@"^git(?:\s+-C\s+(?<git>\S+))?\s+worktree\s+(?<verb>add|remove)\s+(?<rest>.+)$", RegexOptions.CultureInvariant)]
     private static partial Regex WorktreeCommand();
 }
+
+/// <summary>A worktree a <c>git worktree</c> command names: its full path and the branch git gives it.</summary>
+internal sealed record NamedWorktree(string Path, string Branch);

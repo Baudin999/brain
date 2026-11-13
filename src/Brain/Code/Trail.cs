@@ -7,7 +7,7 @@ namespace Brain.Code;
 /// story of steps in the order they happened. The builder's report is what it handed back, or sent the validator, before
 /// a validator first wrote to it; each message a validator sent the builder is a round's findings; what the builder sent
 /// or handed back after each is its answer, with the commits its Bash calls made meanwhile; and each validator's own
-/// report closes its part, with the range it fast-forwarded the default branch by when it landed the work.
+/// report closes its part. Whether the work landed is git's to say, in <see cref="Landings"/>, never the trail's.
 /// </summary>
 internal static partial class Trail
 {
@@ -101,7 +101,7 @@ internal static partial class Trail
         return told;
     }
 
-    /// <summary>A validator's findings, each message it sent the builder, and its report, which says whether it landed the work.</summary>
+    /// <summary>A validator's findings, each message it sent the builder, and its report.</summary>
     private static List<CodeStep> ValidatorSteps(string builder, Worker validator)
     {
         var steps = new List<CodeStep>();
@@ -124,7 +124,7 @@ internal static partial class Trail
 
         if (turn.Words() is { } said)
         {
-            steps.Add(new CodeStep(Verdict, validator.Agent, said.At, said.Text, [], turn.Landed, Round: null));
+            steps.Add(new CodeStep(Verdict, validator.Agent, said.At, said.Text, [], Landed: null, Round: null));
         }
 
         return steps;
@@ -165,9 +165,8 @@ internal static partial class Trail
     private sealed record TurnWords(string Text, DateTimeOffset? At, IReadOnlyList<CodeCommit> Commits);
 
     /// <summary>
-    /// One turn of an agent: the last message it sent or handed back, its last words, the commits its Bash calls made,
-    /// and the range one of them fast-forwarded a branch by. Once it ended, its last words stand for a message it never
-    /// sent.
+    /// One turn of an agent: the last message it sent or handed back, its last words, and the commits its Bash calls
+    /// made. Once it ended, its last words stand for a message it never sent.
     /// </summary>
     private sealed partial class Turn(HashSet<string> bash)
     {
@@ -176,11 +175,8 @@ internal static partial class Trail
         private (string Text, DateTimeOffset? At)? said;
         private bool ended;
 
-        /// <summary>The ids of the agent's Bash calls, whose results are read for commits and landings.</summary>
+        /// <summary>The ids of the agent's Bash calls, whose results are read for commits.</summary>
         public HashSet<string> Bash { get; } = bash;
-
-        /// <summary>The range a Bash call of the turn fast-forwarded a branch by, the last when there are more; null for none.</summary>
-        public string? Landed { get; private set; }
 
         public void Take(CodeEvent one)
         {
@@ -233,7 +229,7 @@ internal static partial class Trail
             }
         }
 
-        /// <summary>A Bash call's result: the commits git printed, and the range of a fast-forward.</summary>
+        /// <summary>A Bash call's result: the commits git printed.</summary>
         private void Gave(CodeEvent result)
         {
             if (result.Text is null || !Bash.Contains(result.Id ?? string.Empty))
@@ -245,24 +241,7 @@ internal static partial class Trail
             {
                 commits.Add(new CodeCommit(commit.Groups["hash"].Value, commit.Groups["subject"].Value.Trim()));
             }
-
-            Landed = FastForward(result.Text) ?? Landed;
         }
-
-        /// <summary>The range a fast-forward moved a branch by, as git prints it, <c>a..b</c>, or null for output that is none.</summary>
-        private static string? FastForward(string output)
-        {
-            var moved = FastForwardLine().Match(output);
-            if (!moved.Success)
-            {
-                return null;
-            }
-
-            return moved.Groups["range"].Value;
-        }
-
-        [GeneratedRegex(@"^Updating (?<range>[0-9a-f]{7,40}\.\.[0-9a-f]{7,40})\s*\r?\nFast-forward", RegexOptions.Multiline | RegexOptions.CultureInvariant)]
-        private static partial Regex FastForwardLine();
 
         /// <summary>The line a git commit opens with: <c>[branch hash] subject</c>.</summary>
         [GeneratedRegex(@"^\[[^\]\s]+(?: \(root-commit\))? (?<hash>[0-9a-f]{7,40})\] (?<subject>.+)$", RegexOptions.Multiline | RegexOptions.CultureInvariant)]

@@ -9,17 +9,17 @@ namespace Brain.Tests;
 /// </summary>
 public sealed partial class CodeServerTests
 {
-    private const string Landing = "Updating cbfdcf1..8124cb8\\nFast-forward\\n README.md | 23 +++";
     private const string Review = "Validate the lens. Builder agent ID: b1.";
 
     [Fact]
     public async Task APieceOfWorkListsItsChecksAndItsStepsAsOutlinedTrail()
     {
+        var range = Landed("lens");
         var id = await SentAgentsOf(
             ("toolu_r1", "brain-ready", "r1", true, [Brief(0, "Build the lens."), Said(1, "READY")]),
-            ("toolu_b", "builder", "b1", true, [Brief(2, "Build the lens."), Handback(4, "Built the lens."), Peer(7, "v1", "1. No test."), Bash(8, "c1"), BashResult(9, "c1", "[worktree-agent-b1 1234abc] Test the lens"), Handback(10, "Tested.")]),
+            ("toolu_b", "builder", "b1", true, [Brief(2, "Build the lens."), Bash(3, "w1", $"git -C {project} worktree add .claude/worktrees/lens -b lens main"), BashResult(3, "w1", ""), Handback(4, "Built the lens."), Peer(7, "v1", "1. No test."), Bash(8, "c1"), BashResult(9, "c1", "[worktree-agent-b1 1234abc] Test the lens"), Handback(10, "Tested.")]),
             ("toolu_r2", "brain-ready", "r2", true, [Brief(5, Review), Said(5, "READY")]),
-            ("toolu_v", "validator", "v1", true, [Brief(6, Review), Message(7, "b1", "1. No test."), Bash(11, "c2"), BashResult(12, "c2", Landing), Handback(13, "Landed.")]));
+            ("toolu_v", "validator", "v1", true, [Brief(6, Review), Message(7, "b1", "1. No test."), Bash(11, "c2", "git merge --ff-only lens 2>&1 | tail -1"), BashResult(12, "c2", " 1 file changed"), Handback(13, "Landed.")]));
 
         var agents = await ListedAgents(id);
 
@@ -29,8 +29,8 @@ public sealed partial class CodeServerTests
         Assert.Equal(["report", "findings", "answer", "verdict"], steps.Select((one) => one.GetProperty("kind").GetString()!));
         Assert.Equal(["toolu_b", "toolu_v", "toolu_b", "toolu_v"], steps.Select((one) => one.GetProperty("tool").GetString()!));
         Assert.Equal([0, 1, 1], steps[..3].Select((one) => one.GetProperty("round").GetInt32()));
-        Assert.Equal([0, 0, 1, 0], steps.Select((one) => one.GetProperty("commits").GetInt32()));
-        Assert.Equal("cbfdcf1..8124cb8", steps[3].GetProperty("landed").GetString());
+        Assert.Equal([0, 0, 1, 2], steps.Select((one) => one.GetProperty("commits").GetInt32()));
+        Assert.Equal(range, steps[3].GetProperty("landed").GetString());
         Assert.False(agents[0].TryGetProperty("steps", out _));
     }
 

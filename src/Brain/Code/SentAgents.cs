@@ -25,8 +25,8 @@ internal sealed class SentAgents
     }
 
     /// <summary>
-    /// Every agent the session sent, in the order it sent them. The commits a landing put on the default branch come
-    /// from <paramref name="landings"/>, and the work's Navarone signals from <paramref name="signals"/>.
+    /// Every agent the session sent, in the order it sent them. Whether a work landed, and the commits the landing put on
+    /// the default branch, come from <paramref name="landings"/>, and the work's Navarone signals from <paramref name="signals"/>.
     /// </summary>
     public IReadOnlyList<CodeSent> All(Transcript session, WorkSignals signals, Landings landings)
     {
@@ -46,8 +46,8 @@ internal sealed class SentAgents
 
     /// <summary>
     /// The agent the session's call <paramref name="toolUseId"/> sent, as its view draws it, or null when the session
-    /// sent none by that call. The commits a landing put on the default branch come from <paramref name="landings"/>,
-    /// and the work's Navarone signals from <paramref name="signals"/>.
+    /// sent none by that call. Whether its work landed, and the commits the landing put on the default branch, come from
+    /// <paramref name="landings"/>, and the work's Navarone signals from <paramref name="signals"/>.
     /// </summary>
     // navarone: 0000190
     public CodeAgentView? View(Transcript session, string toolUseId, WorkSignals signals, Landings landings)
@@ -99,7 +99,7 @@ internal sealed class SentAgents
                 continue;
             }
 
-            all.Add(new SentMeta(string.Empty, call.Id, call.Name ?? string.Empty, call.Subject ?? string.Empty, null, Finished: false, Stopped: false, string.Empty));
+            all.Add(new SentMeta(string.Empty, call.Id, call.Name ?? string.Empty, call.Subject ?? string.Empty, null, null, Finished: false, Stopped: false, string.Empty));
         }
 
         return all;
@@ -151,7 +151,7 @@ internal sealed class SentAgents
             var asks = agent.Questions is not null;
             if (agent.Sent.Kind != CodeSent.Builder)
             {
-                var worktree = Worktrees.Of(agent.Meta.Worktree, agent.Sent.Started, agent.Events, [], cwd);
+                var worktree = Worktrees.Of(agent.Meta, agent.Sent.Started, agent.Events, [], cwd);
                 return agent.Sent with { Attached = attached, Asks = asks, Worktree = worktree };
             }
 
@@ -171,8 +171,7 @@ internal sealed class SentAgents
             }
 
             var piece = PieceOf(builder);
-            var told = piece.Steps.Select(landings.Told).ToList();
-            return new CodeTrail(builder.Meta.Agent, told, SignalsOf(builder, piece));
+            return new CodeTrail(builder.Meta.Agent, piece.Steps, SignalsOf(builder, piece));
         }
 
         /// <summary>The call id of the agent the check <paramref name="check"/> checked; null for any other agent, and for a check with no agent sent after it.</summary>
@@ -197,15 +196,19 @@ internal sealed class SentAgents
             return sentAfter.FirstOrDefault()?.Meta.ToolUseId;
         }
 
-        /// <summary>A builder's work: the validators sent for it, its steps, and the worktree it builds in.</summary>
+        /// <summary>
+        /// A builder's work: the validators sent for it, its steps, the last validator's report with the landing git
+        /// says it had, and the worktree it builds in.
+        /// </summary>
         private sealed record Piece(List<Agent> Validators, IReadOnlyList<CodeStep> Steps, CodeWorktree? Worktree);
 
         private Piece PieceOf(Agent builder)
         {
             var validators = agents.Where(one => one.Sent.Kind == CodeSent.Validator && one.Sent.Work == builder.Meta.Agent).ToList();
+            var worktree = Worktrees.Of(builder.Meta, builder.Sent.Started, builder.Events, [.. validators.Select(one => one.Events)], cwd);
             var steps = Trail.Of(builder.Worker, [.. validators.Select(one => one.Worker)]);
-            var worktree = Worktrees.Of(builder.Meta.Worktree, builder.Sent.Started, builder.Events, [.. validators.Select(one => one.Events)], cwd);
-            return new Piece(validators, steps, worktree);
+            var told = landings.Told(steps, worktree?.Branch, builder.Sent.Started);
+            return new Piece(validators, told, worktree);
         }
 
         /// <summary>The Navarone signals the work touched on its worktree; none read for a work with no worktree.</summary>
@@ -224,7 +227,7 @@ internal sealed class SentAgents
         private static bool IsWork(Agent agent) => agent.Sent.Kind == CodeSent.Builder || agent.Sent.Kind == CodeSent.Validator;
 
         /// <summary>The short steps of the work a builder heads, the earliest first, a landing with the commits it put on the default branch.</summary>
-        private List<CodeOutline> OutlineOf(Agent builder, Piece piece)
+        private static List<CodeOutline> OutlineOf(Agent builder, Piece piece)
         {
             var tools = new Dictionary<string, string>(StringComparer.Ordinal) { [builder.Meta.Agent] = builder.Meta.ToolUseId };
             foreach (var validator in piece.Validators)
@@ -235,8 +238,7 @@ internal sealed class SentAgents
             var outline = new List<CodeOutline>();
             foreach (var step in piece.Steps)
             {
-                var told = landings.Told(step);
-                outline.Add(new CodeOutline(step.Kind, tools[step.Agent], step.At, step.Round, told.Commits.Count, step.Landed));
+                outline.Add(new CodeOutline(step.Kind, tools[step.Agent], step.At, step.Round, step.Commits.Count, step.Landed));
             }
 
             return outline;

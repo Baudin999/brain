@@ -227,13 +227,15 @@ internal sealed record CodeSent(
 
 /// <summary>
 /// The worktree an agent builds in: its full path, when it was opened, whether it was removed, by a call that removed it
-/// or by its folder being gone, and when that call ran.
+/// or by its folder being gone, and when that call ran; and the branch it is on, by which the server asks git whether
+/// the work landed, and which it never sends.
 /// </summary>
 internal sealed record CodeWorktree(
     string Path,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DateTimeOffset? Opened,
     bool Removed,
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DateTimeOffset? RemovedAt);
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DateTimeOffset? RemovedAt,
+    [property: JsonIgnore] string? Branch);
 
 /// <summary>
 /// A step of a piece of work, short, for the list: its <see cref="Trail"/> kind, the call id of the agent that wrote it,
@@ -267,7 +269,8 @@ internal sealed record CodeTrail(string Builder, IReadOnlyList<CodeStep> Steps, 
 
 /// <summary>
 /// One step of a trail, of a <see cref="Trail"/> kind: the agent that wrote it, when, its words as markdown, the commits
-/// it made, for a validator's report that landed the work the range it moved the default branch by, and the round a
+/// it made, for the validator's report of a work that landed the range git says the landing moved the default branch by,
+/// and the round a
 /// step is of: findings by their place among the messages validators sent the builder, from 1; the builder's word by how
 /// many of those it had been sent before it, its report being round 0; null for a validator's report.
 /// </summary>

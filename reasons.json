@@ -1,5 +1,5 @@
 {
-  "granted": 219,
+  "granted": 220,
   "problems": [
     {
       "id": "0000001",
@@ -1589,11 +1589,11 @@
       "id": "0000191",
       "check": "split-complexity",
       "symbol": "brain::Brain.Code.SentAgents.Read(Transcript)",
-      "fingerprint": "032acdf50938e810d093b483cc80cfcc5e1ce67df5fd90476f956c2c8d99d5d8",
+      "fingerprint": "4ed3350dbe466dcb01c4b0157d729d132612c743fab91a3f9bf375c218b95c47",
       "value": 34,
       "resolution": {
-        "reason": "Read stays a short walk: calls, metas, agents, order. The .ctor reads one agent\u0027s state, start, end and now; KindOf maps a type to a kind; NowOf reads the last tool call or words; StateOf picks one of four states; Verdict reads the two words a check opens with; WorkOf finds the builder a brief names; WithUnwritten adds the agents whose meta Claude Code has not written yet. Each answers one question about one agent. Which calls failed is now CodeEvent.FailedCalls, a question about events that Worktrees asks too.",
-        "fingerprint": "032acdf50938e810d093b483cc80cfcc5e1ce67df5fd90476f956c2c8d99d5d8",
+        "reason": "Read stays a short walk: calls, metas, agents, order. This change only gives WithUnwritten\u0027s meta the new null branch. The .ctor reads one agent\u0027s state, start, end and now; KindOf maps a type to a kind; NowOf reads the last tool call or words; StateOf picks one of four states; Verdict reads the two words a check opens with; WorkOf finds the builder a brief names; WithUnwritten adds the agents whose meta Claude Code has not written yet. Each answers one question about one agent; inlined they would be one method doing seven jobs.",
+        "fingerprint": "4ed3350dbe466dcb01c4b0157d729d132612c743fab91a3f9bf375c218b95c47",
         "value": 34
       }
     },
@@ -1601,12 +1601,12 @@
       "id": "0000192",
       "check": "split-complexity",
       "symbol": "brain::Brain.Code.Trail.Of(Worker, IReadOnlyList\u003CWorker\u003E)",
-      "fingerprint": "97fdf07af408c115a19ef45c054a6e10b02225e246a34e8a517207a41b27f803",
-      "value": 39,
+      "fingerprint": "2468382c9197683e6620d31d1240dec836ed658e9d261a67f5c88252ff57e9fd",
+      "value": 37,
       "resolution": {
-        "reason": "Of tells one piece of work as its steps in time order, and its helpers are the voices of that story: BuilderSteps(Worker, HashSet\u003Cstring\u003E) cuts the builder\u0027s events into turns at each validator\u0027s message and numbers its words by turn, ValidatorSteps(string, Worker) takes the findings it sent and its report, InOrder(List\u003CCodeStep\u003E) orders the steps and numbers the findings, FindingsOf(CodeEvent, string) and CallsOf(IReadOnlyList\u003CCodeEvent\u003E, string) pick calls by tool, and Turn, with Take(CodeEvent), Called(CodeEvent), Gave(CodeEvent), Words() and FastForward(string), holds what one turn of an agent said, committed and landed. Each is one rule of the transcript\u0027s shape; inlined they would be one method doing the builder\u0027s, the validator\u0027s and git\u0027s reading at once.",
-        "fingerprint": "97fdf07af408c115a19ef45c054a6e10b02225e246a34e8a517207a41b27f803",
-        "value": 39
+        "reason": "Of tells a work\u0027s steps in order; this change took the fast-forward parse out of it, so Trail no longer decides a landing. BuilderSteps cuts the builder\u0027s events into turns at each validator message; CallsOf collects one tool\u0027s call ids; FindingsOf reads one call as findings or not; InOrder orders the steps and numbers the findings; ValidatorSteps reads a validator\u0027s findings and report; Take, Called, Gave and Words are the one Turn\u0027s reading of an event, a call, a result and what it said. Each is one question about one event or one agent; inlined they would be one method doing nine jobs.",
+        "fingerprint": "2468382c9197683e6620d31d1240dec836ed658e9d261a67f5c88252ff57e9fd",
+        "value": 37
       }
     },
     {
@@ -1772,13 +1772,13 @@
     {
       "id": "0000218",
       "check": "split-complexity",
-      "symbol": "brain::Brain.Code.Worktrees.Of(string, DateTimeOffset?, IReadOnlyList\u003CCodeEvent\u003E, IReadOnlyList\u003CIReadOnlyList\u003CCodeEvent\u003E\u003E, string)",
-      "fingerprint": "948122a179e5f0ccdef1b8fe0fa7892d896b694f2bf1f41265eed89cbe0bb76f",
-      "value": 29,
+      "symbol": "brain::Brain.Code.Worktrees.Of(SentMeta, DateTimeOffset?, IReadOnlyList\u003CCodeEvent\u003E, IReadOnlyList\u003CIReadOnlyList\u003CCodeEvent\u003E\u003E, string)",
+      "fingerprint": "974e921a8451ced62209e499cf5274d5e59ece4b50ed274675e5469898447c0f",
+      "value": 36,
       "resolution": {
-        "reason": "Of decides given or opened, then removed, then gone. Ran lists every Bash call of a verb whose result was no error, with the worktree it named and when; RemovedAt finds among them the removal that names this worktree, so a removal of another worktree first no longer hides it; Named reads one Bash line, its cd, its git -C and its verb; PathAfterOptions skips the option words and their values; Resolved makes a path full, expanding ~ and refusing a variable. Ran and RemovedAt are about the agents\u0027 events and the other three about one shell line; inlined they would be one method that mixes the two.",
-        "fingerprint": "948122a179e5f0ccdef1b8fe0fa7892d896b694f2bf1f41265eed89cbe0bb76f",
-        "value": 29
+        "reason": "Of decides given or opened, then removed, then gone, with the branch the meta or the add command names. Ran lists every Bash call of a verb whose result was no error, with the worktree and branch it named and when; RemovedAt finds the removal that names this worktree; Named reads one Bash line, its cd, its git -C and its verb; Words reads the words after the verb as git does, the path and the branch of -b, -B or the word after the path, replacing PathAfterOptions; Resolved makes a path full in a folder. Ran is about the agent\u0027s events and the other four about one shell line; inlined they would be one method doing five jobs.",
+        "fingerprint": "974e921a8451ced62209e499cf5274d5e59ece4b50ed274675e5469898447c0f",
+        "value": 36
       }
     },
     {
@@ -1791,6 +1791,18 @@
         "reason": "Answer is the one boundary every request is answered in: the policy and headers, the route, and a failure answered, logged and recorded. TrySend\u0027s decisions are what sending an answer to a window that may have gone needs, which only this boundary does. This change adds the policy as a parameter and no decision.",
         "fingerprint": "2298cab4e7d7ef2cd2632efc70ad1263b0b95d5bf846da7ab0754fea2c9bf409",
         "value": 11
+      }
+    },
+    {
+      "id": "0000220",
+      "check": "split-complexity",
+      "symbol": "brain::Brain.Code.Landings.Told(IReadOnlyList\u003CCodeStep\u003E, string, DateTimeOffset?)",
+      "fingerprint": "3137da9c562d3d2ae6fc4c1ac2877bcd0b77b18fcad6d0c48971a3325aa8a69e",
+      "value": 29,
+      "resolution": {
+        "reason": "Told asks git whether a work landed and puts the landing on the last validator report. LastVerdict finds that report; LandingOf picks the first fast-forward of the branch since the builder started; Moves reads the reflog once per instance; ReadMoves turns git\u0027s reflog lines into ranges; DefaultBranch asks git which branch the primary is on; When reads a reflog selector\u0027s time; Commits lists a range\u0027s commits once per process. Each is one question to git or one parse of its answer; inlined they would be one method doing seven jobs.",
+        "fingerprint": "3137da9c562d3d2ae6fc4c1ac2877bcd0b77b18fcad6d0c48971a3325aa8a69e",
+        "value": 29
       }
     }
   ]

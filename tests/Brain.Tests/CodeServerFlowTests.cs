@@ -19,6 +19,7 @@ public sealed partial class CodeServerTests
     [Fact]
     public async Task TheServerSaysWhereEachWorktreeWasOpenedAndWhetherItWasRemoved()
     {
+        var range = Landed("lens");
         var id = await ThreeBuilders();
 
         var agents = await ListedAgents(id);
@@ -39,7 +40,9 @@ public sealed partial class CodeServerTests
         Assert.True(Listed(agents, "toolu_r1").GetProperty("asks").GetBoolean());
         Assert.False(Listed(agents, "toolu_r2").TryGetProperty("asks", out _));
         var landing = Listed(agents, "toolu_b1").GetProperty("steps").EnumerateArray().Last();
-        Assert.Equal("cbfdcf1..8124cb8", landing.GetProperty("landed").GetString());
+        Assert.Equal(range, landing.GetProperty("landed").GetString());
+        Assert.Equal(2, landing.GetProperty("commits").GetInt32());
+        Assert.All(Listed(agents, "toolu_b2").GetProperty("steps").EnumerateArray(), (step) => Assert.False(step.TryGetProperty("landed", out _)));
     }
 
     [Fact]
@@ -76,7 +79,17 @@ public sealed partial class CodeServerTests
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         var expected = path?.Replace("~", home, StringComparison.Ordinal);
 
-        Assert.Equal(expected, Brain.Code.Worktrees.Named(command, verb, cwd));
+        Assert.Equal(expected, Brain.Code.Worktrees.Named(command, verb, cwd)?.Path);
+    }
+
+    [Theory]
+    [InlineData("git -C /p worktree add .claude/worktrees/x -b y main", "y")]
+    [InlineData("git worktree add -B z w", "z")]
+    [InlineData("git worktree add w feature", "feature")]
+    [InlineData("git worktree add --lock ../w", "w")]
+    public void AWorktreeCommandNamesTheBranchGitGivesItsWorktree(string command, string branch)
+    {
+        Assert.Equal(branch, Brain.Code.Worktrees.Named(command, "add", "/s")?.Branch);
     }
 
     [Fact]
@@ -98,6 +111,7 @@ public sealed partial class CodeServerTests
     [WindowFact]
     public async Task TheFlowDrawsEachPieceOfWorkApartAndTheListSettingDrawsTheList()
     {
+        var range = Landed("lens");
         var id = await ThreeBuilders().ConfigureAwait(false);
         var window = await Headless.Open(windows[0], Path.Combine(brain.Root, "chromium")).ConfigureAwait(false);
         try
@@ -113,7 +127,7 @@ public sealed partial class CodeServerTests
             await window.Until($"[...{Lens}.querySelectorAll('.agent-flow-check')].map((check) => check.dataset.verdict).join()", "NOT READY,READY,READY").ConfigureAwait(false);
             await window.Until($"[...{Lens}.querySelectorAll('.agent-flow-step')].map((step) => step.dataset.way).join()", "forth,back,forth,back,forth").ConfigureAwait(false);
             await window.Until($"[...{Lens}.querySelectorAll('.agent-flow-tree')].map((tree) => tree.dataset.opened).join()", "true,false").ConfigureAwait(false);
-            await window.Until($"{Lens}.querySelector('.agent-flow-end-range').textContent", "cbfdcf1..8124cb8").ConfigureAwait(false);
+            await window.Until($"{Lens}.querySelector('.agent-flow-end-range').textContent", range).ConfigureAwait(false);
             const string Dial = "document.querySelectorAll('.agent-flow-work')[1]";
             await window.Until($"{Dial}.querySelector('.agent-flow-end').textContent.trim()", "The validator is in round 1").ConfigureAwait(false);
             await window.Until($"[...{Dial}.querySelectorAll('.agent-flow-tree')].map((tree) => tree.dataset.opened).join()", "true").ConfigureAwait(false);
@@ -182,7 +196,7 @@ public sealed partial class CodeServerTests
         await Sent(
             folder, "v1", "validator", "toolu_v1", "Validate the lens", true,
             Brief(1050, LensReview), Message(1200, "b1", "1. No test."), Message(1700, "b1", "2. Name it."),
-            Bash(2000, "l1", $"git -C {project} merge --ff-only lens"), BashResult(2005, "l1", Landing),
+            Bash(2000, "l1", $"git -C {project} merge --ff-only lens 2>&1 | tail -1"), BashResult(2005, "l1", " 2 files changed"),
             Bash(2030, "stale", $"git -C {project} worktree remove {project}/.claude/worktrees/stale"), BashResult(2035, "stale", ""),
             Bash(2050, "rm", $"git -C {project} worktree remove {lens}"), BashResult(2055, "rm", ""),
             Handback(2100, "Landed.")).ConfigureAwait(false);
@@ -192,6 +206,30 @@ public sealed partial class CodeServerTests
         var given = Path.Combine(project, ".claude", "worktrees", "agent-b3");
         await SentWith(folder, "b3", "builder", "toolu_b3", "Build the gauge", false, $$$""","worktreePath":"{{{given}}}" """, Brief(2250, "Build the gauge."), Bash(2400, "t3", "scripts/dotnet-guard.sh build brain.slnx")).ConfigureAwait(false);
         return id;
+    }
+
+    /// <summary>
+    /// Makes the project a repo whose default branch a validator fast-forwarded with <paramref name="branch"/>, which it
+    /// had rebased, and then removed with its worktree; the range it moved the default branch by, as git abbreviates it.
+    /// </summary>
+    private string Landed(string branch)
+    {
+        TempBrain.Git(project, "init", "-q", "-b", "main");
+        TempBrain.Git(project, "config", "user.name", "t");
+        TempBrain.Git(project, "config", "user.email", "t@t");
+        TempBrain.Git(project, "config", "commit.gpgsign", "false");
+        TempBrain.Git(project, "commit", "-q", "--allow-empty", "-m", "start");
+        var tree = Path.Combine(project, ".claude", "worktrees", branch);
+        TempBrain.Git(project, "worktree", "add", "-q", tree, "-b", branch, "main");
+        TempBrain.Git(tree, "commit", "-q", "--allow-empty", "-m", "Draw the " + branch);
+        TempBrain.Git(tree, "commit", "-q", "--allow-empty", "-m", "Test the " + branch);
+        TempBrain.Git(project, "commit", "-q", "--allow-empty", "-m", "Something else");
+        TempBrain.Git(tree, "rebase", "-q", "main");
+        var before = TempBrain.Git(project, "rev-parse", "--short", "main").Trim();
+        TempBrain.Git(project, "merge", "-q", "--ff-only", branch);
+        TempBrain.Git(project, "worktree", "remove", tree);
+        TempBrain.Git(project, "branch", "-q", "-D", branch);
+        return before + ".." + TempBrain.Git(project, "rev-parse", "--short", "main").Trim();
     }
 
     /// <summary>Writes one agent's meta and transcript.</summary>

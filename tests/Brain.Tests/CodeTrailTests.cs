@@ -8,7 +8,7 @@ namespace Brain.Tests;
 /// The trail of a piece of work as brain code reads it from real transcript shapes: a validator's findings reach its
 /// builder as a message whose origin is a peer's, a validator sends them with SendMessage to the builder's agent id, a
 /// builder answers with SendMessage or hands its report back, a commit shows in a Bash result as git prints it, and a
-/// landing as git's fast-forward. Navarone's signals end as its event log tells them, and a clash is one its disputes
+/// validator's printed fast-forward is no landing: git says that, in <see cref="Landings"/>. Navarone's signals end as its event log tells them, and a clash is one its disputes
 /// hold.
 /// </summary>
 public sealed class CodeTrailTests
@@ -31,7 +31,7 @@ public sealed class CodeTrailTests
     }
 
     [Fact]
-    public void TheTrailTellsTheReportEachRoundAndTheLandingInTheOrderTheyHappened()
+    public void TheTrailTellsTheReportEachRoundAndTheVerdictInTheOrderTheyHappened()
     {
         var builder = new Worker(Builder, [
             Bash("b1", 1),
@@ -56,8 +56,7 @@ public sealed class CodeTrailTests
         Assert.Equal(["Built it. The gate is green.", "1. BLOCKER", "All findings fixed; report.", "Landed 8124cb8 on main."], steps.Select((step) => step.Text));
         Assert.Equal([new CodeCommit("70125ec", "brain code takes a folder")], steps[0].Commits);
         Assert.Equal([new CodeCommit("8124cb8", "brain code takes a folder, and says why")], steps[2].Commits);
-        Assert.Equal("cbfdcf1..8124cb8", steps[3].Landed);
-        Assert.Null(steps[1].Landed);
+        Assert.All(steps, (step) => Assert.Null(step.Landed));
         Assert.Equal([0, 1, 1, null], steps.Select((step) => step.Round));
     }
 
@@ -71,19 +70,6 @@ public sealed class CodeTrailTests
 
         Assert.Empty(working);
         Assert.Equal(["Done: it works."], finished.Select((step) => step.Text));
-    }
-
-    [Theory]
-    [InlineData("Updating a1b2c3d..d4e5f6a\nFast-forward\n x | 1 +", "a1b2c3d..d4e5f6a")]
-    [InlineData("Already up to date.", null)]
-    [InlineData("Updating a1b2c3d..d4e5f6a\nerror: Your local changes would be overwritten", null)]
-    public void OnlyAFastForwardIsALanding(string output, string? range)
-    {
-        var validator = new Worker(Validator, [Bash("v1", 1), Result("v1", 2, output), Handback(3, "Done.")], Done: true);
-
-        var verdict = Trail.Of(new Worker(Builder, [], Done: false), [validator]).Single();
-
-        Assert.Equal(range, verdict.Landed);
     }
 
     [Fact]
