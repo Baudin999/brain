@@ -17,6 +17,7 @@
 // live text last drawn with its element.
 import { html, nothing } from '/lit-html.js';
 import { markdownView } from '/components/markdown.js';
+import { withWrapToggles } from '/components/code-wrap.js';
 import { agentMessageView } from '/components/agent-message.js';
 import { agentRowView } from '/components/agent-row.js';
 import { toolCallView } from '/components/tool-call.js';
@@ -31,7 +32,7 @@ const drawn = new WeakMap();
 const live = { text: null, element: null };
 
 function prose(event) {
-  if (!drawn.has(event)) drawn.set(event, markdownView(event.text));
+  if (!drawn.has(event)) drawn.set(event, withWrapToggles(markdownView(event.text)));
   return drawn.get(event);
 }
 
@@ -50,7 +51,7 @@ function liveView(text) {
   if (!text) return nothing;
   if (live.text !== text) {
     live.text = text;
-    live.element = markdownView(text);
+    live.element = withWrapToggles(markdownView(text));
   }
   return html`<div class="code-said">${live.element}</div>`;
 }

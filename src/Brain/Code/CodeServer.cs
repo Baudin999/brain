@@ -71,6 +71,7 @@ internal sealed class CodeServer : IDisposable
         ("/components/session-list.js", "code/components/session-list.js", WebAssets.Script),
         ("/components/new-session.js", "code/components/new-session.js", WebAssets.Script),
         ("/components/conversation.js", "code/components/conversation.js", WebAssets.Script),
+        ("/components/code-wrap.js", "code/components/code-wrap.js", WebAssets.Script),
         ("/components/composer.js", "code/components/composer.js", WebAssets.Script),
         ("/components/quote.js", "code/components/quote.js", WebAssets.Script),
         ("/components/asks.js", "code/components/asks.js", WebAssets.Script),

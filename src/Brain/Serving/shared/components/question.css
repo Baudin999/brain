@@ -8,7 +8,10 @@
 
 .question {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--sp-3);
+  min-width: 0;
+  overflow-wrap: anywhere;
   padding: var(--sp-3) var(--sp-4);
   border: 1px solid var(--rule-strong);
   border-left: 3px solid var(--focus);
@@ -20,7 +23,8 @@
 .question:is([data-state="answered"], [data-state="closed"], [data-state="ended"]) { border-left-color: var(--rule-strong); box-shadow: none; }
 .question[data-state="answering"] { opacity: .6; }
 .question-head { color: var(--muted); font: 600 var(--text-1)/1.4 var(--sans); letter-spacing: .04em; text-transform: uppercase; }
-.question-item { display: grid; gap: var(--sp-2); }
+.question-item { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
+.question .prose pre { white-space: pre-wrap; }
 .question-item + .question-item { padding-top: var(--sp-3); border-top: 1px solid var(--rule); }
 .question-choices { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
 

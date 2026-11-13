@@ -83,7 +83,14 @@
 .code-frame { position: relative; display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .code-to-end { position: absolute; right: var(--sp-6); bottom: var(--sp-4); }
 .code-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: var(--sp-5) var(--sp-6) var(--sp-6); }
-.code-events { display: flex; flex-direction: column; gap: var(--sp-3); max-width: var(--measure); }
+.code-events { display: flex; flex-direction: column; gap: var(--sp-3); }
+/* The words keep the reading measure; a code block takes the pane's whole width, and a toggle above it wraps it. */
+.code-events > :not(.code-said), .code-said .prose > :not(pre, .code-wrap) { max-width: var(--measure); }
+.code-said { min-width: 0; }
+.code-wrap { display: block; margin: 0 0 var(--sp-1) auto; padding: 0 var(--sp-2); border: 1px solid var(--rule-strong); border-radius: var(--radius-1); background: none; color: var(--muted); font: 400 var(--text-1)/1.6 var(--sans); cursor: pointer; }
+.code-wrap[hidden] { display: none; }
+.code-wrap[aria-pressed="true"] { border-color: var(--ink); background: var(--select); color: var(--ink); }
+.code-wrap + pre[data-wrap] { white-space: pre-wrap; overflow-wrap: anywhere; }
 .code-asks { display: grid; gap: var(--sp-3); max-width: var(--measure); margin-top: var(--sp-4); }
 .code-said { padding: 0 var(--sp-1); }
 .code-interrupted { margin: 0; padding: 0 var(--sp-1); color: var(--muted); font-size: var(--text-1); }
