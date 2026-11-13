@@ -5,7 +5,10 @@
 
 .permission-request {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--sp-2);
+  min-width: 0;
+  overflow-wrap: anywhere;
   padding: var(--sp-3) var(--sp-4);
   border: 1px solid var(--rule-strong);
   border-left: 3px solid var(--focus);

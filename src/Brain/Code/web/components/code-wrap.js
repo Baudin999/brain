@@ -14,7 +14,7 @@ export function withWrapToggles(prose) {
 function toggleFor(block) {
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = 'code-wrap';
+  button.className = 'button code-wrap';
   button.textContent = 'Wrap';
   button.hidden = true;
   button.setAttribute('aria-pressed', 'false');
@@ -23,7 +23,9 @@ function toggleFor(block) {
     button.setAttribute('aria-pressed', String(wrapped));
   });
   new ResizeObserver(() => {
-    button.hidden = !block.hasAttribute('data-wrap') && block.scrollWidth <= block.clientWidth;
+    const wrapped = block.hasAttribute('data-wrap');
+    const fits = block.scrollWidth <= block.clientWidth;
+    button.hidden = !wrapped && fits;
   }).observe(block);
   return button;
 }

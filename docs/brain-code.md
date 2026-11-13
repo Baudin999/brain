@@ -42,7 +42,8 @@ session id of its own with `--session-id`, a moved one continues with `--resume`
 What the window draws is read from the session's transcript in Claude Code's `projects/<folder>/<session-id>.jsonl`, as
 brain's own events: your words, the agent's text, each tool call with its result, and each agent it sent. The agent's
 thinking and the harness's notes are left out. Text is markdown through the shared markdown component, mermaid
-included.
+included. Prose keeps the reading measure, a code block takes the conversation's width, and a Wrap toggle shows above
+a block whose code does not fit.
 
 An agent the session sent, a builder or a validator, opens read only, live while it runs, from its own transcript in
 `projects/<folder>/<session-id>/subagents/agent-<id>.jsonl`, found by the `toolUseId` in the `.meta.json` beside it. Its
