@@ -95,6 +95,8 @@ const state = {
   away: false,
   // How many follows to the end wait for their frame: a conversation about to be followed to its end is not away from it.
   following: 0,
+  // The session whose agents panel scrolls to its end in the next draw, once its new agents are in it; or null.
+  agentsFollow: null,
   // Each conversation's events read so far, by its key: a session's id, or the id of the call that sent an agent.
   conversations: new Map(),
   // The session whose name the user is writing in its row, { id, problem, focus }, or null; focus asks the next draw to
@@ -274,9 +276,9 @@ function readConversation(key, path) {
 function readSent(session) {
   return once(`sent:${session}`, async () => {
     const read = await ask(`/api/sent?session=${session}`);
-    const wasAtEnd = agentsAtEnd();
+    const wasAtEnd = atEndOf(agentsPanel());
     state.sent.set(session, read.agents);
-    if (wasAtEnd) agentsToEndWhenDrawn(session);
+    if (wasAtEnd) state.agentsFollow = session;
   });
 }
 
@@ -309,10 +311,14 @@ function scroller() {
   return document.getElementById('conversation');
 }
 
-function atEnd() {
-  const shown = scroller();
+// Whether a scroller is within reach of its end; one not drawn is.
+function atEndOf(shown) {
   if (!shown) return true;
   return shown.scrollHeight - shown.scrollTop - shown.clientHeight < AT_END_PX;
+}
+
+function atEnd() {
+  return atEndOf(scroller());
 }
 
 // Whether the conversation in view is away from its end; a view with no conversation is not.
@@ -326,22 +332,6 @@ function awayNow() {
 // The agents panel beside the conversation, which runs downward in time and scrolls on its own; null when none is drawn.
 function agentsPanel() {
   return document.querySelector('.code-agents');
-}
-
-// Whether the agents panel is at its end; one not drawn yet is.
-function agentsAtEnd() {
-  const panel = agentsPanel();
-  if (!panel) return true;
-  return panel.scrollHeight - panel.scrollTop - panel.clientHeight < AT_END_PX;
-}
-
-// Scrolls the agents panel to its newest agent once it is drawn, when the session is still the one in view.
-function agentsToEndWhenDrawn(session) {
-  requestAnimationFrame(() => {
-    if (state.selected !== session) return;
-    const panel = agentsPanel();
-    if (panel) panel.scrollTop = panel.scrollHeight;
-  });
 }
 
 // The user pressed the button to the end: the one place the viewport moves on purpose.
@@ -386,7 +376,7 @@ async function pick(id) {
     state.page = 'session';
     await readShown();
     scrollWhenDrawn(id);
-    agentsToEndWhenDrawn(id);
+    state.agentsFollow = id;
     if (viewsShown()?.code) await openWorkspace();
   });
 }
@@ -1135,6 +1125,7 @@ async function changed(id) {
 function draw() {
   const host = document.getElementById('app');
   render(page(), host);
+  followAgents();
   if (state.renaming?.focus) {
     state.renaming.focus = false;
     const field = host.querySelector('.code-session-rename');
@@ -1150,6 +1141,16 @@ function draw() {
   focusCloseConfirm();
   quotePlace(host, state.quote);
   readThumbs();
+}
+
+// The agents panel of a session that asked to follow scrolls to its newest agent, now that the draw holds it.
+function followAgents() {
+  const session = state.agentsFollow;
+  if (session === null || state.selected !== session) return;
+  const panel = agentsPanel();
+  if (!panel) return;
+  state.agentsFollow = null;
+  panel.scrollTop = panel.scrollHeight;
 }
 
 // A frame for each folder whose workspace opened, and that of the session in view shows while its code does.
