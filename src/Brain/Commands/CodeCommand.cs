@@ -9,17 +9,22 @@ namespace Brain.Commands;
 
 /// <summary>
 /// <c>brain code [agent] [folder] [--resume &lt;session id&gt;]</c>: starts a Claude Code session of the agent, the open
-/// agent unless named, in the folder, the current one unless named, in that project's brain code window, and brings the
-/// window forward. A positional that names an existing folder is the folder and any other is the agent, in either order.
-/// A project is a folder, and each has its own window: its server, a process of its own apart from brain serve's, every
-/// workspace's and every other project's, runs every session the window shows and starts with the project's first
-/// <c>brain code</c>. <c>--resume</c> moves a session that runs elsewhere, as in a terminal, into the window of the
-/// project it ran in, where it continues by its id. <c>--serve &lt;folder&gt;</c> runs the folder's server in the
-/// foreground, which <c>brain code</c> starts in the background, and which starts its own successor when the user
-/// reloads it on a newer build. <c>--permission &lt;session id&gt; &lt;folder&gt;</c> is the PermissionRequest hook each
-/// session carries: it hands the request on its stdin to the server of the session's project, waits for the user's
-/// answer in the window, and writes the decision; with no server, or one that went away, it writes deny, so it never
-/// hangs.
+/// agent unless named, in the folder, the current one unless named, in that project's brain code window, and brings
+/// the window forward. A positional that names an existing folder is the folder and any other is the agent, in either
+/// order. A project is a folder, and each has its own window: its server, a process of its own apart from brain
+/// serve's, every workspace's and every other project's, runs every session the window shows and starts with the
+/// project's first <c>brain code</c>. <c>--resume</c> moves a session that runs elsewhere, as in a terminal, into the
+/// window of the project it ran in, where it continues by its id. <c>--serve &lt;folder&gt;</c> runs the folder's
+/// server in the foreground, which <c>brain code</c> starts in the background, and which starts its own successor when
+/// the user reloads it on a newer build. <c>--permission &lt;session id&gt; &lt;folder&gt;</c> is the
+/// PermissionRequest hook each session carries: it hands the request on its stdin to the server of the session's
+/// project, waits for the user's answer in the window, and writes the decision; with no server, or one that went away,
+/// it writes deny, so it never hangs.
+/// <para>
+/// The forms that name no folder are those of the one shared server of the builds before each project had its own
+/// window, and of its sessions. A hook that names none reaches that server in <c>cache/code</c>. A serve that names
+/// none is that server's successor once the user reloads it: it moves each of its sessions into its project's window.
+/// </para>
 /// </summary>
 internal static class CodeCommand
 {
@@ -38,14 +43,12 @@ internal static class CodeCommand
         var options = Options.ParseFlagged(arguments, [ServeFlag], ResumeOption, PermissionHook.Flag);
         if (options.Has(ServeFlag))
         {
-            var served = Folders.Resolve(options.Expect(1, Usage)[0], env.UserHome, env.Cwd);
-            return Serve(env, served);
+            return Served(env, options);
         }
 
         if (options.Get(PermissionHook.Flag) is { } session)
         {
-            var asking = Folders.Resolve(options.Expect(1, Usage)[0], env.UserHome, env.Cwd);
-            return Permission(env, session, asking);
+            return Permission(env, session, options);
         }
 
         var (agent, folder) = Positionals(env, options.Expect(options.Positional.Count, Usage));
@@ -56,6 +59,20 @@ internal static class CodeCommand
         }
 
         return Open(env, new CodeStart(agent, folder, resume));
+    }
+
+    /// <summary>
+    /// The project a serve or a hook names, in full; null when it names none, as the server and the sessions of a build
+    /// from before each project had its own window do.
+    /// </summary>
+    private static string? Named(BrainEnv env, Options options)
+    {
+        if (options.Positional.Count == 0)
+        {
+            return null;
+        }
+
+        return Folders.Resolve(options.Expect(1, Usage)[0], env.UserHome, env.Cwd);
     }
 
     /// <summary>
@@ -197,15 +214,23 @@ internal static class CodeCommand
     }
 
     /// <summary>
-    /// The hook's run: the request on stdin goes to the server of <paramref name="project"/>'s window, and its decision,
-    /// or deny, goes to stdout.
+    /// The hook's run: the request on stdin goes to the server of the project the hook names, or to the shared server
+    /// of the builds before when it names none, and its decision, or deny, goes to stdout.
     /// </summary>
-    private static int Permission(BrainEnv env, string session, string project)
+    private static int Permission(BrainEnv env, string session, Options options)
     {
+        var files = new ServeFiles(env.Home, CodeServer.Folder);
+        var root = env.UserHome;
+        if (Named(env, options) is { } project)
+        {
+            files = CodeProjectFiles.Of(env.Home, project);
+            root = project;
+        }
+
         var decision = CodeDecision.Deny("brain code could not read the permission request.");
         if (PermissionHook.Request(env.In.ReadToEnd(), session) is { } asked)
         {
-            decision = Asked(env, project, asked);
+            decision = Asked(files, root, asked);
         }
 
         env.Out.WriteLine(PermissionHook.Output(decision));
@@ -213,13 +238,12 @@ internal static class CodeCommand
     }
 
     /// <summary>
-    /// Hands the request to the server of <paramref name="project"/>'s window and waits, as long as it takes, for the
-    /// user's answer; deny when no server runs or it went away before he answered.
+    /// Hands the request to the server and waits, as long as it takes, for the user's answer; deny when no server runs
+    /// or it went away before he answered.
     /// </summary>
-    private static CodeDecision Asked(BrainEnv env, string project, CodePermission asked)
+    private static CodeDecision Asked(ServeFiles files, string root, CodePermission asked)
     {
-        var files = CodeProjectFiles.Of(env.Home, project);
-        using var running = WindowClient.Running(files, CodeServer.App, project);
+        using var running = WindowClient.Running(files, CodeServer.App, root);
         if (running is null)
         {
             return CodeDecision.Deny("brain code's window is not open, so nobody can answer.");
@@ -239,6 +263,54 @@ internal static class CodeCommand
         {
             return CodeDecision.Deny("brain code's server went away before the user answered.");
         }
+    }
+
+    /// <summary>
+    /// The serve's run: the server of the project it names, or, when it names none, the successor of the shared server
+    /// of the builds before.
+    /// </summary>
+    private static int Served(BrainEnv env, Options options)
+    {
+        if (Named(env, options) is { } project)
+        {
+            return Serve(env, project);
+        }
+
+        return Rehome(env);
+    }
+
+    /// <summary>
+    /// The successor a shared server of a build from before each project had its own window starts when the user
+    /// reloads it: it takes that server's handover and moves each session that was alive into the window of its
+    /// project, as <c>brain code --resume</c> does, and says why of one that would not move. A session that had ended
+    /// is not carried. With no handover waiting, a serve that names no folder is refused.
+    /// </summary>
+    private static int Rehome(BrainEnv env)
+    {
+        var handover = Handover.Take(new ServeFiles(env.Home, CodeServer.Folder));
+        if (handover is null)
+        {
+            throw new BrainException($"brain code --serve names the folder whose window it serves\n{Usage}");
+        }
+
+        foreach (var carried in handover.Sessions)
+        {
+            if (!carried.Alive)
+            {
+                continue;
+            }
+
+            try
+            {
+                Open(env, new CodeStart(carried.Agent, carried.Cwd, carried.Id));
+            }
+            catch (BrainException refusal) when (!refusal.IsFailure)
+            {
+                env.Err.WriteLine($"brain code: session {carried.Id} did not move into its project's window: {refusal.Message}");
+            }
+        }
+
+        return ExitCodes.Ok;
     }
 
     /// <summary>

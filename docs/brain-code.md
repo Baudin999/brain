@@ -183,7 +183,8 @@ and a job already gone answers as gone. Each stop is a record.
 A tool call that would ask your permission waits for you in the window. Each session carries Claude Code's
 `PermissionRequest` hook in its own `--settings`, so the hook applies to brain code's sessions only and never to a
 terminal's. The hook is `brain code --permission <session-id> <folder>`, with the session's project as the folder: it
-hands the request to that project's server and waits, up to a week, for your answer. The harness's PreToolUse hooks run first and still refuse what they refuse.
+hands the request to that project's server and waits, up to a week, for your answer. The harness's PreToolUse hooks run
+first and still refuse what they refuse.
 
 The request shows under the session's conversation, and under the agent's when a subagent asked, as the permission
 request of the Stylebook: the tool and what it will do, a Bash command as code, a file edit as the path and its change,
@@ -308,6 +309,12 @@ old server says `moved` with the successor's launch URL on the window's own even
 with `location.replace` and trades the code. So the window you clicked in is the window on the new build, and no second
 one opens. A session that had ended stays ended as it was shown, and the window shows the session that was in view.
 Only when no window listened does the successor open a new one.
+
+Builds before each project had its own window ran one shared server, in `cache/code`. Its sessions' hooks name no
+project, so `brain code --permission <session-id>` with no folder still reaches that server. Its reload starts
+`brain code --serve` with no folder, which takes its `cache/code/handover.json` and moves each session that was alive
+into the window of its project, as `--resume` does; a session that had ended is not carried. The old window closes, and
+each project's window opens on its own.
 
 Every call and the server's work are records in the data repo's `perf/code/`, kept 14 days and out of git; they never
 leave the machine.

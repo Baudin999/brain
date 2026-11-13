@@ -5,15 +5,15 @@ using static Brain.Children.ClaudeStream;
 namespace Brain.Code;
 
 /// <summary>
-/// Claude Code's <c>PermissionRequest</c> hook, as brain code's sessions carry it: each session's own
-/// <c>--settings</c> runs <c>brain code --permission &lt;session id&gt; &lt;project&gt;</c>, which reaches the window of
-/// the session's project, for every tool call that would have asked the
-/// user, and only for the sessions brain code starts. The hook reads the request from stdin, as
-/// <c>{"tool_name", "tool_input", "agent_id", "agent_type", ...}</c>, where <c>agent_id</c> is there only for a request
-/// of a subagent, and the decision it writes is
+/// Claude Code's <c>PermissionRequest</c> hook, as brain code's sessions carry it: each session's own <c>--settings</c>
+/// runs <c>brain code --permission &lt;session id&gt; &lt;project&gt;</c>, which reaches the window of the session's
+/// project, for every tool call that would have asked the user, and only for the sessions brain code starts. The hook
+/// reads the request from stdin, as <c>{"tool_name", "tool_input", "agent_id", "agent_type", ...}</c>, where
+/// <c>agent_id</c> is there only for a request of a subagent, and the decision it writes is
 /// <c>{"hookSpecificOutput": {"hookEventName": "PermissionRequest", "decision": {"behavior": "allow"}}}</c>, or
 /// <c>"deny"</c> with a <c>message</c> that goes back to the agent. The harness's PreToolUse hooks run before it and keep
-/// refusing what they refuse.
+/// refusing what they refuse. A session of a build from before each project had its own window carries a hook that
+/// names no project, which reaches that build's one shared server.
 /// </summary>
 internal static class PermissionHook
 {

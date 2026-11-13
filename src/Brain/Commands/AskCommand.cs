@@ -44,8 +44,9 @@ internal static class AskCommand
     }
 
     /// <summary>
-    /// Hands the ask to the server of <paramref name="project"/>'s brain code window and waits, as long as it takes for an ask that waits, for its word; refused
-    /// when no server runs, when it refuses the ask, and when it went away first.
+    /// Hands the ask to the server of <paramref name="project"/>'s brain code window and waits, as long as it takes for
+    /// an ask that waits, for its word; refused when no server runs, when it refuses the ask, and when it went away
+    /// first.
     /// </summary>
     private static CodeQuestionsOut Asked(BrainEnv env, string project, CodeQuestionsIn asked)
     {

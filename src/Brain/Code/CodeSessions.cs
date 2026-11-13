@@ -114,7 +114,10 @@ internal sealed partial class CodeSessions(string program, ClaudeFiles claude, A
         changed(session.Id);
     }
 
-    /// <summary>The folder the Claude Code session <paramref name="resume"/> continues in, as <see cref="RunsIn"/> says; refused when the window shows it already.</summary>
+    /// <summary>
+    /// The folder the Claude Code session <paramref name="resume"/> continues in, as <see cref="RunsIn"/> says; refused
+    /// when the window shows it already.
+    /// </summary>
     private string? Continued(string resume, string? cwd)
     {
         var folder = RunsIn(claude, resume, cwd);

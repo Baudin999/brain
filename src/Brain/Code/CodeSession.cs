@@ -7,28 +7,30 @@ using static Brain.Children.ClaudeStream;
 namespace Brain.Code;
 
 /// <summary>
-/// One session of brain code: a <c>claude -p --agent &lt;agent&gt;</c> in its folder, on the user's own logged-in claude,
-/// which reads the user's words as stream-json. It starts through <see cref="ClaudeRuns"/>, the one door, so it and
-/// everything it starts stop with <see cref="Stop"/> and with brain code's server. Claude Code keeps the session as it
-/// would in a terminal, so its id is a Claude Code session id: a new session is given one, and a session moved in from
-/// a terminal continues by its own. What the window draws is read from the session's transcript; its output only says
-/// whether it is answering, which session id it runs as, that it wrote, and the text its agent is writing now, which
-/// the window shows until the transcript holds it. An interrupt ends the agent's turn and leaves the session alive. Its
-/// transcript and its agents' are watched through the system's file events, and every change goes to <c>changed</c>. A
-/// tool call that would ask the user's permission waits in its <see cref="PermissionAsks"/> until he answers in the
-/// window; once the session ends or its turn is interrupted, each is denied. Its claude runs with
-/// <see cref="AskVariable"/> set to its id and <see cref="ProjectVariable"/> to its folder, so a <c>brain ask</c> it runs
-/// finds its project's window and its session there; what it asks stays in its
-/// <see cref="SessionQuestions"/>, and once the session ends, each open ask ends with it and goes to
-/// <c>unanswered</c>. A session that had ended when brain code reloaded on a new build comes back as it was shown: ended,
-/// with no claude, and its conversation read from its transcript.
+/// One session of brain code: a <c>claude -p --agent &lt;agent&gt;</c> in its folder, on the user's own logged-in
+/// claude, which reads the user's words as stream-json. It starts through <see cref="ClaudeRuns"/>, the one door, so it
+/// and everything it starts stop with <see cref="Stop"/> and with brain code's server. Claude Code keeps the session as
+/// it would in a terminal, so its id is a Claude Code session id: a new session is given one, and a session moved in
+/// from a terminal continues by its own. What the window draws is read from the session's transcript; its output only
+/// says whether it is answering, which session id it runs as, that it wrote, and the text its agent is writing now,
+/// which the window shows until the transcript holds it. An interrupt ends the agent's turn and leaves the session
+/// alive. Its transcript and its agents' are watched through the system's file events, and every change goes to
+/// <c>changed</c>. A tool call that would ask the user's permission waits in its <see cref="PermissionAsks"/> until he
+/// answers in the window; once the session ends or its turn is interrupted, each is denied. Its claude runs with <see
+/// cref="AskVariable"/> set to its id and <see cref="ProjectVariable"/> to its folder, so a <c>brain ask</c> it runs
+/// finds its project's window and its session there; what it asks stays in its <see cref="SessionQuestions"/>, and once
+/// the session ends, each open ask ends with it and goes to <c>unanswered</c>. A session that had ended when brain code
+/// reloaded on a new build comes back as it was shown: ended, with no claude, and its conversation read from its
+/// transcript.
 /// </summary>
 internal sealed class CodeSession : IDisposable
 {
     /// <summary>The variable that tells <c>brain ask</c> the session it runs in: the session's id.</summary>
     public const string AskVariable = "BRAIN_CODE_SESSION";
 
-    /// <summary>The variable that tells <c>brain ask</c> the project whose window runs its session: the session's folder.</summary>
+    /// <summary>
+    /// The variable that tells <c>brain ask</c> the project whose window runs its session: the session's folder.
+    /// </summary>
     public const string ProjectVariable = "BRAIN_CODE_PROJECT";
 
     private const int ErrorLines = 20;

@@ -306,8 +306,9 @@ internal sealed record CodeSignal(
 
 /// <summary>
 /// Every session, the oldest first, and the window's project, the folder each runs in; whether a newer build waits for
-/// a reload, <see cref="CodeReload.Running"/> while a session runs and <see cref="CodeReload.Ready"/> once none does, and
-/// nothing until one is published; and the session the window showed before a reload, which the window opens in view.
+/// a reload, <see cref="CodeReload.Running"/> while a session runs and <see cref="CodeReload.Ready"/> once none does,
+/// and nothing until one is published; and the session the window showed before a reload, which the window opens in
+/// view.
 /// </summary>
 internal sealed record CodeSessionList(
     IReadOnlyList<CodeSessionView> Sessions,

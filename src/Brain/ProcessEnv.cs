@@ -72,7 +72,9 @@ internal static class ProcessEnv
     /// <summary>The brain code session that runs this process, from the variable its server sets; null outside one.</summary>
     private static string? CodeSession() => Environment.GetEnvironmentVariable(Code.CodeSession.AskVariable) is { Length: > 0 } session ? session : null;
 
-    /// <summary>The project whose brain code window runs this process, from the variable its server sets; null outside one.</summary>
+    /// <summary>
+    /// The project whose brain code window runs this process, from the variable its server sets; null outside one.
+    /// </summary>
     private static string? CodeProject() => Environment.GetEnvironmentVariable(Code.CodeSession.ProjectVariable) is { Length: > 0 } project ? project : null;
 
     /// <summary>

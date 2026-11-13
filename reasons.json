@@ -505,11 +505,11 @@
       "id": "0000065",
       "check": "lcom4",
       "symbol": "brain::Brain.ProcessEnv",
-      "fingerprint": "4b6a8602b5506f5ff0aa58c4ef61732c0064a5c9075e273bc281f5e0a31dc20f",
+      "fingerprint": "aac460da266853ff83991d259905b78064ab8d3bdd22ced64ee6e98f043f5c06",
       "value": 2,
       "resolution": {
-        "reason": "ProcessEnv is what this process runs in, read once at its start: its environment variables, and where its binary lies, from which the packaged harness, the model folder and the checkout are found. Both pieces are static reads of the process\u0027s own surroundings with no state; this change only adds the reading of BRAIN_CODE_PROJECT beside BRAIN_CODE_SESSION.",
-        "fingerprint": "4b6a8602b5506f5ff0aa58c4ef61732c0064a5c9075e273bc281f5e0a31dc20f",
+        "reason": "ProcessEnv is what this process runs in, read once at its start: its environment variables, and where its binary lies, from which the packaged harness, the model folder and the checkout are found. Both pieces are static reads of the process\u0027s own surroundings with no state; this change only adds the reading of BRAIN_CODE_PROJECT beside BRAIN_CODE_SESSION and rewraps its summary.",
+        "fingerprint": "aac460da266853ff83991d259905b78064ab8d3bdd22ced64ee6e98f043f5c06",
         "value": 2
       }
     },
@@ -1365,12 +1365,12 @@
       "id": "0000167",
       "check": "split-complexity",
       "symbol": "brain::Brain.Commands.CodeCommand.Run(BrainEnv, IReadOnlyList\u003Cstring\u003E)",
-      "fingerprint": "74e9f32e82d186da1f64c59d1ab63d0ad4f566fb284277fd0d654e49791cbc4e",
-      "value": 31,
+      "fingerprint": "8f392b213b0cdd6e5da21df26bb5f39eeb944231b0b2812edf862a0e2158c3c3",
+      "value": 39,
       "resolution": {
-        "reason": "Run parses the command line and picks one of its three runs, each a step with its own meaning: Serve runs a project\u0027s window\u0027s server; Permission is the hook\u0027s run and Asked hands it to the project\u0027s server; Positionals tells the folder from the agent, ProjectOf finds the project a session runs in, the folder named or the one a moved session ran in, Open finds or starts that project\u0027s server and raises its window, Started posts the start, Ended watches a session that fails at once, and Checked turns the server\u0027s refusal into the command\u0027s message. ProjectOf is the one new step: brain code must know the project before it can reach its window.",
-        "fingerprint": "74e9f32e82d186da1f64c59d1ab63d0ad4f566fb284277fd0d654e49791cbc4e",
-        "value": 31
+        "reason": "Run parses the command line and picks one of its three runs, each a step with its own meaning. Served runs a project\u0027s server through Serve, or with no folder Rehome, the successor of the shared server of older builds, which moves each of its sessions into its project\u0027s window through Open. Permission is the hook\u0027s run, to its project\u0027s server or the shared one, and Asked hands it on. Named reads the project a serve or a hook names. Positionals tells the folder from the agent, ProjectOf finds the project a session runs in, Open finds or starts that project\u0027s server and raises its window, Started posts the start, Ended watches a session that fails at once, and Checked turns the server\u0027s refusal into the command\u0027s message. The decisions this change adds are the project each run is for and the move from the shared server, which keeps the hooks and the reload of the server that runs today working.",
+        "fingerprint": "8f392b213b0cdd6e5da21df26bb5f39eeb944231b0b2812edf862a0e2158c3c3",
+        "value": 39
       }
     },
     {

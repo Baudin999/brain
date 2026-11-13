@@ -818,8 +818,8 @@ path is no folder, or `--serve` is missing.
 
 ### brain code
 
-Starts a Claude Code session of an agent in the brain code window of its project, the folder. It is a terminal replacement: sessions run your own
-logged-in `claude`, drawn in brain's styling.
+Starts a Claude Code session of an agent in the brain code window of its project, the folder. It is a terminal
+replacement: sessions run your own logged-in `claude`, drawn in brain's styling.
 
 ```
 brain code [agent] [folder] [--resume <session-id>] [--serve <folder>] [--permission <session-id> <folder>]
@@ -835,10 +835,10 @@ brain code [agent] [folder] [--resume <session-id>] [--serve <folder>] [--permis
 
 Each folder is a project with its own brain code window, apart from brain's window and every other project's. A second
 `brain code` in the folder adds a session to its window and brings it forward; another project's window is left as it
-is. A new session in a window runs in its project's folder. Each session's folder shows as its workspace, in a tab or side by side, served by
-[`brain workspace --serve`](#brain-workspace). A tool call that would ask your permission waits in the window, in its
-session, until you allow or deny it. The server ends with its window, and every session with it. Every call the window
-makes and the server's work are recorded in the data repo's `perf/code`, outside git.
+is. A new session in a window runs in its project's folder. Each session's folder shows as its workspace, in a tab or
+side by side, served by [`brain workspace --serve`](#brain-workspace). A tool call that would ask your permission waits
+in the window, in its session, until you allow or deny it. The server ends with its window, and every session with it.
+Every call the window makes and the server's work are recorded in the data repo's `perf/code`, outside git.
 
 It prints `brain code: started <agent> in <folder>, session <id>`, or for `--resume`
 `brain code: moved session <id> into the window, in <folder>; close its terminal yourself`. `--permission` always

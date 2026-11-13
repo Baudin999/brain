@@ -787,7 +787,73 @@ public sealed partial class CodeServerTests : IDisposable
         }
     }
 
-    /// <summary>A moved session's project is the folder its transcript says it ran in, which a folder that differs cannot change.</summary>
+    /// <summary>
+    /// A hook that names no project is a session's of the one shared server of the builds before each project had its
+    /// own window: it reaches that server in <c>cache/code</c>, which answers it, and does not fail on its usage.
+    /// </summary>
+    [Fact]
+    public async Task AHookThatNamesNoProjectReachesTheSharedServerOfTheBuildsBefore()
+    {
+        using var stopping = new CancellationTokenSource();
+        using var shared = Server(brain.Root);
+        var served = shared.Serve(stopping.Token);
+        try
+        {
+            var own = CodeProjectFiles.Of(brain.Home, brain.Root);
+            var old = new ServeFiles(brain.Home, CodeServer.Folder);
+            Directory.CreateDirectory(old.Dir);
+            old.Write(WindowServer.PortFile, own.Read(WindowServer.PortFile)!);
+            old.Write("key", own.ReadKey()!);
+
+            var (code, output, errors) = brain.RunWithInput(HookInput("Bash", new { command = "ls" }), "code", "--permission", Guid.NewGuid().ToString("D"));
+
+            Assert.True(code == 0, errors);
+            Assert.Equal("deny", Decision(output).GetProperty("behavior").GetString());
+            Assert.Contains("no such session", Decision(output).GetProperty("message").GetString(), StringComparison.Ordinal);
+        }
+        finally
+        {
+            await stopping.CancelAsync();
+            await served.WaitAsync(Wait);
+        }
+    }
+
+    /// <summary>
+    /// A serve that names no folder is the successor the shared server of the builds before starts on its reload: it
+    /// takes that server's handover and moves each session that was alive into its project's window, and leaves an
+    /// ended one. With no handover waiting, it is refused.
+    /// </summary>
+    [Fact]
+    public async Task AServeThatNamesNoFolderMovesTheSharedServersSessionsIntoTheirProjectsWindows()
+    {
+        var alive = Guid.NewGuid().ToString("D");
+        var ended = Guid.NewGuid().ToString("D");
+        var old = new ServeFiles(brain.Home, CodeServer.Folder);
+        Directory.CreateDirectory(old.Dir);
+        var sessions = new List<CodeCarried>
+        {
+            new(alive, "immediate", project, true, null, DateTimeOffset.UtcNow),
+            new(ended, "brain", project, false, "it ended", DateTimeOffset.UtcNow),
+        };
+        Handover.Write(old, new CodeHandover(sessions, alive));
+
+        var (code, output, errors) = brain.Run("code", "--serve");
+        var (again, _, refused) = brain.Run("code", "--serve");
+
+        Assert.True(code == 0, errors);
+        Assert.Contains($"moved session {alive} into the window, in {project}", output, StringComparison.Ordinal);
+        Assert.Equal(HttpStatusCode.OK, (await Send(HttpMethod.Get, "/api/key/session?id=" + alive, key: Key())).StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, (await Send(HttpMethod.Get, "/api/key/session?id=" + ended, key: Key())).StatusCode);
+        Assert.Equal(["--resume", alive], Args()[^2..]);
+        Assert.False(File.Exists(Path.Combine(old.Dir, Handover.FileName)));
+        Assert.NotEqual(0, again);
+        Assert.Contains("names the folder whose window it serves", refused, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// A moved session's project is the folder its transcript says it ran in, which a folder that differs cannot
+    /// change.
+    /// </summary>
     [Fact]
     public void AMovedSessionRunsInTheProjectItRanIn()
     {
