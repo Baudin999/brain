@@ -304,15 +304,14 @@ internal sealed record CodeSignal(
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Judgement,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Words);
 
-/// <summary>Every session of the window, the oldest first, and the folder a new one starts in unless the window says.</summary>
 /// <summary>
-/// Every session, the oldest first, and the user's home; whether a newer build waits for a reload, <see
-/// cref="CodeReload.Running"/> while a session runs and <see cref="CodeReload.Ready"/> once none does, and nothing until
-/// one is published; and the session the window showed before a reload, which the window opens in view.
+/// Every session, the oldest first, and the window's project, the folder each runs in; whether a newer build waits for
+/// a reload, <see cref="CodeReload.Running"/> while a session runs and <see cref="CodeReload.Ready"/> once none does, and
+/// nothing until one is published; and the session the window showed before a reload, which the window opens in view.
 /// </summary>
 internal sealed record CodeSessionList(
     IReadOnlyList<CodeSessionView> Sessions,
-    string Home,
+    string Project,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Reload,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Opened);
 

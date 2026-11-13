@@ -10,13 +10,13 @@ using static Brain.Windows.WindowServer;
 namespace Brain.Code;
 
 /// <summary>
-/// brain code's own server: a <see cref="WindowServer"/>, one on the machine, apart from brain serve's and every
-/// workspace's, that runs the window's sessions in its <see cref="CodeSessions"/> and ends, with every session and what
+/// brain code's own server: a <see cref="WindowServer"/>, one per project, apart from brain serve's, every workspace's
+/// and every other project's, that runs the window's sessions in its <see cref="CodeSessions"/> and ends, with every session and what
 /// runs under each, once its window is gone. <c>brain code</c> starts a session through the keyed
 /// <c>/api/key/start</c>; the window starts one through <c>/api/start</c>, says the user's words, interrupts a turn,
 /// ends a process a session started, reads a session's conversation, the agents it sent and one agent's view with the
 /// trail of its work and its conversation, answers a permission request and a session's questions, and closes a
-/// session. The user's words carry the images he attached. Its file explorer lists a folder's folders and images
+/// session. A project is a folder, and every session of its window runs in it. The user's words carry the images he attached. Its file explorer lists a folder's folders and images
 /// through <see cref="ImageFolders"/>, reads an image file, and says which folder images were attached from; the server
 /// reads nothing else of the disk for it. Each session's folder has its workspace, which <see cref="CodeWorkspaces"/>
 /// starts and the window shows in a frame; brain code reads nothing of it. A session's permission hook,
@@ -25,7 +25,7 @@ namespace Brain.Code;
 /// questions in through the keyed <c>/api/key/ask</c>, which answers at once for an agent that goes on, and once the
 /// user answered, or the session ended, for one that waits. The window hears on its event stream which session changed,
 /// at most once each 50 ms, and which one a <c>brain code</c> started. Every call, each request with its answer, and
-/// each question with its answer, is a record in the <see cref="WindowLog"/> of <c>perf/code</c>.
+/// each question with its answer, is a record in the project's <see cref="WindowLog"/> of <c>perf/code</c>.
 /// <para>
 /// Once a newer build is published beside it, its window hears so and its session list says whether a reload waits for
 /// a session that runs. The user's reload, refused while one runs, hands every session on in <see cref="Handover"/>, and
@@ -39,8 +39,9 @@ internal sealed class CodeServer : IDisposable
 {
     public const string App = "brain-code";
     public const string Command = "brain code";
+
+    /// <summary>brain code's folder of cache, which holds the settings and the explorer's memory every project shares, and its perf log.</summary>
     public const string Folder = "code";
-    private const string Title = "brain code";
 
     /// <summary>A conversation read past this many milliseconds is over its budget.</summary>
     private const double ReadBudgetMs = 100;
@@ -93,6 +94,8 @@ internal sealed class CodeServer : IDisposable
     private readonly Lock gate = new();
     private readonly HashSet<string> pending = new(StringComparer.Ordinal);
     private readonly string userHome;
+    private readonly string project;
+    private readonly string title;
     private readonly ClaudeFiles claude;
     private readonly PastSessions past;
     private readonly WindowLog log;
@@ -114,30 +117,33 @@ internal sealed class CodeServer : IDisposable
     private bool reloading;
     private bool moved;
 
+    /// <param name="project">The project's folder, in full, which every session of the window runs in.</param>
     /// <param name="program">The claude each session runs: <c>claude</c>, or a test's stand-in.</param>
     /// <param name="build">The build the server runs, which says when a newer one is published.</param>
     /// <param name="raise">Brings the window titled as it says forward through the compositor; false when it could not.</param>
     /// <param name="successor">Starts the server's successor on the build now published, once a reload stopped it.</param>
     /// <param name="startWorkspace">Starts the server of a folder's workspace, and gives the log it writes.</param>
-    public CodeServer(string home, string userHome, string program, ClaudeFiles claude, TextWriter err, Func<string, bool> openWindow, Func<string, bool> raise, TimeProvider time, OmarchyTheme theme, CodeBuild build, Action successor, Func<string, string> startWorkspace)
+    public CodeServer(string home, string userHome, string project, string program, ClaudeFiles claude, TextWriter err, Func<string, bool> openWindow, Func<string, bool> raise, TimeProvider time, OmarchyTheme theme, CodeBuild build, Action successor, Func<string, string> startWorkspace)
     {
         this.raise = raise;
         this.userHome = userHome;
+        this.project = project;
+        title = Command + " · " + WorkspaceServer.Title(project, userHome);
         this.claude = claude;
         past = new PastSessions(claude);
         this.time = time;
         this.build = build;
         this.successor = successor;
-        files = new ServeFiles(home, Folder);
-        log = new WindowLog(home, Folder, Folder, time);
+        files = CodeProjectFiles.Of(home, project);
+        log = new WindowLog(home, Folder, WorkspaceServer.Name(project) + "-" + WorkspaceServer.Id(project), time);
         records = new Records(log, time);
         sessions = new CodeSessions(program, claude, Changed, Unanswered);
         signals = new WorkSignals(home, records);
         settings = new CodeSettings(home);
-        explorer = new ImageFolders(userHome, files);
+        explorer = new ImageFolders(userHome, new ServeFiles(home, Folder));
         workspaces = new CodeWorkspaces(home, startWorkspace);
         gathering = time.CreateTimer(_ => Tell(), null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
-        var kind = new WindowKind(App, Command, Folder, userHome, Title, Title, Assets, WebAssets.Framing);
+        var kind = new WindowKind(App, Command, CodeProjectFiles.Folder(project), project, Command, title, Assets, WebAssets.Framing);
         window = new WindowServer(home, kind, err, openWindow, time, theme, records, Keyed, Api);
     }
 
@@ -251,7 +257,7 @@ internal sealed class CodeServer : IDisposable
     /// <summary>Brings the window forward: the compositor raises it, or a fresh window takes its place.</summary>
     private string Raise()
     {
-        if (raise(Title))
+        if (raise(title))
         {
             return "raised";
         }
@@ -409,7 +415,7 @@ internal sealed class CodeServer : IDisposable
     private CodeSessionList List()
     {
         var views = sessions.All().Select(session => session.View()).ToList();
-        return new CodeSessionList(views, userHome, Waits(views), opened);
+        return new CodeSessionList(views, project, Waits(views), opened);
     }
 
     /// <summary>What a reload waits for: nothing until a newer build is published, then the sessions while one runs.</summary>
@@ -545,15 +551,24 @@ internal sealed class CodeServer : IDisposable
         }
     }
 
-    /// <summary>The folder a start names, in full; the user's home for a new session that names none, and null for a moved one, which runs where its transcript says.</summary>
-    private string? FolderOf(CodeStart? start)
+    /// <summary>
+    /// The folder a start names, in full, the project when it names none; refused for another folder, which is another
+    /// project's and has its own window.
+    /// </summary>
+    private string FolderOf(CodeStart? start)
     {
         if (string.IsNullOrWhiteSpace(start?.Cwd))
         {
-            return start?.Resume is null ? userHome : null;
+            return project;
         }
 
-        return Folders.Resolve(start.Cwd, userHome, userHome);
+        var folder = Folders.Resolve(start.Cwd, userHome, userHome);
+        if (folder != project)
+        {
+            throw new BrainException($"this window is {project}'s: brain code in {folder} opens that folder's own window");
+        }
+
+        return folder;
     }
 
     /// <summary>Keeps the choice the window sent; a body that is no choice is refused and nothing is saved.</summary>

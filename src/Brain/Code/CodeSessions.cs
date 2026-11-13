@@ -114,20 +114,31 @@ internal sealed partial class CodeSessions(string program, ClaudeFiles claude, A
         changed(session.Id);
     }
 
-    /// <summary>The folder the Claude Code session <paramref name="resume"/> continues in: where its transcript says it ran, or <paramref name="cwd"/> when that is not known; refused when <paramref name="cwd"/> differs.</summary>
+    /// <summary>The folder the Claude Code session <paramref name="resume"/> continues in, as <see cref="RunsIn"/> says; refused when the window shows it already.</summary>
     private string? Continued(string resume, string? cwd)
+    {
+        var folder = RunsIn(claude, resume, cwd);
+        if (Find(resume) is not null)
+        {
+            throw new BrainException($"the session {resume} is in the window already");
+        }
+
+        return folder;
+    }
+
+    /// <summary>
+    /// The folder the Claude Code session <paramref name="resume"/> continues in: where its transcript says it ran, or
+    /// <paramref name="cwd"/> when that is not known; refused for an id that is none, and when <paramref name="cwd"/>
+    /// differs. <c>brain code --resume</c> asks it to find the project whose window the session moves into.
+    /// </summary>
+    public static string? RunsIn(ClaudeFiles claude, string resume, string? cwd)
     {
         if (!ClaudeFiles.IsSessionId(resume))
         {
             throw new BrainException($"{resume} is no Claude Code session id");
         }
 
-        if (Find(resume) is not null)
-        {
-            throw new BrainException($"the session {resume} is in the window already");
-        }
-
-        var ran = RanIn(resume);
+        var ran = RanIn(claude, resume);
         if (ran is null)
         {
             return cwd;
@@ -142,7 +153,7 @@ internal sealed partial class CodeSessions(string program, ClaudeFiles claude, A
     }
 
     /// <summary>The folder the transcript of the session <paramref name="resume"/> says it ran in, when it is still there.</summary>
-    private string? RanIn(string resume)
+    private static string? RanIn(ClaudeFiles claude, string resume)
     {
         var path = claude.Session(resume);
         if (path is null)

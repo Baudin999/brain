@@ -25,13 +25,17 @@ checks the rule and so does the server, and a name that breaks it keeps the fiel
 A session whose claude exits without a transcript, or with an error, is marked ended and says the exit status and
 claude's stderr in its conversation; `brain code` prints the same when the server reports it within a second.
 
-There is one brain code window, apart from brain's window. A `brain code` while it is open adds a session to it, shows
-that session and brings the window forward. The window lists its sessions on the side, several alive at once, and its
-own new session takes an agent and a folder, and refuses one that does not exist.
+brain code is project based. A project is a folder: the one `brain code` names, or the current one, the same folder a
+workspace is served over. Each project has its own brain code window, apart from brain's window and from every other
+project's. A `brain code` over a project whose window is open adds a session to it, shows that session and brings the
+window forward; over a project with no window, it starts that project's server, which opens one. Opening one project
+never moves or touches another project's window. A window lists its sessions on the side, several alive at once, and
+each can land a write. Its own new session takes an agent and runs in the window's project, with no folder to pick; the
+server refuses a session in any other folder, which is another project's.
 
-`brain code [agent] --resume <session-id>` moves a session that runs elsewhere, as in a terminal, into the window: it
-continues by its id, in the folder it ran in, with its history drawn. A folder argument that differs from it is
-refused. Close the terminal's copy yourself.
+`brain code [agent] --resume <session-id>` moves a session that runs elsewhere, as in a terminal, into the window of the
+project it ran in: it continues by its id, in the folder its transcript names, with its history drawn. A folder
+argument that differs from it is refused. Close the terminal's copy yourself.
 
 ## What a session is
 
@@ -178,8 +182,8 @@ and a job already gone answers as gone. Each stop is a record.
 
 A tool call that would ask your permission waits for you in the window. Each session carries Claude Code's
 `PermissionRequest` hook in its own `--settings`, so the hook applies to brain code's sessions only and never to a
-terminal's. The hook is `brain code --permission <session-id>`: it hands the request to the server and waits, up to a
-week, for your answer. The harness's PreToolUse hooks run first and still refuse what they refuse.
+terminal's. The hook is `brain code --permission <session-id> <folder>`, with the session's project as the folder: it
+hands the request to that project's server and waits, up to a week, for your answer. The harness's PreToolUse hooks run first and still refuse what they refuse.
 
 The request shows under the session's conversation, and under the agent's when a subagent asked, as the permission
 request of the Stylebook: the tool and what it will do, a Bash command as code, a file edit as the path and its change,
@@ -213,8 +217,9 @@ An agent in a session asks you questions with `brain ask`, one JSON document on 
 - You may always answer in your own words, beside an option or alone, so `own` is still read and changes nothing.
 
 `brain ask` refuses a document with any problem, an unknown field included, and says each one before anything reaches
-the window. It works only in a session of the window, whose server sets `BRAIN_CODE_SESSION` to the session's id;
-outside one it refuses and says to ask in prose.
+the window. It works only in a session of a window, whose server sets `BRAIN_CODE_SESSION` to the session's id and
+`BRAIN_CODE_PROJECT` to its project, so the ask reaches that project's window; outside one it refuses and says to ask
+in prose.
 
 The window draws each ask as a question, in the conversation where it was asked: the text, the options with the
 recommended one marked and its reason under them, a field for your own words, always, and Answer and Close. The
@@ -277,20 +282,25 @@ verdict are shared components, each in its states in the Stylebook.
 
 ## The server, and reloading it
 
-The window's server, `brain code --serve`, is a process of the same binary that `brain code` starts in the background
-with its output in the data repo's `cache/code/serve.log`. It runs every session, keeps the list of what runs under each
-in memory, and ends a few seconds after its window closes, and every session and what runs under it with it. Closing
-or reloading the window asks nothing first. Like a workspace, it takes calls only from its window's session;
-`brain code` reaches it with the key in `cache/code`. The window is a Chromium-family browser in app mode with the
-window class `brain-code`.
+Each project's window has its own server, `brain code --serve <folder>`, a process of the same binary that `brain code`
+starts in the background. Its files live in the data repo's `cache/code/<id>`, where `<id>` is the project's id, the
+same as its workspace's: the first 16 hex digits of the sha256 of the folder's full path. Its output goes to
+`cache/code/<id>/serve.log`. It runs every session of its window, keeps the list of what runs under each in memory, and
+ends a few seconds after its window closes, and every session and what runs under it with it. Closing or reloading the
+window asks nothing first. Like a workspace, it takes calls only from its window's session; `brain code` reaches it
+with the key in `cache/code/<id>`. The window is a Chromium-family browser in app mode. Its title is
+`brain code · <name> · <folder>`, by which it is brought forward, and Chromium names its window class after the launch
+file in `cache/code/<id>`, so the class carries `_cache_code_<id>_` and a project opener finds one project's window by
+it. The settings and the folders the file explorer remembers stay in `cache/code`, shared by every project.
 
 Once `./build.sh` or `./install.sh` has published a newer build beside the server's binary, which the server tells by
 the `source.stamp` the build writes, the head of the sessions shows a **Reload brain code** button. It is disabled while
 any session runs: a turn, a process or an agent it started, or a permission request or a question waiting for you. It
 is highlighted once none does. Install never restarts brain code.
 
-A click writes every session to `cache/code/handover.json`, by its Claude Code session id with its agent and its folder,
-and the session in view, with a fresh launch code for the successor in `cache/code`, which only your account can read.
+A click writes every session to `cache/code/<id>/handover.json`, by its Claude Code session id with its agent and its
+folder, and the session in view, with a fresh launch code for the successor of that project's server in
+`cache/code/<id>`, which only your account can read. Each project reloads on its own.
 Then the server stops every session and starts its successor on the new build itself, from its own environment, so no
 session owns the new server. The successor takes the handover once and resumes each session that was alive with
 `--resume`, in the same order; it takes the code once too, in place of opening a window. Once the successor serves, the

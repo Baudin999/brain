@@ -818,23 +818,24 @@ path is no folder, or `--serve` is missing.
 
 ### brain code
 
-Starts a Claude Code session of an agent in brain code's window. It is a terminal replacement: sessions run your own
+Starts a Claude Code session of an agent in the brain code window of its project, the folder. It is a terminal replacement: sessions run your own
 logged-in `claude`, drawn in brain's styling.
 
 ```
-brain code [agent] [folder] [--resume <session-id>] [--serve] [--permission <session-id>]
+brain code [agent] [folder] [--resume <session-id>] [--serve <folder>] [--permission <session-id> <folder>]
 ```
 
 | Argument | Default | What it does |
 |---|---|---|
 | `[agent]` | `brain`, the open agent | Any agent file's name, such as `immediate`. |
-| `[folder]` | the working directory | The folder the session runs in. A positional that names an existing folder is the folder and any other is the agent, in either order. |
-| `--resume <session-id>` | none | Move a session that runs elsewhere, as in a terminal, into the window. It continues by its id, in the folder it ran in. Close the terminal's copy yourself. |
-| `--serve` | off | Run the window's server in the foreground. `brain code` starts it in the background. |
-| `--permission <session-id>` | none | The PermissionRequest hook of a session, which the server gives each session: it reads the request on stdin, waits for your answer in the window and prints the decision. |
+| `[folder]` | the working directory | The project: the folder the session runs in, whose window it opens in. A positional that names an existing folder is the folder and any other is the agent, in either order. |
+| `--resume <session-id>` | none | Move a session that runs elsewhere, as in a terminal, into the window of the folder it ran in. It continues by its id there. Close the terminal's copy yourself. |
+| `--serve <folder>` | off | Run the server of the folder's window in the foreground. `brain code` starts it in the background. |
+| `--permission <session-id> <folder>` | none | The PermissionRequest hook of a session, which the server gives each session: it reads the request on stdin, waits for your answer in the folder's window and prints the decision. |
 
-There is one brain code window, apart from brain's window. A second `brain code` adds a session to it and brings it
-forward. Each session's folder shows as its workspace, in a tab or side by side, served by
+Each folder is a project with its own brain code window, apart from brain's window and every other project's. A second
+`brain code` in the folder adds a session to its window and brings it forward; another project's window is left as it
+is. A new session in a window runs in its project's folder. Each session's folder shows as its workspace, in a tab or side by side, served by
 [`brain workspace --serve`](#brain-workspace). A tool call that would ask your permission waits in the window, in its
 session, until you allow or deny it. The server ends with its window, and every session with it. Every call the window
 makes and the server's work are recorded in the data repo's `perf/code`, outside git.
@@ -1276,6 +1277,7 @@ $ brain --project ~/Projects/lens subjects project
 | `LOCAL_BIN` | `~/.local/bin` | Where `install` links `brain` when the binary was built from a checkout. |
 | `XDG_CONFIG_HOME` | `~/.config` | `install` links the data repo's `harness/guard` to `brain/guard` under it, when there is one. |
 | `BRAIN_CODE_SESSION` | none | Set by brain code's server in each session it runs, so `brain ask` finds its session. Do not set it yourself. |
+| `BRAIN_CODE_PROJECT` | none | Set by brain code's server in each session it runs, so `brain ask` finds its project's window. Do not set it yourself. |
 | `HYPRLAND_INSTANCE_SIGNATURE` | none | Set by Hyprland. With it, `code` brings its open window forward through `hyprctl`; without it, `code` opens a fresh one. |
 
 One command is not in the help: `brain keep-agent`, the keeper brain puts between itself and every `claude` it starts,

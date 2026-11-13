@@ -15,7 +15,8 @@ namespace Brain.Commands;
 /// option. An ask that waits blocks until the user answered every question, then prints his answers, or that he closed
 /// them unanswered; one that does not prints that the questions wait and returns at once, and the server sends his
 /// answers to the session as his next message once he gives them. It works only inside a brain code session, which its
-/// server names to it through <see cref="CodeSession.AskVariable"/>.
+/// server names to it through <see cref="CodeSession.AskVariable"/>, in the window of the project it names through
+/// <see cref="CodeSession.ProjectVariable"/>.
 /// </summary>
 internal static class AskCommand
 {
@@ -25,13 +26,13 @@ internal static class AskCommand
     public static int Run(BrainEnv env, IReadOnlyList<string> arguments)
     {
         Options.Parse(arguments).Expect(0, Usage);
-        if (env.CodeSession is not { } session)
+        if (env.CodeSession is not { } session || env.CodeProject is not { } project)
         {
             throw new BrainException("brain ask works only in a session of brain code's window; outside one, ask the user in prose");
         }
 
         var document = AskContract.Read(env.In.ReadToEnd());
-        var answer = Asked(env, new CodeQuestionsIn(session, document));
+        var answer = Asked(env, project, new CodeQuestionsIn(session, document));
         if (answer.Answers is { } answers)
         {
             env.Out.Write(answers);
@@ -43,13 +44,13 @@ internal static class AskCommand
     }
 
     /// <summary>
-    /// Hands the ask to brain code's server and waits, as long as it takes for an ask that waits, for its word; refused
+    /// Hands the ask to the server of <paramref name="project"/>'s brain code window and waits, as long as it takes for an ask that waits, for its word; refused
     /// when no server runs, when it refuses the ask, and when it went away first.
     /// </summary>
-    private static CodeQuestionsOut Asked(BrainEnv env, CodeQuestionsIn asked)
+    private static CodeQuestionsOut Asked(BrainEnv env, string project, CodeQuestionsIn asked)
     {
-        var files = new ServeFiles(env.Home, CodeServer.Folder);
-        using var running = WindowClient.Running(files, CodeServer.App, env.UserHome);
+        var files = CodeProjectFiles.Of(env.Home, project);
+        using var running = WindowClient.Running(files, CodeServer.App, project);
         if (running is null)
         {
             throw new BrainException("brain code's window is not running, so nobody can answer; ask the user in prose");

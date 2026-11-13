@@ -46,7 +46,8 @@ internal static class ProcessEnv
             embedder,
             models,
             SkillFile: Path.Combine(ClaudeHome(), Rules),
-            CodeSession: CodeSession());
+            CodeSession: CodeSession(),
+            CodeProject: CodeProject());
     }
 
     /// <summary>The brain root: BRAIN_HOME, or the default when it is unset.</summary>
@@ -70,6 +71,9 @@ internal static class ProcessEnv
 
     /// <summary>The brain code session that runs this process, from the variable its server sets; null outside one.</summary>
     private static string? CodeSession() => Environment.GetEnvironmentVariable(Code.CodeSession.AskVariable) is { Length: > 0 } session ? session : null;
+
+    /// <summary>The project whose brain code window runs this process, from the variable its server sets; null outside one.</summary>
+    private static string? CodeProject() => Environment.GetEnvironmentVariable(Code.CodeSession.ProjectVariable) is { Length: > 0 } project ? project : null;
 
     /// <summary>
     /// The brain root as far as it is known without the working directory, which may be gone: BRAIN_HOME when it is a

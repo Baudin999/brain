@@ -121,7 +121,7 @@ public sealed class AskTests : IDisposable
     [Fact]
     public void ABadAskInASessionIsRefusedBeforeTheWindowIsLookedFor()
     {
-        var env = brain.Env(new StringReader("""{"wait": true}"""), TextWriter.Null, TextWriter.Null) with { CodeSession = Guid.NewGuid().ToString("D") };
+        var env = brain.Env(new StringReader("""{"wait": true}"""), TextWriter.Null, TextWriter.Null) with { CodeSession = Guid.NewGuid().ToString("D"), CodeProject = brain.Root };
 
         var refused = Assert.Throws<BrainException>(() => AskCommand.Run(env, []));
 
@@ -131,7 +131,7 @@ public sealed class AskTests : IDisposable
     [Fact]
     public void AGoodAskWithNoWindowRunningIsRefused()
     {
-        var env = brain.Env(new StringReader(Good), TextWriter.Null, TextWriter.Null) with { CodeSession = Guid.NewGuid().ToString("D") };
+        var env = brain.Env(new StringReader(Good), TextWriter.Null, TextWriter.Null) with { CodeSession = Guid.NewGuid().ToString("D"), CodeProject = brain.Root };
 
         var refused = Assert.Throws<BrainException>(() => AskCommand.Run(env, []));
 

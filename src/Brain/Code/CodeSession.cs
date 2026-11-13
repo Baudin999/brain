@@ -17,7 +17,8 @@ namespace Brain.Code;
 /// transcript and its agents' are watched through the system's file events, and every change goes to <c>changed</c>. A
 /// tool call that would ask the user's permission waits in its <see cref="PermissionAsks"/> until he answers in the
 /// window; once the session ends or its turn is interrupted, each is denied. Its claude runs with
-/// <see cref="AskVariable"/> set to its id, so a <c>brain ask</c> it runs finds its session; what it asks stays in its
+/// <see cref="AskVariable"/> set to its id and <see cref="ProjectVariable"/> to its folder, so a <c>brain ask</c> it runs
+/// finds its project's window and its session there; what it asks stays in its
 /// <see cref="SessionQuestions"/>, and once the session ends, each open ask ends with it and goes to
 /// <c>unanswered</c>. A session that had ended when brain code reloaded on a new build comes back as it was shown: ended,
 /// with no claude, and its conversation read from its transcript.
@@ -26,6 +27,9 @@ internal sealed class CodeSession : IDisposable
 {
     /// <summary>The variable that tells <c>brain ask</c> the session it runs in: the session's id.</summary>
     public const string AskVariable = "BRAIN_CODE_SESSION";
+
+    /// <summary>The variable that tells <c>brain ask</c> the project whose window runs its session: the session's folder.</summary>
+    public const string ProjectVariable = "BRAIN_CODE_PROJECT";
 
     private const int ErrorLines = 20;
 
@@ -82,12 +86,12 @@ internal sealed class CodeSession : IDisposable
 
     /// <summary>
     /// The arguments of the session's command line: the agent, typed events in and out with the text as it streams, the
-    /// settings that hand each permission request to the window through <paramref name="brain"/>, and
-    /// <paramref name="session"/> with its id: <c>--session-id</c> for a new session, <c>--resume</c> for one it
-    /// continues.
+    /// settings that hand each permission request to the window of <paramref name="project"/> through
+    /// <paramref name="brain"/>, and <paramref name="session"/> with its id: <c>--session-id</c> for a new session,
+    /// <c>--resume</c> for one it continues.
     /// </summary>
-    public static IReadOnlyList<string> Arguments(string agent, string brain, string session, string id) =>
-        ["-p", "--agent", agent, .. Flags, "--include-partial-messages", "--settings", PermissionHook.Settings(brain, id), session, id];
+    public static IReadOnlyList<string> Arguments(string agent, string brain, string session, string id, string project) =>
+        ["-p", "--agent", agent, .. Flags, "--include-partial-messages", "--settings", PermissionHook.Settings(brain, id, project), session, id];
 
     /// <summary>
     /// Starts a session of <paramref name="agent"/> in <paramref name="cwd"/>: a new one, or the Claude Code session
@@ -107,8 +111,9 @@ internal sealed class CodeSession : IDisposable
         var place = new RunPlace("code", "session", id, agent);
         // The hook runs this brain: the server is brain code --serve.
         var brain = Environment.ProcessPath ?? "brain";
-        var info = Info(program, cwd, Arguments(agent, brain, session, id));
+        var info = Info(program, cwd, Arguments(agent, brain, session, id, cwd));
         info.Environment[AskVariable] = id;
+        info.Environment[ProjectVariable] = cwd;
         var run = ClaudeRuns.Start(info, agent, place);
         var started = new CodeSession(id, agent, cwd, claude, run, run.Started, changed, unanswered);
         run.Process.ErrorDataReceived += (_, line) => started.Error(line.Data);

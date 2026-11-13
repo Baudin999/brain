@@ -80,7 +80,8 @@ const VIEW_KEYS = { KeyC: 'conversation', KeyW: 'code', KeyV: 'beside' };
 
 const state = {
   closed: null,
-  home: '',
+  // The folder of the window's project, which every session of the window runs in.
+  project: '',
   sessions: [],
   agents: [],
   selected: null,
@@ -210,7 +211,7 @@ async function ask(path, sent) {
 async function readSessions() {
   const listed = await ask('/api/sessions');
   state.sessions = listed.sessions;
-  state.home = listed.home;
+  state.project = listed.project;
   state.reload = listed.reload ?? null;
   state.opened = listed.opened ?? null;
   for (const session of state.sessions) {
@@ -525,9 +526,9 @@ async function showSettings() {
   });
 }
 
-// Opens the history of the open agent's past sessions in the folder in view, and reads the list.
+// Opens the history of the open agent's past sessions in the window's project, and reads the list.
 async function showHistory() {
-  const folder = folderOfView();
+  const folder = state.project;
   state.history = { folder, sessions: null, open: null, problem: null };
   draw();
   await act('history.open', folder, null, async () => {
@@ -686,9 +687,9 @@ async function back() {
   });
 }
 
-async function start(agent, cwd) {
+async function start(agent) {
   await act('session.start', agent, null, async () => {
-    const started = await ask('/api/start', { agent, cwd });
+    const started = await ask('/api/start', { agent });
     await readSessions();
     await pick(started.id);
   });
@@ -1199,12 +1200,6 @@ function mainView() {
   return sessionPage(session, conversationOf(session.id), agents, actions);
 }
 
-function folderOfView() {
-  const session = state.sessions.find((one) => one.id === state.selected);
-  if (session) return session.cwd;
-  return state.home;
-}
-
 function explorerView() {
   if (!state.explorer) return nothing;
   return fileExplorerView(state.explorer, {
@@ -1251,7 +1246,7 @@ function page() {
         <header class="pane-head"><h1 class="pane-title">Sessions</h1>${reloadView(state.reload, state.reloading, { onReload: reload })}${historyButtonView({ onOpen: showHistory })}${settingsCogView(state.page === 'settings', { onOpen: showSettings })}</header>
         ${questionsRowView(state.sessions, questionsInView, { onOpen: showQuestions })}
         ${sessionListView(state.sessions, current, state.renaming, { onPick: pick, onRenameStart: startRename, onRename: rename, onRenameCancel: cancelRename })}
-        ${newSessionView(state.agents, folderOfView(), { onStart: start })}
+        ${newSessionView(state.agents, state.project, { onStart: start })}
         ${state.problem ? html`<p class="code-problem" role="status">${state.problem}</p>` : nothing}
       </nav>
       <main class="code-main" ?data-focus=${beside && state.focus === 'conversation'}>${mainView()}</main>

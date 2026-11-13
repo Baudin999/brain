@@ -50,8 +50,8 @@ conversations/       personal/ and global/: each scope's conversations, one fold
 dreams/              the dream log, one JSON file per dream, each committed by its dream
 usage/               the usage log, one JSON line per event in a file per month, outside the graph
 perf/                the window's perf log, CSV files of 1 MB at most, ignored by git and kept 14 days; workspace/,
-                     each workspace's records, and code/, brain code's, a JSON line each in a file per day, ignored by
-                     git and kept 14 days
+                     each workspace's records, and code/, each project's brain code window's, a JSON line each in a
+                     file per day, ignored by git and kept 14 days
 settings.json        the settings page's choices, committed; a missing file or key is the default
 sources.tsv          optional, written by you: other tools whose questions the window shows
 cache/               derived and gitignored: trail.sqlite, search.sqlite, traversals/<scope>.tsv, conversations.json

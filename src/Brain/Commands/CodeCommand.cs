@@ -9,14 +9,15 @@ namespace Brain.Commands;
 
 /// <summary>
 /// <c>brain code [agent] [folder] [--resume &lt;session id&gt;]</c>: starts a Claude Code session of the agent, the open
-/// agent unless named, in the folder, the current one unless named, in brain code's window, and brings the window
-/// forward. A positional that names an existing folder is the folder and any other is the agent, in either order. There is one such window:
-/// its server, a process of its own apart from brain serve's and every workspace's, runs every session the window shows
-/// and starts with the first <c>brain code</c>. <c>--resume</c> moves a session that runs elsewhere, as in a terminal,
-/// into the window, where it continues by its id in the folder it ran in. <c>--serve</c> runs that server in the
-/// foreground, which <c>brain code</c> starts in the background, and which starts its own successor when the user reloads
-/// it on a newer build. <c>--permission &lt;session id&gt;</c> is the
-/// PermissionRequest hook each session carries: it hands the request on its stdin to the server, waits for the user's
+/// agent unless named, in the folder, the current one unless named, in that project's brain code window, and brings the
+/// window forward. A positional that names an existing folder is the folder and any other is the agent, in either order.
+/// A project is a folder, and each has its own window: its server, a process of its own apart from brain serve's, every
+/// workspace's and every other project's, runs every session the window shows and starts with the project's first
+/// <c>brain code</c>. <c>--resume</c> moves a session that runs elsewhere, as in a terminal, into the window of the
+/// project it ran in, where it continues by its id. <c>--serve &lt;folder&gt;</c> runs the folder's server in the
+/// foreground, which <c>brain code</c> starts in the background, and which starts its own successor when the user
+/// reloads it on a newer build. <c>--permission &lt;session id&gt; &lt;folder&gt;</c> is the PermissionRequest hook each
+/// session carries: it hands the request on its stdin to the server of the session's project, waits for the user's
 /// answer in the window, and writes the decision; with no server, or one that went away, it writes deny, so it never
 /// hangs.
 /// </summary>
@@ -37,21 +38,21 @@ internal static class CodeCommand
         var options = Options.ParseFlagged(arguments, [ServeFlag], ResumeOption, PermissionHook.Flag);
         if (options.Has(ServeFlag))
         {
-            options.Expect(0, Usage);
-            return Serve(env);
+            var served = Folders.Resolve(options.Expect(1, Usage)[0], env.UserHome, env.Cwd);
+            return Serve(env, served);
         }
 
         if (options.Get(PermissionHook.Flag) is { } session)
         {
-            options.Expect(0, Usage);
-            return Permission(env, session);
+            var asking = Folders.Resolve(options.Expect(1, Usage)[0], env.UserHome, env.Cwd);
+            return Permission(env, session, asking);
         }
 
         var (agent, folder) = Positionals(env, options.Expect(options.Positional.Count, Usage));
         var resume = options.Get(ResumeOption);
         if (folder is null && resume is null)
         {
-            folder = env.Cwd;
+            folder = Folders.Resolve(".", env.UserHome, env.Cwd);
         }
 
         return Open(env, new CodeStart(agent, folder, resume));
@@ -83,21 +84,25 @@ internal static class CodeCommand
         return (agent, folder);
     }
 
-    /// <summary>Starts the session in the window's running server, or starts its server, which opens the window, and then the session.</summary>
+    /// <summary>
+    /// Starts the session in the running server of its project's window, or starts that server, which opens the window,
+    /// and then the session. Another project's window is left as it is.
+    /// </summary>
     private static int Open(BrainEnv env, CodeStart start)
     {
-        var files = new ServeFiles(env.Home, CodeServer.Folder);
-        var running = WindowClient.Running(files, CodeServer.App, env.UserHome);
+        var project = ProjectOf(env, start);
+        var files = CodeProjectFiles.Of(env.Home, project);
+        var running = WindowClient.Running(files, CodeServer.App, project);
         var raise = running is not null;
         if (running is null)
         {
             BrainException.ThrowIf(Browser.Find() is null ? $"no Chromium-family browser found: set {Browser.Variable} to one" : null);
-            var log = StartServer(env);
-            running = WindowClient.Await(files, CodeServer.App, env.UserHome, log);
+            var log = StartServer(env, project);
+            running = WindowClient.Await(files, CodeServer.App, project, log);
         }
 
         using var client = running;
-        var session = Started(client, files, start);
+        var session = Started(client, files, start with { Cwd = project });
         Ended(client, files, session.Id);
         if (raise)
         {
@@ -115,14 +120,34 @@ internal static class CodeCommand
     }
 
     /// <summary>
-    /// Starts brain code's server in a process of its own, on the binary beside this one, and gives the log it writes:
-    /// <c>brain code</c> starts the first, and a server the user reloads starts its successor so, from its own
-    /// environment.
+    /// The project whose window the session runs in: the folder the start names, or for a moved session the folder its
+    /// transcript says it ran in; refused when there is neither, or the two differ.
     /// </summary>
-    private static string StartServer(BrainEnv env)
+    private static string ProjectOf(BrainEnv env, CodeStart start)
     {
-        var log = Path.Combine(new ServeFiles(env.Home, CodeServer.Folder).Dir, LogFile);
-        ServeProcess.Start(log, env.UserHome, [Name, "--" + ServeFlag], "brain code's server");
+        var folder = start.Cwd;
+        if (start.Resume is not null)
+        {
+            folder = CodeSessions.RunsIn(ClaudeFiles.Of(env.UserHome), start.Resume, start.Cwd);
+        }
+
+        if (folder is null)
+        {
+            throw new BrainException($"the session {start.Resume} has no folder to continue in: name it\n{Usage}");
+        }
+
+        return folder;
+    }
+
+    /// <summary>
+    /// Starts the server of <paramref name="project"/>'s window in a process of its own, on the binary beside this one,
+    /// and gives the log it writes: <c>brain code</c> starts the first, and a server the user reloads starts its
+    /// successor so, from its own environment.
+    /// </summary>
+    private static string StartServer(BrainEnv env, string project)
+    {
+        var log = Path.Combine(CodeProjectFiles.Of(env.Home, project).Dir, LogFile);
+        ServeProcess.Start(log, env.UserHome, [Name, "--" + ServeFlag, project], "brain code's server");
         return log;
     }
 
@@ -171,13 +196,16 @@ internal static class CodeCommand
         return session ?? throw BrainException.Failed("brain code's server said nothing of the session");
     }
 
-    /// <summary>The hook's run: the request on stdin goes to the server, and its decision, or deny, goes to stdout.</summary>
-    private static int Permission(BrainEnv env, string session)
+    /// <summary>
+    /// The hook's run: the request on stdin goes to the server of <paramref name="project"/>'s window, and its decision,
+    /// or deny, goes to stdout.
+    /// </summary>
+    private static int Permission(BrainEnv env, string session, string project)
     {
         var decision = CodeDecision.Deny("brain code could not read the permission request.");
         if (PermissionHook.Request(env.In.ReadToEnd(), session) is { } asked)
         {
-            decision = Asked(env, asked);
+            decision = Asked(env, project, asked);
         }
 
         env.Out.WriteLine(PermissionHook.Output(decision));
@@ -185,13 +213,13 @@ internal static class CodeCommand
     }
 
     /// <summary>
-    /// Hands the request to the window's server and waits, as long as it takes, for the user's answer; deny when no
-    /// server runs or it went away before he answered.
+    /// Hands the request to the server of <paramref name="project"/>'s window and waits, as long as it takes, for the
+    /// user's answer; deny when no server runs or it went away before he answered.
     /// </summary>
-    private static CodeDecision Asked(BrainEnv env, CodePermission asked)
+    private static CodeDecision Asked(BrainEnv env, string project, CodePermission asked)
     {
-        var files = new ServeFiles(env.Home, CodeServer.Folder);
-        using var running = WindowClient.Running(files, CodeServer.App, env.UserHome);
+        var files = CodeProjectFiles.Of(env.Home, project);
+        using var running = WindowClient.Running(files, CodeServer.App, project);
         if (running is null)
         {
             return CodeDecision.Deny("brain code's window is not open, so nobody can answer.");
@@ -213,12 +241,15 @@ internal static class CodeCommand
         }
     }
 
-    /// <summary>Runs the window's server until its window is gone, or an interrupt or a terminate signal; every session stops with it.</summary>
-    private static int Serve(BrainEnv env)
+    /// <summary>
+    /// Runs the server of <paramref name="project"/>'s window until its window is gone, or an interrupt or a terminate
+    /// signal; every session stops with it.
+    /// </summary>
+    private static int Serve(BrainEnv env, string project)
     {
         var browser = Browser.Find();
         var theme = new OmarchyTheme(env.UserHome, OmarchyTheme.FindCommand());
-        using var server = new CodeServer(env.Home, env.UserHome, "claude", ClaudeFiles.Of(env.UserHome), env.Err, url => WindowClient.OpenWindow(env, browser, url, WindowClass, "brain code"), Compositor.Raise, TimeProvider.System, theme, new CodeBuild(AppContext.BaseDirectory), () => StartServer(env), root => WorkspaceCommand.StartServer(env, root));
+        using var server = new CodeServer(env.Home, env.UserHome, project, "claude", ClaudeFiles.Of(env.UserHome), env.Err, url => WindowClient.OpenWindow(env, browser, url, WindowClass, "brain code"), Compositor.Raise, TimeProvider.System, theme, new CodeBuild(AppContext.BaseDirectory), () => StartServer(env, project), root => WorkspaceCommand.StartServer(env, root));
         Foreground.Run(server.Serve);
         return ExitCodes.Ok;
     }

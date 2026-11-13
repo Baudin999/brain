@@ -217,12 +217,10 @@ public sealed partial class CodeServerTests : IDisposable
     }
 
     [Fact]
-    public async Task ASessionMovedInRunsWhereItRanAndShowsItsHistoryAtOnce()
+    public async Task ASessionMovedInRunsInItsProjectWhereItRanAndShowsItsHistoryAtOnce()
     {
         var id = Guid.NewGuid().ToString("D");
-        var ran = Path.Combine(brain.Root, "elsewhere");
-        Directory.CreateDirectory(ran);
-        WriteTranscript("q", id, $$$"""{"type":"user","cwd":"{{{ran}}}","message":{"role":"user","content":"what is here?"}}""", """{"type":"assistant","message":{"content":[{"type":"thinking","thinking":"hm"},{"type":"text","text":"A lens."}]}}""");
+        WriteTranscript("q", id, $$$"""{"type":"user","cwd":"{{{project}}}","message":{"role":"user","content":"what is here?"}}""", """{"type":"assistant","message":{"content":[{"type":"thinking","thinking":"hm"},{"type":"text","text":"A lens."}]}}""");
         var token = await Trade(Code(windows[0]));
 
         var started = await Json(await Send(HttpMethod.Post, "/api/start", Json(new { agent = "brain", resume = id }), token: token, origin: server.Origin));
@@ -230,7 +228,7 @@ public sealed partial class CodeServerTests : IDisposable
         var again = await Send(HttpMethod.Post, "/api/start", Json(new { agent = "brain", resume = id }), token: token, origin: server.Origin);
 
         Assert.Equal(id, started.RootElement.GetProperty("id").GetString());
-        Assert.Equal(ran, started.RootElement.GetProperty("cwd").GetString());
+        Assert.Equal(project, started.RootElement.GetProperty("cwd").GetString());
         Assert.Equal(["user:what is here?", "text:A lens."], conversation);
         var args = Args();
         Assert.Equal(["--resume", id], args[^2..]);
@@ -450,7 +448,7 @@ public sealed partial class CodeServerTests : IDisposable
     }
 
     [Fact]
-    public async Task AFolderThatIsNotThereOrDiffersFromAMovedSessionsIsRefusedAndATildeIsHome()
+    public async Task AFolderThatIsNotThereIsAnotherProjectsOrDiffersFromAMovedSessionsIsRefusedAndATildeIsHome()
     {
         var id = Guid.NewGuid().ToString("D");
         var ran = Path.Combine(brain.Root, "elsewhere");
@@ -459,11 +457,16 @@ public sealed partial class CodeServerTests : IDisposable
 
         var missing = await Send(HttpMethod.Post, "/api/key/start", Json(new { agent = "brain", cwd = Path.Combine(brain.Root, "nowhere") }), key: Key());
         var differs = await Send(HttpMethod.Post, "/api/key/start", Json(new { agent = "brain", cwd = project, resume = id }), key: Key());
+        var moved = await Send(HttpMethod.Post, "/api/key/start", Json(new { agent = "brain", resume = id }), key: Key());
+        var other = await Send(HttpMethod.Post, "/api/key/start", Json(new { agent = "brain", cwd = ran }), key: Key());
         var home = await Json(await Send(HttpMethod.Post, "/api/key/start", Json(new { agent = "brain", cwd = "~/lens" }), key: Key()));
 
         Assert.Equal(HttpStatusCode.Conflict, missing.StatusCode);
         Assert.Contains("nowhere", await missing.Content.ReadAsStringAsync(), StringComparison.Ordinal);
         Assert.Equal(HttpStatusCode.Conflict, differs.StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, moved.StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, other.StatusCode);
+        Assert.Contains("own window", await other.Content.ReadAsStringAsync(), StringComparison.Ordinal);
         Assert.Equal(project, home.RootElement.GetProperty("cwd").GetString());
     }
 
@@ -744,6 +747,64 @@ public sealed partial class CodeServerTests : IDisposable
     }
 
     /// <summary>
+    /// Each project has its own window: <c>brain code</c> in a folder starts its session in that folder's server and
+    /// leaves the other project's alone, and a hook that names one project does not reach a session of another.
+    /// </summary>
+    [Fact]
+    public async Task EachProjectHasItsOwnWindowAndTheCommandReachesTheOneOfItsFolder()
+    {
+        var atlas = Path.Combine(brain.Root, "atlas");
+        Directory.CreateDirectory(atlas);
+        using var stopping = new CancellationTokenSource();
+        using var other = Server(atlas);
+        var served = other.Serve(stopping.Token);
+        try
+        {
+            brain.Cwd = atlas;
+            var (code, output, errors) = brain.Run("code");
+            brain.Cwd = project;
+            var (again, here, _) = brain.Run("code", "immediate");
+            var there = SessionIdIn(output);
+            var mine = SessionIdIn(here);
+            var (_, crossed, _) = brain.RunWithInput(HookInput("Bash", new { command = "ls" }), "code", "--permission", there, project);
+
+            Assert.True(code == 0, errors);
+            Assert.Equal(0, again);
+            Assert.StartsWith($"brain code: started brain in {atlas}", output, StringComparison.Ordinal);
+            Assert.StartsWith($"brain code: started immediate in {project}", here, StringComparison.Ordinal);
+            Assert.Equal(HttpStatusCode.OK, (await Send(HttpMethod.Get, "/api/key/session?id=" + mine, key: Key())).StatusCode);
+            Assert.Equal(HttpStatusCode.Conflict, (await Send(HttpMethod.Get, "/api/key/session?id=" + there, key: Key())).StatusCode);
+            using var http = new HttpClient { BaseAddress = new Uri(other.Origin) };
+            Assert.Equal(HttpStatusCode.OK, (await KeyedGet(http, atlas, "/api/key/session?id=" + there)).StatusCode);
+            Assert.Equal(HttpStatusCode.Conflict, (await KeyedGet(http, atlas, "/api/key/session?id=" + mine)).StatusCode);
+            Assert.Contains("no such session", Decision(crossed).GetProperty("message").GetString(), StringComparison.Ordinal);
+            Assert.NotEqual(CodeProjectFiles.Of(brain.Home, project).Dir, CodeProjectFiles.Of(brain.Home, atlas).Dir);
+        }
+        finally
+        {
+            await stopping.CancelAsync();
+            await served.WaitAsync(Wait);
+        }
+    }
+
+    /// <summary>A moved session's project is the folder its transcript says it ran in, which a folder that differs cannot change.</summary>
+    [Fact]
+    public void AMovedSessionRunsInTheProjectItRanIn()
+    {
+        var id = Guid.NewGuid().ToString("D");
+        WriteTranscript("q", id, $$$"""{"type":"user","cwd":"{{{project}}}","message":{"role":"user","content":"hi"}}""");
+        var claude = new ClaudeFiles(config);
+
+        var ran = CodeSessions.RunsIn(claude, id, null);
+        var differs = Assert.Throws<BrainException>(() => CodeSessions.RunsIn(claude, id, brain.Root));
+        var unknown = CodeSessions.RunsIn(claude, Guid.NewGuid().ToString("D"), null);
+
+        Assert.Equal(project, ran);
+        Assert.Contains($"runs in {project}", differs.Message, StringComparison.Ordinal);
+        Assert.Null(unknown);
+    }
+
+    /// <summary>
     /// Each session carries the PermissionRequest hook in its own <c>--settings</c>, so it applies to brain code's
     /// sessions only: the server's own binary, <c>code --permission</c> with the session's id, waiting a week.
     /// </summary>
@@ -759,7 +820,7 @@ public sealed partial class CodeServerTests : IDisposable
         var hook = hooks.RootElement.GetProperty("hooks").GetProperty("PermissionRequest")[0].GetProperty("hooks")[0];
 
         Assert.Equal("command", hook.GetProperty("type").GetString());
-        Assert.Equal($"'{Environment.ProcessPath}' code --permission {id}", hook.GetProperty("command").GetString());
+        Assert.Equal($"'{Environment.ProcessPath}' code --permission {id} '{project}'", hook.GetProperty("command").GetString());
         Assert.Equal(7 * 24 * 60 * 60, hook.GetProperty("timeout").GetInt32());
     }
 
@@ -774,7 +835,7 @@ public sealed partial class CodeServerTests : IDisposable
         var started = await Json(await Send(HttpMethod.Post, "/api/key/start", Json(new { agent = "brain", cwd = project }), key: Key()));
         var id = started.RootElement.GetProperty("id").GetString()!;
 
-        var hook = Task.Run(() => brain.RunWithInput(HookInput("Bash", new { command = "git push", description = "Push" }), "code", "--permission", id));
+        var hook = Task.Run(() => brain.RunWithInput(HookInput("Bash", new { command = "git push", description = "Push" }), "code", "--permission", id, project));
         var asked = await WaitingAsk(token, id, hook);
         var answered = await Send(HttpMethod.Post, "/api/answer", Json(new { session = id, ask = asked.GetProperty("id").GetString(), allow = false, words = "not yet" }), token: token, origin: server.Origin);
         var (code, output, _) = await hook.WaitAsync(Wait);
@@ -806,7 +867,7 @@ public sealed partial class CodeServerTests : IDisposable
         var token = await Trade(Code(windows[0]));
         await Send(HttpMethod.Post, "/api/start", Json(new { agent = "brain", cwd = project, resume = id }), token: token, origin: server.Origin);
 
-        var hook = Task.Run(() => brain.RunWithInput(HookInput("Write", new { file_path = "/tmp/x", content = "hi" }, agentId: "a7", agentType: "builder"), "code", "--permission", id));
+        var hook = Task.Run(() => brain.RunWithInput(HookInput("Write", new { file_path = "/tmp/x", content = "hi" }, agentId: "a7", agentType: "builder"), "code", "--permission", id, project));
         var asked = await WaitingAsk(token, id, hook);
         await Send(HttpMethod.Post, "/api/answer", Json(new { session = id, ask = asked.GetProperty("id").GetString(), allow = true }), token: token, origin: server.Origin);
         var (_, output, _) = await hook.WaitAsync(Wait);
@@ -827,7 +888,7 @@ public sealed partial class CodeServerTests : IDisposable
         var started = await Json(await Send(HttpMethod.Post, "/api/key/start", Json(new { agent = "brain", cwd = project }), key: Key()));
         var id = started.RootElement.GetProperty("id").GetString()!;
 
-        var hook = Task.Run(() => brain.RunWithInput(HookInput("Bash", new { command = "ls" }), "code", "--permission", id));
+        var hook = Task.Run(() => brain.RunWithInput(HookInput("Bash", new { command = "ls" }), "code", "--permission", id, project));
         await WaitingAsk(token, id, hook);
         await Send(HttpMethod.Post, "/api/close", Json(new { session = id }), token: token, origin: server.Origin);
         var (_, output, _) = await hook.WaitAsync(Wait);
@@ -845,8 +906,8 @@ public sealed partial class CodeServerTests : IDisposable
     {
         using var lone = new TempBrain();
 
-        var (code, output, _) = lone.RunWithInput(HookInput("Bash", new { command = "ls" }), "code", "--permission", Guid.NewGuid().ToString("D"));
-        var (_, unread, _) = lone.RunWithInput("not json", "code", "--permission", Guid.NewGuid().ToString("D"));
+        var (code, output, _) = lone.RunWithInput(HookInput("Bash", new { command = "ls" }), "code", "--permission", Guid.NewGuid().ToString("D"), lone.Root);
+        var (_, unread, _) = lone.RunWithInput("not json", "code", "--permission", Guid.NewGuid().ToString("D"), lone.Root);
 
         Assert.Equal(0, code);
         Assert.Contains("not open", Decision(output).GetProperty("message").GetString(), StringComparison.Ordinal);
@@ -868,7 +929,7 @@ public sealed partial class CodeServerTests : IDisposable
             var id = started.RootElement.GetProperty("id").GetString()!;
             await window.Until("document.querySelector('.code-session')?.getAttribute('aria-current')", "true").ConfigureAwait(false);
 
-            var hook = Task.Run(() => brain.RunWithInput(HookInput("Bash", new { command = "git push origin lens" }), "code", "--permission", id));
+            var hook = Task.Run(() => brain.RunWithInput(HookInput("Bash", new { command = "git push origin lens" }), "code", "--permission", id, project));
             await window.Until("document.querySelector('.permission-request .permission-request-code')?.textContent", "git push origin lens").ConfigureAwait(false);
             await window.Until("document.querySelector('.code-session-state')?.textContent", "asks you").ConfigureAwait(false);
             await window.Eval("document.querySelector('.permission-request .button.yes').click()").ConfigureAwait(false);
@@ -1148,9 +1209,14 @@ public sealed partial class CodeServerTests : IDisposable
         return path;
     }
 
-    /// <summary>A server of this brain on the stand-in, whose build runs from the publish folder; its successor is counted, then <see cref="succeeding"/> runs.</summary>
-    private CodeServer Server() =>
-        new(brain.Home, brain.Root, StandIn(), new ClaudeFiles(config), TextWriter.Null, Open, (_) => false, clock, new OmarchyTheme(brain.Root, colorCommand: null), new CodeBuild(publish), Succeed, StartWorkspace);
+    private CodeServer Server() => Server(project);
+
+    /// <summary>
+    /// A server of this brain over <paramref name="folder"/> on the stand-in, whose build runs from the publish folder;
+    /// its successor is counted, then <see cref="succeeding"/> runs.
+    /// </summary>
+    private CodeServer Server(string folder) =>
+        new(brain.Home, brain.Root, folder, StandIn(), new ClaudeFiles(config), TextWriter.Null, Open, (_) => false, clock, new OmarchyTheme(brain.Root, colorCommand: null), new CodeBuild(publish), Succeed, StartWorkspace);
 
     /// <summary>The system's clock until <see cref="Leaps"/>; from then on each read is ten seconds past the one before.</summary>
     private sealed class LeapingClock : TimeProvider
@@ -1187,7 +1253,18 @@ public sealed partial class CodeServerTests : IDisposable
         return true;
     }
 
-    private string Key() => new ServeFiles(brain.Home, CodeServer.Folder).ReadKey()!;
+    private string Key() => CodeProjectFiles.Of(brain.Home, project).ReadKey()!;
+
+    /// <summary>The session id a <c>brain code</c> printed.</summary>
+    private static string SessionIdIn(string output) => output.Trim().Split(' ')[^1];
+
+    /// <summary>A GET of the server of <paramref name="folder"/>'s window with its key.</summary>
+    private async Task<HttpResponseMessage> KeyedGet(HttpClient http, string folder, string path)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, path);
+        request.Headers.Add(ServeFiles.KeyHeader, CodeProjectFiles.Of(brain.Home, folder).ReadKey());
+        return await http.SendAsync(request).ConfigureAwait(false);
+    }
 
     /// <summary>The launch code in the launch file a window was opened on.</summary>
     private static string Code(string url) => LaunchCode().Match(File.ReadAllText(new Uri(url).LocalPath)).Groups[1].Value;

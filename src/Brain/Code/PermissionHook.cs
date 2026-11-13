@@ -6,7 +6,8 @@ namespace Brain.Code;
 
 /// <summary>
 /// Claude Code's <c>PermissionRequest</c> hook, as brain code's sessions carry it: each session's own
-/// <c>--settings</c> runs <c>brain code --permission &lt;session id&gt;</c> for every tool call that would have asked the
+/// <c>--settings</c> runs <c>brain code --permission &lt;session id&gt; &lt;project&gt;</c>, which reaches the window of
+/// the session's project, for every tool call that would have asked the
 /// user, and only for the sessions brain code starts. The hook reads the request from stdin, as
 /// <c>{"tool_name", "tool_input", "agent_id", "agent_type", ...}</c>, where <c>agent_id</c> is there only for a request
 /// of a subagent, and the decision it writes is
@@ -27,10 +28,13 @@ internal static class PermissionHook
 
     private const string Event = "PermissionRequest";
 
-    /// <summary>The settings a session starts with: the hook, for every tool, waiting up to <see cref="Longest"/>.</summary>
-    public static string Settings(string brain, string session)
+    /// <summary>
+    /// The settings a session of <paramref name="project"/>'s window starts with: the hook, for every tool, waiting up
+    /// to <see cref="Longest"/>.
+    /// </summary>
+    public static string Settings(string brain, string session, string project)
     {
-        var command = Quoted(brain) + " code --" + Flag + " " + session;
+        var command = Quoted(brain) + " code --" + Flag + " " + session + " " + Quoted(project);
         using var buffer = new MemoryStream();
         using (var json = new Utf8JsonWriter(buffer))
         {

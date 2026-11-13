@@ -198,13 +198,14 @@ internal static class Help
         {
             Flags =
             [
-                new("--resume <session-id>", "Move a Claude Code session that runs elsewhere, as in a terminal, into the window; it continues by its id."),
-                new("--serve", "Run the window's server in the foreground; brain code starts it in the background."),
-                new("--permission <session-id>", "The PermissionRequest hook of a session: wait for the user's answer in the window."),
+                new("--resume <session-id>", "Move a Claude Code session that runs elsewhere, as in a terminal, into the window of the folder it ran in; it continues by its id."),
+                new("--serve <folder>", "Run the server of the folder's window in the foreground; brain code starts it in the background."),
+                new("--permission <session-id> <folder>", "The PermissionRequest hook of a session: wait for the user's answer in the folder's window."),
             ],
             Notes =
             [
-                "There is one brain code window. A second brain code adds a session to it and brings it forward.",
+                "Each folder is a project with its own brain code window. A second brain code in the folder adds a session to it and brings it forward.",
+                "A new session in a window runs in its project's folder. Another project's window is left as it is.",
                 "A tool call that would ask your permission waits in the window, in its session, until you allow or deny it.",
                 "Each session runs your own logged-in claude. The server ends with its window, and every session with it.",
                 "Every call the window makes and the server's work go to the data repo's perf/code, outside git.",

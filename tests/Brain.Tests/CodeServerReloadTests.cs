@@ -26,10 +26,8 @@ public sealed partial class CodeServerTests
         var token = await Trade(Code(windows[0]));
         using var events = await OpenEvents(token);
         using var reader = new StreamReader(await events.Content.ReadAsStreamAsync());
-        var atlas = Path.Combine(brain.Root, "atlas");
-        Directory.CreateDirectory(atlas);
         var first = await StartIn("immediate", project);
-        var second = await StartIn("brain", atlas);
+        var second = await StartIn("brain", project);
         var third = await StartIn("brain", project);
         await Say(token, first, "start a background job");
         var job = await StartedJob();
@@ -78,15 +76,15 @@ public sealed partial class CodeServerTests
 
         Assert.Equal([first, second, third], resumed.Select((one) => one.GetProperty("id").GetString()));
         Assert.Equal(["immediate", "brain", "brain"], resumed.Select((one) => one.GetProperty("agent").GetString()));
-        Assert.Equal([project, atlas, project], resumed.Select((one) => one.GetProperty("cwd").GetString()));
+        Assert.Equal([project, project, project], resumed.Select((one) => one.GetProperty("cwd").GetString()));
         Assert.Equal([true, true, false], resumed.Select((one) => one.GetProperty("alive").GetBoolean()));
         Assert.Equal(shown, resumed[2].GetProperty("problem").GetString());
         Assert.Equal(second, listed.RootElement.GetProperty("opened").GetString());
-        Assert.False(File.Exists(Path.Combine(brain.Home, "cache", CodeServer.Folder, Handover.FileName)));
-        Assert.False(File.Exists(Path.Combine(brain.Home, "cache", CodeServer.Folder, HandedLaunch.FileName)));
+        Assert.False(File.Exists(Path.Combine(CodeProjectFiles.Of(brain.Home, project).Dir, Handover.FileName)));
+        Assert.False(File.Exists(Path.Combine(CodeProjectFiles.Of(brain.Home, project).Dir, HandedLaunch.FileName)));
         var runs = Runs(5);
         Assert.Contains(runs, (run) => run.StartsWith(project + " ", StringComparison.Ordinal) && run.Contains("--agent immediate", StringComparison.Ordinal) && run.EndsWith("--resume " + first, StringComparison.Ordinal));
-        Assert.Contains(runs, (run) => run.StartsWith(atlas + " ", StringComparison.Ordinal) && run.Contains("--agent brain", StringComparison.Ordinal) && run.EndsWith("--resume " + second, StringComparison.Ordinal));
+        Assert.Contains(runs, (run) => run.StartsWith(project + " ", StringComparison.Ordinal) && run.Contains("--agent brain", StringComparison.Ordinal) && run.EndsWith("--resume " + second, StringComparison.Ordinal));
         Assert.DoesNotContain(runs, (run) => run.EndsWith("--resume " + third, StringComparison.Ordinal));
         await stopping.CancelAsync();
         await served!.WaitAsync(Wait);
@@ -107,7 +105,7 @@ public sealed partial class CodeServerTests
 
         Assert.Equal(HttpStatusCode.NoContent, reloaded.StatusCode);
         Assert.Equal(1, successors);
-        Assert.False(File.Exists(Path.Combine(brain.Home, "cache", CodeServer.Folder, HandedLaunch.FileName)));
+        Assert.False(File.Exists(Path.Combine(CodeProjectFiles.Of(brain.Home, project).Dir, HandedLaunch.FileName)));
         Assert.Equal(2, windows.Count);
         await stopping.CancelAsync();
         await served.WaitAsync(Wait);
@@ -124,7 +122,7 @@ public sealed partial class CodeServerTests
         using var events = await OpenEvents(token);
         await File.WriteAllTextAsync(Path.Combine(publish, CodeBuild.StampFile), "second\n");
         using var ready = await ListedWhen(token, CodeReload.Ready);
-        var handed = Path.Combine(brain.Home, "cache", CodeServer.Folder, HandedLaunch.FileName);
+        var handed = Path.Combine(CodeProjectFiles.Of(brain.Home, project).Dir, HandedLaunch.FileName);
         var whileWaiting = false;
         succeeding = () =>
         {
