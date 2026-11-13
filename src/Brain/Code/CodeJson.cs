@@ -270,9 +270,9 @@ internal sealed record CodeTrail(string Builder, IReadOnlyList<CodeStep> Steps, 
 /// <summary>
 /// One step of a trail, of a <see cref="Trail"/> kind: the agent that wrote it, when, its words as markdown, the commits
 /// it made, for the validator's report of a work that landed the range git says the landing moved the default branch by,
-/// and the round a
-/// step is of: findings by their place among the messages validators sent the builder, from 1; the builder's word by how
-/// many of those it had been sent before it, its report being round 0; null for a validator's report.
+/// and the round a step is of: findings by their place among the messages validators sent the builder, from 1; the
+/// builder's word by how many of those it had been sent before it, its report being round 0; null for a validator's
+/// report.
 /// </summary>
 internal sealed record CodeStep(
     string Kind,

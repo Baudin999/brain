@@ -8,8 +8,8 @@ namespace Brain.Tests;
 /// The trail of a piece of work as brain code reads it from real transcript shapes: a validator's findings reach its
 /// builder as a message whose origin is a peer's, a validator sends them with SendMessage to the builder's agent id, a
 /// builder answers with SendMessage or hands its report back, a commit shows in a Bash result as git prints it, and a
-/// validator's printed fast-forward is no landing: git says that, in <see cref="Landings"/>. Navarone's signals end as its event log tells them, and a clash is one its disputes
-/// hold.
+/// validator's printed fast-forward is no landing: git says that, in <see cref="Landings"/>. Navarone's signals end as
+/// its event log tells them, and a clash is one its disputes hold.
 /// </summary>
 public sealed class CodeTrailTests
 {

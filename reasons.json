@@ -1,5 +1,5 @@
 {
-  "granted": 220,
+  "granted": 222,
   "problems": [
     {
       "id": "0000001",
@@ -1773,12 +1773,12 @@
       "id": "0000218",
       "check": "split-complexity",
       "symbol": "brain::Brain.Code.Worktrees.Of(SentMeta, DateTimeOffset?, IReadOnlyList\u003CCodeEvent\u003E, IReadOnlyList\u003CIReadOnlyList\u003CCodeEvent\u003E\u003E, string)",
-      "fingerprint": "974e921a8451ced62209e499cf5274d5e59ece4b50ed274675e5469898447c0f",
-      "value": 36,
+      "fingerprint": "cc03cbb4676674821d0c8307e734938a78b388fa32b0dab489c4616dc152c5b5",
+      "value": 39,
       "resolution": {
-        "reason": "Of decides given or opened, then removed, then gone, with the branch the meta or the add command names. Ran lists every Bash call of a verb whose result was no error, with the worktree and branch it named and when; RemovedAt finds the removal that names this worktree; Named reads one Bash line, its cd, its git -C and its verb; Words reads the words after the verb as git does, the path and the branch of -b, -B or the word after the path, replacing PathAfterOptions; Resolved makes a path full in a folder. Ran is about the agent\u0027s events and the other four about one shell line; inlined they would be one method doing five jobs.",
-        "fingerprint": "974e921a8451ced62209e499cf5274d5e59ece4b50ed274675e5469898447c0f",
-        "value": 36
+        "reason": "Of decides given or opened, then removed, then gone, with the branch the meta or the add command names. Ran lists every Bash call of a verb whose result was no error, with the worktree and branch it named and when; RemovedAt finds the removal that names this worktree; Named reads one Bash line, its cd, its git -C and its verb; Arguments drops the shell\u0027s redirections so only git\u0027s words remain; Words reads those words as git does, the path, the branch of -b, -B or the word after the path, and none when detached; Resolved makes a path full in a folder. Ran is about the agent\u0027s events and the other five about one shell line; inlined they would be one method doing six jobs.",
+        "fingerprint": "cc03cbb4676674821d0c8307e734938a78b388fa32b0dab489c4616dc152c5b5",
+        "value": 39
       }
     },
     {
@@ -1797,13 +1797,29 @@
       "id": "0000220",
       "check": "split-complexity",
       "symbol": "brain::Brain.Code.Landings.Told(IReadOnlyList\u003CCodeStep\u003E, string, DateTimeOffset?)",
-      "fingerprint": "3137da9c562d3d2ae6fc4c1ac2877bcd0b77b18fcad6d0c48971a3325aa8a69e",
-      "value": 29,
+      "fingerprint": "6f28ca47b64fd0cb17fc2a903707d992c90daa75e73bae4af5bce93cf0a84632",
+      "value": 32,
       "resolution": {
-        "reason": "Told asks git whether a work landed and puts the landing on the last validator report. LastVerdict finds that report; LandingOf picks the first fast-forward of the branch since the builder started; Moves reads the reflog once per instance; ReadMoves turns git\u0027s reflog lines into ranges; DefaultBranch asks git which branch the primary is on; When reads a reflog selector\u0027s time; Commits lists a range\u0027s commits once per process. Each is one question to git or one parse of its answer; inlined they would be one method doing seven jobs.",
-        "fingerprint": "3137da9c562d3d2ae6fc4c1ac2877bcd0b77b18fcad6d0c48971a3325aa8a69e",
-        "value": 29
+        "reason": "Told asks git whether a work landed and puts the landing on the last validator report. LastVerdict finds that report; LandingOf picks the first fast-forward of the branch between the builder\u0027s start and that report; Moves reads the reflog once per instance; ReadMoves turns git\u0027s reflog lines into ranges; DefaultBranch asks git which branch the primary is on; When reads a reflog selector\u0027s time; Commits lists a range\u0027s commits once per process. Each is one question to git or one parse of its answer; inlined they would be one method doing seven jobs.",
+        "fingerprint": "6f28ca47b64fd0cb17fc2a903707d992c90daa75e73bae4af5bce93cf0a84632",
+        "value": 32
       }
+    },
+    {
+      "id": "0000221",
+      "check": "cyclomatic",
+      "symbol": "brain::Brain.Code.Worktrees.Words(string)",
+      "fingerprint": "7bbd4c843a964fcdb04c518887e7ad632c9757134abf1077e1ddeaf844c400f8",
+      "value": 12,
+      "resolution": null
+    },
+    {
+      "id": "0000222",
+      "check": "cognitive",
+      "symbol": "brain::Brain.Code.Worktrees.Words(string)",
+      "fingerprint": "7bbd4c843a964fcdb04c518887e7ad632c9757134abf1077e1ddeaf844c400f8",
+      "value": 19,
+      "resolution": null
     }
   ]
 }

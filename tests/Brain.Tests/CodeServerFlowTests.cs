@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
 
@@ -19,7 +20,7 @@ public sealed partial class CodeServerTests
     [Fact]
     public async Task TheServerSaysWhereEachWorktreeWasOpenedAndWhetherItWasRemoved()
     {
-        var range = Landed("lens");
+        var range = Landed("lens", 2005);
         var id = await ThreeBuilders();
 
         var agents = await ListedAgents(id);
@@ -87,7 +88,12 @@ public sealed partial class CodeServerTests
     [InlineData("git worktree add -B z w", "z")]
     [InlineData("git worktree add w feature", "feature")]
     [InlineData("git worktree add --lock ../w", "w")]
-    public void AWorktreeCommandNamesTheBranchGitGivesItsWorktree(string command, string branch)
+    [InlineData("git worktree add .claude/worktrees/x 2>&1", "x")]
+    [InlineData("git worktree add x > /dev/null", "x")]
+    [InlineData("git worktree add x >/dev/null 2>&1", "x")]
+    [InlineData("git worktree add --detach x main", null)]
+    [InlineData("git worktree add -d x", null)]
+    public void AWorktreeCommandNamesTheBranchGitGivesItsWorktree(string command, string? branch)
     {
         Assert.Equal(branch, Brain.Code.Worktrees.Named(command, "add", "/s")?.Branch);
     }
@@ -111,7 +117,7 @@ public sealed partial class CodeServerTests
     [WindowFact]
     public async Task TheFlowDrawsEachPieceOfWorkApartAndTheListSettingDrawsTheList()
     {
-        var range = Landed("lens");
+        var range = Landed("lens", 2005);
         var id = await ThreeBuilders().ConfigureAwait(false);
         var window = await Headless.Open(windows[0], Path.Combine(brain.Root, "chromium")).ConfigureAwait(false);
         try
@@ -210,9 +216,10 @@ public sealed partial class CodeServerTests
 
     /// <summary>
     /// Makes the project a repo whose default branch a validator fast-forwarded with <paramref name="branch"/>, which it
-    /// had rebased, and then removed with its worktree; the range it moved the default branch by, as git abbreviates it.
+    /// had rebased, at the second <paramref name="second"/> of the session, and then removed with its worktree; the range
+    /// it moved the default branch by, as git abbreviates it.
     /// </summary>
-    private string Landed(string branch)
+    private string Landed(string branch, int second)
     {
         TempBrain.Git(project, "init", "-q", "-b", "main");
         TempBrain.Git(project, "config", "user.name", "t");
@@ -226,10 +233,25 @@ public sealed partial class CodeServerTests
         TempBrain.Git(project, "commit", "-q", "--allow-empty", "-m", "Something else");
         TempBrain.Git(tree, "rebase", "-q", "main");
         var before = TempBrain.Git(project, "rev-parse", "--short", "main").Trim();
-        TempBrain.Git(project, "merge", "-q", "--ff-only", branch);
+        FastForward(branch, second);
         TempBrain.Git(project, "worktree", "remove", tree);
         TempBrain.Git(project, "branch", "-q", "-D", branch);
         return before + ".." + TempBrain.Git(project, "rev-parse", "--short", "main").Trim();
+    }
+
+    /// <summary>Fast-forwards the project's default branch with <paramref name="branch"/>, its reflog dated at the second <paramref name="second"/>.</summary>
+    private void FastForward(string branch, int second)
+    {
+        var start = new ProcessStartInfo("git") { UseShellExecute = false, WorkingDirectory = project };
+        start.Environment["GIT_COMMITTER_DATE"] = Stamp(second);
+        foreach (var argument in new[] { "merge", "-q", "--ff-only", branch })
+        {
+            start.ArgumentList.Add(argument);
+        }
+
+        using var process = Process.Start(start)!;
+        process.WaitForExit();
+        Assert.Equal(0, process.ExitCode);
     }
 
     /// <summary>Writes one agent's meta and transcript.</summary>

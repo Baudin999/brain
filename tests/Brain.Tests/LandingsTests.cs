@@ -8,7 +8,7 @@ namespace Brain.Tests;
 /// Whether a piece of work landed, asked of a real repo's git and never of what an agent printed: a branch the
 /// validator rebased, fast-forwarded the default branch with, then removed with its worktree, landed with the rebased
 /// commits; a branch that never reached the default branch did not land; a landing of the same branch name before the
-/// builder started is another work's.
+/// builder started, or after its last validator reported, is another work's.
 /// </summary>
 public sealed class LandingsTests : IDisposable
 {
@@ -79,11 +79,25 @@ public sealed class LandingsTests : IDisposable
         Assert.All(told, (step) => Assert.Null(step.Landed));
     }
 
-    /// <summary>A work's steps: the builder's report and a validator's report.</summary>
-    private static List<CodeStep> Steps() =>
+    [Fact]
+    public void ALandingOfTheSameBranchAfterTheLastValidatorReportedIsALaterWorks()
+    {
+        var since = DateTimeOffset.UtcNow.AddMinutes(-2);
+        var reported = DateTimeOffset.UtcNow.AddMinutes(-1);
+        TempBrain.Git(repo, "worktree", "add", "-q", tree, "-b", "lens", "main");
+        Commit(tree, "Draw the lens");
+        TempBrain.Git(repo, "merge", "-q", "--ff-only", "lens");
+
+        var told = new Landings(repo, records).Told(Steps(reported), "lens", since);
+
+        Assert.All(told, (step) => Assert.Null(step.Landed));
+    }
+
+    /// <summary>A work's steps: the builder's report and a validator's report, written at <paramref name="reported"/>.</summary>
+    private static List<CodeStep> Steps(DateTimeOffset? reported = null) =>
     [
         new CodeStep(Trail.Report, "b1", null, "Built the lens.", [], Landed: null, Round: 0),
-        new CodeStep(Trail.Verdict, "v1", null, "Done.", [], Landed: null, Round: null),
+        new CodeStep(Trail.Verdict, "v1", reported, "Done.", [], Landed: null, Round: null),
     ];
 
     /// <summary>Commits a new file in <paramref name="directory"/>, named for <paramref name="subject"/>.</summary>

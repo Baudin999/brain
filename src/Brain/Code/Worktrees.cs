@@ -5,10 +5,10 @@ namespace Brain.Code;
 /// <summary>
 /// The worktree an agent builds in, read from what its work did: the worktree Claude Code gave it, as its meta names, or
 /// the one its own Bash call added with <c>git worktree add</c>, opened when that call ran; its branch, as the meta names
-/// it or as git names it for that call: the branch of <c>-b</c>, else the one it checks out, else the folder's name; and
-/// removed when a Bash call
-/// of the agent or of a validator of its work ran <c>git worktree remove</c> on it, or once its folder is gone. A call
-/// whose result was an error opened or removed nothing. A relative path is in the folder of <c>git -C</c>, else of the
+/// it or as git names it for that call: the branch of <c>-b</c>, else the one it checks out, else the folder's name, and
+/// none for a detached one; and removed when a Bash call of the agent or of a validator of its work ran
+/// <c>git worktree remove</c> on it, or once its folder is gone. A call whose result was an error opened or removed
+/// nothing. A relative path is in the folder of <c>git -C</c>, else of the
 /// command line's last <c>cd</c>, else of the session's folder; a path the shell would expand from a variable is none.
 /// </summary>
 internal static partial class Worktrees
@@ -25,6 +25,9 @@ internal static partial class Worktrees
 
     /// <summary>The options of <c>git worktree add</c> whose value is the branch the worktree is on.</summary>
     private static readonly HashSet<string> Branching = new(StringComparer.Ordinal) { "-b", "-B" };
+
+    /// <summary>The options of <c>git worktree add</c> that put the worktree on no branch.</summary>
+    private static readonly HashSet<string> Detaching = new(StringComparer.Ordinal) { "-d", "--detach" };
 
     /// <summary>
     /// The worktree of an agent that started at <paramref name="started"/>, given by its meta <paramref name="meta"/> or
@@ -71,10 +74,10 @@ internal static partial class Worktrees
     }
 
     /// <summary>Each worktree a Bash call of <paramref name="events"/> ran <c>git worktree</c> <paramref name="verb"/> on, with its branch and when it ran, the earliest first; a call whose result was an error is left out.</summary>
-    private static List<(string Path, string Branch, DateTimeOffset? At)> Ran(IReadOnlyList<CodeEvent> events, string verb, string? cwd)
+    private static List<(string Path, string? Branch, DateTimeOffset? At)> Ran(IReadOnlyList<CodeEvent> events, string verb, string? cwd)
     {
         var failed = CodeEvent.FailedCalls(events);
-        var ran = new List<(string, string, DateTimeOffset?)>();
+        var ran = new List<(string, string?, DateTimeOffset?)>();
         foreach (var call in events)
         {
             if (call.Kind != CodeEvent.Tool || call.Name != Bash || failed.Contains(call.Id ?? string.Empty))
@@ -114,7 +117,7 @@ internal static partial class Worktrees
                 continue;
             }
 
-            var (path, branch) = Words(git.Groups["rest"].Value);
+            var (path, branch, detached) = Words(git.Groups["rest"].Value);
             if (path is null)
             {
                 continue;
@@ -131,6 +134,11 @@ internal static partial class Worktrees
                 return null;
             }
 
+            if (detached)
+            {
+                return new NamedWorktree(full, null);
+            }
+
             return new NamedWorktree(full, branch ?? Path.GetFileName(full));
         }
 
@@ -140,22 +148,29 @@ internal static partial class Worktrees
     /// <summary>
     /// The path a <c>git worktree</c> command's <paramref name="words"/> name, the first that is no option and no
     /// option's value, and the branch they name: the value of <c>-b</c> or <c>-B</c>, else the word after the path; null
-    /// for none.
+    /// for none. Detached is true when an option puts the worktree on no branch.
     /// </summary>
-    private static (string? Path, string? Branch) Words(string words)
+    private static (string? Path, string? Branch, bool Detached) Words(string words)
     {
-        var all = words.Split([' ', '\t'], StringSplitOptions.RemoveEmptyEntries);
+        var all = Arguments(words);
         var plain = new List<string>();
         string? branch = null;
-        for (var at = 0; at < all.Length; at++)
+        var detached = false;
+        for (var at = 0; at < all.Count; at++)
         {
+            if (Detaching.Contains(all[at]))
+            {
+                detached = true;
+                continue;
+            }
+
+            if (Branching.Contains(all[at]))
+            {
+                branch = all.ElementAtOrDefault(at + 1);
+            }
+
             if (Valued.Contains(all[at]))
             {
-                if (Branching.Contains(all[at]) && at + 1 < all.Length)
-                {
-                    branch = all[at + 1];
-                }
-
                 at++;
                 continue;
             }
@@ -168,15 +183,34 @@ internal static partial class Worktrees
 
         if (plain.Count == 0)
         {
-            return (null, null);
+            return (null, null, detached);
         }
 
-        if (branch is null && plain.Count > 1)
+        branch ??= plain.ElementAtOrDefault(1);
+        return (plain[0], branch, detached);
+    }
+
+    /// <summary>The words of a shell command that reach the program it runs: all but each redirection and the file a bare one names.</summary>
+    private static List<string> Arguments(string words)
+    {
+        var all = words.Split([' ', '\t'], StringSplitOptions.RemoveEmptyEntries);
+        var arguments = new List<string>();
+        for (var at = 0; at < all.Length; at++)
         {
-            branch = plain[1];
+            var redirect = Redirection().Match(all[at]);
+            if (!redirect.Success)
+            {
+                arguments.Add(all[at]);
+                continue;
+            }
+
+            if (redirect.Groups["target"].Length == 0)
+            {
+                at++;
+            }
         }
 
-        return (plain[0], branch);
+        return arguments;
     }
 
     /// <summary>
@@ -210,6 +244,13 @@ internal static partial class Worktrees
         return Path.TrimEndingDirectorySeparator(Path.GetFullPath(Path.Combine(folder, full)));
     }
 
+    /// <summary>
+    /// A shell redirection, such as <c>2&gt;&amp;1</c>, <c>&gt;/dev/null</c> or <c>&gt;</c>, with the file it names when
+    /// it holds one; a bare one names the next word.
+    /// </summary>
+    [GeneratedRegex(@"^[0-9&]?(?:>>?|<)(?<target>.*)$", RegexOptions.CultureInvariant)]
+    private static partial Regex Redirection();
+
     /// <summary>A command that changes the folder: <c>cd folder</c>.</summary>
     [GeneratedRegex(@"^cd\s+(?<to>\S+)$", RegexOptions.CultureInvariant)]
     private static partial Regex ChangeFolder();
@@ -219,5 +260,5 @@ internal static partial class Worktrees
     private static partial Regex WorktreeCommand();
 }
 
-/// <summary>A worktree a <c>git worktree</c> command names: its full path and the branch git gives it.</summary>
-internal sealed record NamedWorktree(string Path, string Branch);
+/// <summary>A worktree a <c>git worktree</c> command names: its full path and the branch git gives it, null for a detached one.</summary>
+internal sealed record NamedWorktree(string Path, string? Branch);

@@ -6,10 +6,11 @@ namespace Brain.Code;
 /// <summary>
 /// Whether a piece of work landed, asked of git in the repo at <paramref name="repo"/>: the default branch, the branch
 /// the primary checkout is on, landed the work when its reflog holds a fast-forward of the work's branch, as the
-/// validator's <c>git merge --ff-only &lt;branch&gt;</c> writes it, after the builder started. The reflog keeps it once the
-/// worktree is removed and the branch deleted, and its range holds the commits as they landed, rebased or not. Each git
-/// call is a record. The reflog is read once for the life of this instance, and the commits of a range, which never
-/// change, once for the life of the process.
+/// validator's <c>git merge --ff-only &lt;branch&gt;</c> writes it, after the builder started and by the time the last
+/// validator reported, as a validator lands before it reports. The reflog keeps it once the worktree is removed and the
+/// branch deleted, and its range holds the commits as they landed, rebased or not. Each git call is a record. The
+/// reflog is read once for the life of this instance, and the commits of a range, which never change, once for the
+/// life of the process.
 /// </summary>
 internal sealed class Landings(string repo, Records records)
 {
@@ -28,13 +29,19 @@ internal sealed class Landings(string repo, Records records)
     // navarone: 0000220
     public IReadOnlyList<CodeStep> Told(IReadOnlyList<CodeStep> steps, string? branch, DateTimeOffset? since)
     {
-        var report = LastVerdict(steps);
-        if (branch is null || report < 0)
+        if (branch is null)
         {
             return steps;
         }
 
-        if (LandingOf(branch, since) is not { } range)
+        var report = LastVerdict(steps);
+        if (report < 0)
+        {
+            return steps;
+        }
+
+        var range = LandingOf(branch, since, steps[report].At);
+        if (range is null)
         {
             return steps;
         }
@@ -59,17 +66,29 @@ internal sealed class Landings(string repo, Records records)
     }
 
     /// <summary>
-    /// The range of the first fast-forward of <paramref name="branch"/> since <paramref name="since"/>, <c>a..b</c>; null
-    /// when there is none. The reflog is newest first, so the last one met is the first.
+    /// The range of the first fast-forward of <paramref name="branch"/> from <paramref name="since"/> to
+    /// <paramref name="until"/>, <c>a..b</c>; null when there is none. With no time, either end is open. The reflog is
+    /// newest first, so the last one met is the first.
     /// </summary>
-    private string? LandingOf(string branch, DateTimeOffset? since)
+    private string? LandingOf(string branch, DateTimeOffset? since, DateTimeOffset? until)
     {
         var said = Merge + branch + FastForward;
-        var from = since?.ToUnixTimeSeconds() ?? 0;
+        var from = since?.ToUnixTimeSeconds() ?? long.MinValue;
+        var to = until?.ToUnixTimeSeconds() ?? long.MaxValue;
         string? landed = null;
         foreach (var move in Moves())
         {
-            if (move.Said != said || move.At < from)
+            if (move.Said != said)
+            {
+                continue;
+            }
+
+            if (move.At < from)
+            {
+                continue;
+            }
+
+            if (move.At > to)
             {
                 continue;
             }
@@ -89,7 +108,13 @@ internal sealed class Landings(string repo, Records records)
 
     private List<Move> ReadMoves()
     {
-        if (!Directory.Exists(repo) || DefaultBranch() is not { } branch)
+        if (!Directory.Exists(repo))
+        {
+            return [];
+        }
+
+        var branch = DefaultBranch();
+        if (branch is null)
         {
             return [];
         }
@@ -105,11 +130,19 @@ internal sealed class Landings(string repo, Records records)
         for (var at = 0; at + 1 < lines.Length; at++)
         {
             var entry = lines[at].Split('\t', 3);
-            var before = lines[at + 1].Split('\t', 2)[0];
-            if (entry.Length == 3 && When(entry[1]) is { } when)
+            if (entry.Length != 3)
             {
-                read.Add(new Move(before + ".." + entry[0], when, entry[2]));
+                continue;
             }
+
+            var when = When(entry[1]);
+            if (when is null)
+            {
+                continue;
+            }
+
+            var before = lines[at + 1].Split('\t', 2)[0];
+            read.Add(new Move(before + ".." + entry[0], when.Value, entry[2]));
         }
 
         return read;

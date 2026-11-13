@@ -14,7 +14,7 @@ public sealed partial class CodeServerTests
     [Fact]
     public async Task APieceOfWorkListsItsChecksAndItsStepsAsOutlinedTrail()
     {
-        var range = Landed("lens");
+        var range = Landed("lens", 12);
         var id = await SentAgentsOf(
             ("toolu_r1", "brain-ready", "r1", true, [Brief(0, "Build the lens."), Said(1, "READY")]),
             ("toolu_b", "builder", "b1", true, [Brief(2, "Build the lens."), Bash(3, "w1", $"git -C {project} worktree add .claude/worktrees/lens -b lens main"), BashResult(3, "w1", ""), Handback(4, "Built the lens."), Peer(7, "v1", "1. No test."), Bash(8, "c1"), BashResult(9, "c1", "[worktree-agent-b1 1234abc] Test the lens"), Handback(10, "Tested.")]),
