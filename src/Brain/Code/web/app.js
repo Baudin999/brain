@@ -274,7 +274,9 @@ function readConversation(key, path) {
 function readSent(session) {
   return once(`sent:${session}`, async () => {
     const read = await ask(`/api/sent?session=${session}`);
+    const wasAtEnd = agentsAtEnd();
     state.sent.set(session, read.agents);
+    if (wasAtEnd) agentsToEndWhenDrawn(session);
   });
 }
 
@@ -321,6 +323,27 @@ function awayNow() {
   return !atEnd();
 }
 
+// The agents panel beside the conversation, which runs downward in time and scrolls on its own; null when none is drawn.
+function agentsPanel() {
+  return document.querySelector('.code-agents');
+}
+
+// Whether the agents panel is at its end; one not drawn yet is.
+function agentsAtEnd() {
+  const panel = agentsPanel();
+  if (!panel) return true;
+  return panel.scrollHeight - panel.scrollTop - panel.clientHeight < AT_END_PX;
+}
+
+// Scrolls the agents panel to its newest agent once it is drawn, when the session is still the one in view.
+function agentsToEndWhenDrawn(session) {
+  requestAnimationFrame(() => {
+    if (state.selected !== session) return;
+    const panel = agentsPanel();
+    if (panel) panel.scrollTop = panel.scrollHeight;
+  });
+}
+
 // The user pressed the button to the end: the one place the viewport moves on purpose.
 function toEnd() {
   const shown = scroller();
@@ -363,6 +386,7 @@ async function pick(id) {
     state.page = 'session';
     await readShown();
     scrollWhenDrawn(id);
+    agentsToEndWhenDrawn(id);
     if (viewsShown()?.code) await openWorkspace();
   });
 }
